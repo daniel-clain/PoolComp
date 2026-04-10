@@ -28,5 +28,10 @@ view-container {
     container-type: size;
     flex-direction: column;
     box-sizing: border-box;
+
+    & > * {
+      height: 100cqh;
+      width: 100cqw;
+    }
   }
 }

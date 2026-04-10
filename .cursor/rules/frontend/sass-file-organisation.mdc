@@ -8,7 +8,7 @@ alwaysApply: true
 
 ```
 comp-view {
-  tournament-details {
+  comp-details {
     comp-details-header {
       comp-title {
       }
@@ -35,7 +35,7 @@ comp-view {
 comp-view {
 
   .is-landscape & {
-    tournament-details {
+    comp-details {
       comp-details-header {
         comp-title {
         }
@@ -56,7 +56,7 @@ comp-view {
   }
 
   .is-portrait & {
-    tournament-details {
+    comp-details {
       comp-details-header {
         comp-title {
         }
