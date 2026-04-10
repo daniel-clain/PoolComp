@@ -1,0 +1,5 @@
+# Archived files - kept for historical reference
+
+docs/archive/
+frontend/archive/
+!backend/.env

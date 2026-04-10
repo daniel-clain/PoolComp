@@ -1,0 +1,9 @@
+---
+description: Custom descriptive tag names instead of generic HTML; SCSS via tag selectors
+globs: frontend/**/*.{tsx,scss}
+alwaysApply: false
+---
+
+- Use custom descriptive tag names instead of generic structural elements (`div`, `section`, `aside`, `span`, `main`, `header`, `footer`, `nav`, `article`). Native elements with built-in behavior (`button`, `input`, `img`, `form`, `select`, `textarea`, `a`) are fine — they already describe what they are.
+- Express element state with `data-*` attributes, not `className` — **except** **`tournament-action-button`** on tournament action buttons for shared sizing/variants.
+- Nest SCSS selectors to match DOM hierarchy — style via tag selectors, not layout utility classes.

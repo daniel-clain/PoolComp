@@ -1,0 +1,11 @@
+---
+description: General code style — no classes, named functions, factory pattern
+alwaysApply: true
+---
+
+- Do not use classes. Use plain functions, closures, and objects instead.
+- Prefer named function declarations (`function foo()`) over arrow-assigned variables for top-level definitions.
+- For stateful modules, use a factory function that returns an object of methods closing over local variables rather than a `class` with `this`.
+- Function components as `export function Name(){}` (no default exports).
+- Use SCSS files for styling, organized by feature folder. No TypeScript style objects.
+- Do not use `aria-*`, `role`, or `alt` attributes anywhere in this app.

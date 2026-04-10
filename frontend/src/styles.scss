@@ -1,0 +1,13 @@
+@use "./global.scss";
+
+@use "./App.scss";
+
+@use "./components/ViewContainer/ViewContainer.scss";
+@use "./components/ViewContainer/PoolTable.scss";
+@use "./components/ScalingImage/ScalingImage.scss";
+@use "./components/Header/Header.scss";
+
+@use "./views/LandingPage/LandingPage.scss";
+@use "./views/History/CompHistory.scss";
+@use "./views/Players/Players.scss";
+@use "./views/Comp/Comp.scss";

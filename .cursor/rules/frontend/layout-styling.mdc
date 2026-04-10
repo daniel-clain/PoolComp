@@ -1,0 +1,8 @@
+---
+description: Fixed A4 (1:√2) aspect ratio container with portrait and landscape layouts
+globs: app/**/*.{tsx,scss}
+alwaysApply: false
+---
+
+- The app renders inside a fixed 1:√2 (≈1:1.414) aspect ratio container that fits within the screen, matching A4 paper proportions. Portrait displays get a tall container, landscape displays get a wide one.
+- Every UI component must be designed for both orientations. Always consider how the layout adapts between portrait and landscape.

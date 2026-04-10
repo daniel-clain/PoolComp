@@ -1,0 +1,25 @@
+header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  nav-tabs {
+    display: flex;
+    gap: 1cqw;
+  }
+
+  connection-status {
+    color: #d4d4d4;
+    font-size: 2cqw;
+    text-transform: capitalize;
+    &[data-status="connected"] {
+      color: #34d399;
+    }
+    &[data-status="connecting"] {
+      color: #fbbf24;
+    }
+    &[data-status="disconnected"] {
+      color: #f87171;
+    }
+  }
+}

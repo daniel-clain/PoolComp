@@ -1,0 +1,80 @@
+---
+description: Nested selectors, structrue written multiple times, 1 for unchaging styles, again for different states
+globs: app/**/*.{tsx,scss}
+alwaysApply: true
+---
+
+- selectors should be nested based the same way the elements are nested in the dom. Eg
+
+```
+comp-view {
+  tournament-details {
+    comp-details-header {
+      comp-title {
+      }
+    }
+    text-box-container {
+      text-box {
+        text-box-label {
+        }
+        text-box-value {
+        }
+      }
+    }
+  }
+  comp-actions {
+  }
+  tournament-brackets{
+  }
+}
+```
+
+- when the layout changes from media queries or classes that represent the layout in a different state, the styles should be applied in a copy of the same structure but only for that state context. Eg
+
+```
+comp-view {
+
+  .is-landscape & {
+    tournament-details {
+      comp-details-header {
+        comp-title {
+        }
+      }
+      text-box-container {
+        text-box {
+          text-box-label {
+          }
+          text-box-value {
+          }
+        }
+      }
+    }
+    comp-actions {
+    }
+    tournament-brackets{
+    }
+  }
+
+  .is-portrait & {
+    tournament-details {
+      comp-details-header {
+        comp-title {
+        }
+      }
+      text-box-container {
+        text-box {
+          text-box-label {
+          }
+          text-box-value {
+          }
+        }
+      }
+    }
+    comp-actions {
+    }
+    tournament-brackets{
+    }
+  }
+}
+
+```

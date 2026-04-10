@@ -1,0 +1,6 @@
+- the purpose is to give consistent context for every prompt given throughout the development process so core established context is not lost throughout the development process
+- have a different MD file for each separation of concern
+- put a description at the top of the file describing what will be listed in that file
+- a dot point list of rules
+- there's little value putting in rules the agent would do out of common sense anyway, the main value of rules is to specify things that the agent may get wrong otherwise
+- don't add things like plans or specs or docs, keep things short

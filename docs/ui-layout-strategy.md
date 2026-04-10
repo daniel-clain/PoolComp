@@ -1,0 +1,2 @@
+- pool table is always 1:2 ratio
+- based on the view dimensions, the ui should be portrait or landscape

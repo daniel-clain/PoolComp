@@ -1,0 +1,32 @@
+@use "PoolTable.scss" as *;
+
+view-container {
+  container-type: size;
+
+  .is-portrait & {
+    view-content {
+      left: #{$frame-width}cqh;
+      right: #{$frame-width}cqh;
+      top: #{$frame-width}cqh;
+      bottom: #{$frame-width}cqh;
+      padding: 2cqh 4cqw;
+    }
+  }
+  .is-landscape & {
+    view-content {
+      left: #{$frame-width}cqw;
+      right: #{$frame-width}cqw;
+      top: #{$frame-width}cqw;
+      bottom: #{$frame-width}cqw;
+      padding: 2cqw 4cqh;
+    }
+  }
+  view-content {
+    position: absolute;
+    z-index: 2;
+    display: flex;
+    container-type: size;
+    flex-direction: column;
+    box-sizing: border-box;
+  }
+}
