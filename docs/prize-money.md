@@ -39,14 +39,13 @@ Split rules:
   - 2nd chance 2nd place = 2 x $20 dining vouchers
 - Eligibility: players who lose in round 1 enter 2nd chance, unless they came 1st within the last 6 weeks.
 
-## Guiding Constraints
+## Guiding constraints
 
 - Calculations are reactive to current active comp player count.
-- This is an optional utility feature; comp managers can still calculate manually.
+- The backend computes and broadcasts totals so every client sees the same numbers.
 
 ## Relates to
 
-- [Player Registry](player-registry.md) — active comp player count is the core input.
-- [Backend](backend.md) — calculation should run on the backend so all connected clients see consistent values.
-- [Pool Comp History](pool-comp-history.md) — historical records support month-to-month comparison and validation of prize outcomes.
-- [Philosophy](philosophy.md) — optional enhancement, never a required dependency for running the comp.
+- [Player registry](player-registry.md) — active comp player count is the core input.
+- [Backend](backend.md) — calculation runs on the backend so all connected clients see consistent values.
+- [Pool comp history](pool-comp-history.md) — historical records support month-to-month comparison and validation of prize outcomes.

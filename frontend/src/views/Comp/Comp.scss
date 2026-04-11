@@ -1,15 +1,42 @@
+@use "../../mixins.scss" as *;
+
 comp-view {
   display: flex;
+
+  .is-portrait & {
+    flex-direction: column;
+    gap: 4cqh;
+
+    comp-details {
+      comp-details-header {
+        display: flex;
+        justify-content: space-between;
+
+        #eight-ball-image {
+          width: 18cqw;
+        }
+      }
+      text-box-container {
+        align-items: end;
+        justify-content: space-between;
+        text-box {
+          width: 32cqw;
+          text-box-label {
+            #crown-image {
+              width: 22cqw;
+            }
+          }
+        }
+      }
+    }
+  }
   .is-landscape & {
     flex-direction: row;
     left-container {
       display: flex;
       flex-direction: column;
-      gap: 2%;
+      gap: 2cqh;
       flex: 1;
-      comp-actions {
-      }
-
       tournament-brackets {
         flex: 1;
         min-height: 0;
@@ -18,7 +45,6 @@ comp-view {
     right-container {
       display: flex;
       flex-direction: column;
-      gap: 2%;
       width: 40cqw;
 
       comp-details {
@@ -26,79 +52,50 @@ comp-view {
         flex-direction: column;
         flex: 1;
         align-items: flex-end;
-        gap: 2cqh;
+        gap: 4cqh;
 
         text-box-container {
           display: flex;
           flex-direction: column;
-          flex: 2;
-          width: 50%;
-          gap: 4%;
+          flex: 3;
+          width: 56%;
+
+          gap: 3cqh;
+          justify-content: center;
 
           text-box {
-            flex: 1 0 0;
-            #crown-image {
-              width: 50%;
-              margin: 0 auto;
-            }
             text-box-label {
-              font-size: 1.5cqw;
+              #crown-image {
+                width: 24cqh;
+                margin: 0 auto;
+              }
             }
           }
         }
         #eight-ball-image {
-          flex: 1 0 0;
-          min-height: 0;
+          width: 24cqh;
         }
       }
-    }
-  }
-
-  .is-portrait & {
-    flex-direction: column;
-    comp-details {
-      margin-bottom: 4cqw;
-      comp-details-header {
-        display: flex;
-        justify-content: space-between;
-        margin-bottom: 2cqw;
-        comp-title {
-          font-size: 5cqw;
-          align-self: center;
-          padding-left: 1cqw;
-        }
-
-        #eight-ball-image {
-          width: 14%;
-        }
-      }
-      text-box-container {
-        align-items: end;
-        justify-content: space-between;
-        text-box {
-          width: 30cqw;
-          text-box-label {
-            font-size: 3cqw;
-            margin-bottom: 2%;
-
-            #crown-image {
-              width: 16cqw;
-            }
-          }
-          text-box-value {
-            font-size: 3cqw;
-          }
-        }
-      }
-    }
-    comp-actions {
-      margin-bottom: 4cqw;
     }
   }
 
   comp-actions {
     display: flex;
-    gap: 2cqw;
+    @include cq-responsive(
+      (
+        gap: 2,
+      )
+    );
+    button {
+      @include cq-responsive(
+        (
+          font-size: 3,
+          padding: 1.8 4,
+          border-radius: 1,
+          border-width: 0.3,
+        )
+      );
+    }
   }
 
   tournament-brackets {
@@ -121,6 +118,12 @@ comp-view {
     font-weight: 700;
     text-transform: uppercase;
     white-space: nowrap;
+    letter-spacing: -0.01em;
+    @include cq-responsive(
+      (
+        font-size: 10,
+      )
+    );
   }
 
   text-box-container {
@@ -129,24 +132,39 @@ comp-view {
     text-box {
       display: flex;
       flex-direction: column;
-      gap: 0.5cqw;
       align-items: center;
+
+      @include cq-responsive(
+        (
+          gap: 1,
+        )
+      );
 
       text-box-label {
         font-weight: 700;
         text-transform: uppercase;
         text-align: center;
+        @include cq-responsive(
+          (
+            font-size: 3,
+          )
+        );
       }
 
       text-box-value {
+        @include cq-responsive(
+          (
+            font-size: 3,
+          )
+        );
         aspect-ratio: 5 / 1;
         width: 100%;
         font-weight: 600;
-        border: 3px solid #8aaa9c;
+        border-style: solid;
+        border-color: #8aaa9c;
         box-sizing: border-box;
         display: flex;
         align-items: center;
-        padding: 0 0.5em;
         background: #fff;
         justify-content: center;
         color: #333;
@@ -159,12 +177,13 @@ comp-view {
     left: 50%;
     top: 50%;
     transform: translate(-50%, -50%);
-    max-width: 40cqw;
-    max-height: 40cqw;
-    width: auto;
-    height: auto;
-    object-fit: contain;
-    pointer-events: none;
+    @include cq-responsive(
+      (
+        max-width: 80,
+        max-height: 80,
+      )
+    );
+
     opacity: 0.28;
   }
 }

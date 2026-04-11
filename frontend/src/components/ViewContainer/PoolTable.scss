@@ -1,45 +1,24 @@
-$frame-width: 3;
+@use "../../variables.scss" as *;
+@use "../../mixins.scss" as *;
 
 view-container {
-  display: block;
   .is-portrait & {
-    //width: min(100cqw, 50cqh);
     aspect-ratio: 1/2;
-    table-frame {
-      border-radius: 2cqh;
-    }
-    /* Rim from long axis (height in portrait); keeps top/bottom/sides visually consistent */
-    table-felt {
-      left: #{$frame-width}cqh;
-      right: #{$frame-width}cqh;
-      top: #{$frame-width}cqh;
-      bottom: #{$frame-width}cqh;
-      border-radius: 3cqh;
-      border: 0.15cqh solid #1a4d30;
-    }
   }
   .is-landscape & {
-    //height: min(100cqh, 50cqw);
     aspect-ratio: 2/1;
-
-    table-frame {
-      border-radius: 2cqw;
-    }
-    /* Rim from long axis (width in landscape) */
-    table-felt {
-      left: #{$frame-width}cqw;
-      right: #{$frame-width}cqw;
-      top: #{$frame-width}cqw;
-      bottom: #{$frame-width}cqw;
-      border-radius: 3cqw;
-      border: 0.15cqw solid #1a4d30;
-    }
   }
-}
 
-view-container {
+  @include cq-responsive(
+    (
+      border-radius: 2,
+    )
+  );
+
+  display: block;
   container-type: size;
   position: relative;
+
   table-frame {
     position: relative;
     height: 100cqh;
@@ -71,6 +50,18 @@ view-container {
 
   /* Recessed cloth + thin cushion line */
   table-felt {
+    @include cq-responsive(
+      (
+        left: $frame-width,
+        right: $frame-width,
+        top: $frame-width,
+        bottom: $frame-width,
+        border-radius: 3,
+        border-width: 0.15,
+      )
+    );
+    border-style: solid;
+    border-color: #1a4d30;
     z-index: 1;
     position: absolute;
     background:
@@ -88,6 +79,12 @@ view-container {
   }
 
   table-pocket {
+    @include cq-responsive(
+      (
+        width: $frame-width,
+        border-width: $frame-width * 0.05,
+      )
+    );
     display: block;
     position: absolute;
     aspect-ratio: 1 / 1;
@@ -105,6 +102,11 @@ view-container {
       inset 0 -8px 14px rgba(0, 0, 0, 0.75);
   }
   rail-stud {
+    @include cq-responsive(
+      (
+        width: 0.55,
+      )
+    );
     position: absolute;
     aspect-ratio: 1 / 1;
     border-radius: 50%;
@@ -119,391 +121,215 @@ view-container {
       0 1px 2px rgba(0, 0, 0, 0.5);
     transform: translate(-50%, -50%);
     display: block;
-  }
-  .rail-stud {
-    position: absolute;
-    z-index: 3;
-    width: clamp(4px, 0.55vmin, 8px);
-    aspect-ratio: 1 / 1;
-    border-radius: 50%;
-    background: radial-gradient(
-      circle at 32% 28%,
-      #f0f4f8,
-      #9aa8b5 45%,
-      #5c6b7a 100%
-    );
-    box-shadow:
-      inset 0 1px 1px rgba(255, 255, 255, 0.9),
-      0 1px 2px rgba(0, 0, 0, 0.5);
-    transform: translate(-50%, -50%);
-    display: block;
-    pointer-events: none;
-    .rail-stud--t1 {
-      top: calc(var(--wood-rim) * 0.45);
-      left: 14%;
-    }
-    .rail-stud--t2 {
-      top: calc(var(--wood-rim) * 0.45);
-      left: 26%;
-    }
-    .rail-stud--t3 {
-      top: calc(var(--wood-rim) * 0.45);
-      left: 38%;
-    }
-    .rail-stud--t4 {
-      top: calc(var(--wood-rim) * 0.45);
-      left: 62%;
-    }
-    .rail-stud--t5 {
-      top: calc(var(--wood-rim) * 0.45);
-      left: 74%;
-    }
-    .rail-stud--t6 {
-      top: calc(var(--wood-rim) * 0.45);
-      left: 86%;
-    }
-
-    .rail-stud--b1 {
-      bottom: calc(var(--wood-rim) * 0.45);
-      left: 14%;
-      transform: translate(-50%, 50%);
-    }
-    .rail-stud--b2 {
-      bottom: calc(var(--wood-rim) * 0.45);
-      left: 26%;
-      transform: translate(-50%, 50%);
-    }
-    .rail-stud--b3 {
-      bottom: calc(var(--wood-rim) * 0.45);
-      left: 38%;
-      transform: translate(-50%, 50%);
-    }
-    .rail-stud--b4 {
-      bottom: calc(var(--wood-rim) * 0.45);
-      left: 62%;
-      transform: translate(-50%, 50%);
-    }
-    .rail-stud--b5 {
-      bottom: calc(var(--wood-rim) * 0.45);
-      left: 74%;
-      transform: translate(-50%, 50%);
-    }
-    .rail-stud--b6 {
-      bottom: calc(var(--wood-rim) * 0.45);
-      left: 86%;
-      transform: translate(-50%, 50%);
-    }
-
-    .rail-stud--l1 {
-      left: calc(var(--wood-rim) * 0.48);
-      top: 32%;
-    }
-    .rail-stud--l2 {
-      left: calc(var(--wood-rim) * 0.48);
-      top: 68%;
-    }
-
-    .rail-stud--r1 {
-      left: calc(100% - var(--wood-rim) * 0.48);
-      top: 32%;
-      transform: translate(50%, -50%);
-    }
-    .rail-stud--r2 {
-      left: calc(100% - var(--wood-rim) * 0.48);
-      top: 68%;
-      transform: translate(50%, -50%);
-    }
-  }
-
-  pocket-top-left {
-    top: var(--wood-rim);
-    left: var(--wood-rim);
-    transform: translate(-50%, -50%);
-  }
-
-  pocket-top-center {
-    top: var(--wood-rim);
-    left: 50%;
-    transform: translate(-50%, -50%);
-  }
-
-  pocket-top-right {
-    top: var(--wood-rim);
-    left: calc(100% - var(--wood-rim));
-    transform: translate(-50%, -50%);
-  }
-
-  pocket-bottom-left {
-    top: calc(100% - var(--wood-rim));
-    left: var(--wood-rim);
-    transform: translate(-50%, -50%);
-  }
-
-  pocket-bottom-center {
-    top: calc(100% - var(--wood-rim));
-    left: 50%;
-    transform: translate(-50%, -50%);
-  }
-
-  pocket-bottom-right {
-    top: calc(100% - var(--wood-rim));
-    left: calc(100% - var(--wood-rim));
-    transform: translate(-50%, -50%);
-  }
-
-  /* Portrait: center pockets move to left/right (the long sides) */
-  table-frame[data-orientation="portrait"] pocket-top-center {
-    top: 50%;
-    left: var(--wood-rim);
-  }
-
-  table-frame[data-orientation="portrait"] pocket-bottom-center {
-    top: 50%;
-    left: calc(100% - var(--wood-rim));
   }
 }
 
 /* pockets */
-view-container {
+table-pocket {
   .is-portrait & {
-    table-pocket {
-      width: 3cqh;
-      border-width: 0.2cqh;
+    &#pocket-1,
+    &#pocket-2 {
+      top: #{$frame-width * 0.5}cqw;
+    }
+    &#pocket-3,
+    &#pocket-4 {
+      top: 50cqh;
+    }
 
-      &#pocket-1,
-      &#pocket-2 {
-        top: 1.5cqh;
-      }
-      &#pocket-3,
-      &#pocket-4 {
-        top: 50cqh;
-      }
+    &#pocket-5,
+    &#pocket-6 {
+      bottom: #{$frame-width * 0.5}cqw;
+    }
 
-      &#pocket-5,
-      &#pocket-6 {
-        bottom: 1.5cqh;
-      }
+    &#pocket-1,
+    &#pocket-3,
+    &#pocket-5 {
+      left: #{$frame-width * 0.5}cqw;
+    }
 
-      &#pocket-1,
-      &#pocket-3,
-      &#pocket-5 {
-        left: 1.5cqh;
-      }
-
-      &#pocket-2,
-      &#pocket-4,
-      &#pocket-6 {
-        right: 1.5cqh;
-      }
+    &#pocket-2,
+    &#pocket-4,
+    &#pocket-6 {
+      right: #{$frame-width * 0.5}cqw;
     }
   }
+
   .is-landscape & {
-    table-pocket {
-      width: 3cqw;
-      border-width: 0.2cqw;
+    &#pocket-1,
+    &#pocket-2,
+    &#pocket-3 {
+      top: #{$frame-width * 0.5}cqh;
+    }
 
-      &#pocket-1,
-      &#pocket-2,
-      &#pocket-3 {
-        top: 1.5cqw;
-      }
+    &#pocket-4,
+    &#pocket-5,
+    &#pocket-6 {
+      bottom: #{$frame-width * 0.5}cqh;
+    }
 
-      &#pocket-4,
-      &#pocket-5,
-      &#pocket-6 {
-        bottom: 1.5cqw;
-      }
+    &#pocket-1,
+    &#pocket-4 {
+      left: #{$frame-width * 0.5}cqh;
+    }
 
-      &#pocket-1,
-      &#pocket-4 {
-        left: 1.5cqw;
-      }
-
-      &#pocket-2,
-      &#pocket-5 {
-        left: 50cqw;
-      }
-      &#pocket-3,
-      &#pocket-6 {
-        right: 1.5cqw;
-      }
+    &#pocket-2,
+    &#pocket-5 {
+      left: 50cqw;
+    }
+    &#pocket-3,
+    &#pocket-6 {
+      right: #{$frame-width * 0.5}cqh;
     }
   }
 }
 
-/* studs */
-view-container {
+/* studs — portrait: rim in cqw (with felt); landscape: rim in cqh */
+rail-stud {
   .is-portrait & {
-    rail-stud {
-      width: 0.55cqh;
+    &#stud-1,
+    &#stud-16 {
+      left: calc(#{$frame-width}cqw + (100cqw - #{$frame-width * 2}cqw) / 4);
+    }
+    &#stud-2,
+    &#stud-17 {
+      left: 50cqw;
+    }
+    &#stud-3,
+    &#stud-18 {
+      left: calc(
+        100cqw - #{$frame-width}cqw - (100cqw - #{$frame-width * 2}cqw) / 4
+      );
+    }
 
-      /* Inner width: 100cqw − 2×rim cqh (rim matches portrait felt, long-axis cqh) */
-      &#stud-1,
-      &#stud-16 {
-        left: calc(#{$frame-width}cqh + (100cqw - #{$frame-width * 2}cqh) / 4);
-      }
-      &#stud-2,
-      &#stud-17 {
-        left: 50cqw;
-      }
-      &#stud-3,
-      &#stud-18 {
-        left: calc(
-          100cqw - #{$frame-width}cqh - (100cqw - #{$frame-width * 2}cqh) / 4
-        );
-      }
+    &#stud-1,
+    &#stud-2,
+    &#stud-3 {
+      top: #{$frame-width * 0.5}cqw;
+    }
+    &#stud-16,
+    &#stud-17,
+    &#stud-18 {
+      top: calc(100cqh - #{$frame-width * 0.5}cqw);
+    }
 
-      /* Top: studs 1–3; bottom: studs 16–18 */
-      &#stud-1,
-      &#stud-2,
-      &#stud-3 {
-        top: #{$frame-width * 0.5}cqh;
-      }
-      &#stud-16,
-      &#stud-17,
-      &#stud-18 {
-        top: calc(100cqh - #{$frame-width * 0.5}cqh);
-      }
+    &#stud-4,
+    &#stud-5 {
+      top: calc(#{$frame-width}cqw + (100cqh - #{$frame-width * 2}cqw) / 8);
+    }
+    &#stud-6,
+    &#stud-7 {
+      top: calc(#{$frame-width}cqw + (100cqh - #{$frame-width * 2}cqw) / 4);
+    }
+    &#stud-8,
+    &#stud-9 {
+      top: calc(#{$frame-width}cqw + (100cqh - #{$frame-width * 2}cqw) * 3 / 8);
+    }
+    &#stud-10,
+    &#stud-11 {
+      top: calc(#{$frame-width}cqw + (100cqh - #{$frame-width * 2}cqw) * 5 / 8);
+    }
+    &#stud-12,
+    &#stud-13 {
+      top: calc(#{$frame-width}cqw + (100cqh - #{$frame-width * 2}cqw) * 3 / 4);
+    }
+    &#stud-14,
+    &#stud-15 {
+      top: calc(#{$frame-width}cqw + (100cqh - #{$frame-width * 2}cqw) * 7 / 8);
+    }
 
-      /*
-        Long rail: corner → middle pocket = half of inner height H.
-        Three studs per half at ¼, ½, ¾ of that half → 1/8, 2/8, 3/8 and 5/8, 6/8, 7/8 of H from inner top.
-      */
-      &#stud-4,
-      &#stud-5 {
-        top: calc(#{$frame-width}cqh + (100cqh - #{$frame-width * 2}cqh) / 8);
-      }
-      &#stud-6,
-      &#stud-7 {
-        top: calc(#{$frame-width}cqh + (100cqh - #{$frame-width * 2}cqh) / 4);
-      }
-      &#stud-8,
-      &#stud-9 {
-        top: calc(
-          #{$frame-width}cqh + (100cqh - #{$frame-width * 2}cqh) * 3 / 8
-        );
-      }
-      &#stud-10,
-      &#stud-11 {
-        top: calc(
-          #{$frame-width}cqh + (100cqh - #{$frame-width * 2}cqh) * 5 / 8
-        );
-      }
-      &#stud-12,
-      &#stud-13 {
-        top: calc(
-          #{$frame-width}cqh + (100cqh - #{$frame-width * 2}cqh) * 3 / 4
-        );
-      }
-      &#stud-14,
-      &#stud-15 {
-        top: calc(
-          #{$frame-width}cqh + (100cqh - #{$frame-width * 2}cqh) * 7 / 8
-        );
-      }
-
-      /* Long-rail studs: centered in wood (rim = X → midline at X/2 cqh) */
-      &#stud-4,
-      &#stud-6,
-      &#stud-8,
-      &#stud-10,
-      &#stud-12,
-      &#stud-14 {
-        left: #{$frame-width * 0.5}cqh;
-      }
-      &#stud-5,
-      &#stud-7,
-      &#stud-9,
-      &#stud-11,
-      &#stud-13,
-      &#stud-15 {
-        left: calc(100cqw - #{$frame-width * 0.5}cqh);
-      }
+    &#stud-4,
+    &#stud-6,
+    &#stud-8,
+    &#stud-10,
+    &#stud-12,
+    &#stud-14 {
+      left: #{$frame-width * 0.5}cqw;
+    }
+    &#stud-5,
+    &#stud-7,
+    &#stud-9,
+    &#stud-11,
+    &#stud-13,
+    &#stud-15 {
+      left: calc(100cqw - #{$frame-width * 0.5}cqw);
     }
   }
+
   .is-landscape & {
-    rail-stud {
-      width: 0.55cqw;
+    &#stud-1,
+    &#stud-16 {
+      top: calc(#{$frame-width}cqh + (100cqh - #{$frame-width * 2}cqh) / 4);
+    }
+    &#stud-2,
+    &#stud-17 {
+      top: 50cqh;
+    }
+    &#stud-3,
+    &#stud-18 {
+      top: calc(
+        100cqh - #{$frame-width}cqh - (100cqh - #{$frame-width * 2}cqh) / 4
+      );
+    }
 
-      /* Short rails (left / right): inner height uses top/bottom rim cqw */
-      &#stud-1,
-      &#stud-16 {
-        top: calc(#{$frame-width}cqw + (100cqh - #{$frame-width * 2}cqw) / 4);
-      }
-      &#stud-2,
-      &#stud-17 {
-        top: 50cqh;
-      }
-      &#stud-3,
-      &#stud-18 {
-        top: calc(
-          100cqh - #{$frame-width}cqw - (100cqh - #{$frame-width * 2}cqw) / 4
-        );
-      }
+    &#stud-1,
+    &#stud-2,
+    &#stud-3 {
+      left: #{$frame-width * 0.5}cqh;
+    }
+    &#stud-16,
+    &#stud-17,
+    &#stud-18 {
+      left: calc(100cqw - #{$frame-width * 0.5}cqh);
+    }
 
-      &#stud-1,
-      &#stud-2,
-      &#stud-3 {
-        left: #{$frame-width * 0.5}cqw;
-      }
-      &#stud-16,
-      &#stud-17,
-      &#stud-18 {
-        left: calc(100cqw - #{$frame-width * 0.5}cqw);
-      }
+    &#stud-4,
+    &#stud-5 {
+      left: calc(#{$frame-width}cqh + (100cqw - #{$frame-width * 2}cqh) / 8);
+    }
+    &#stud-6,
+    &#stud-7 {
+      left: calc(#{$frame-width}cqh + (100cqw - #{$frame-width * 2}cqh) / 4);
+    }
+    &#stud-8,
+    &#stud-9 {
+      left: calc(
+        #{$frame-width}cqh + (100cqw - #{$frame-width * 2}cqh) * 3 / 8
+      );
+    }
+    &#stud-10,
+    &#stud-11 {
+      left: calc(
+        #{$frame-width}cqh + (100cqw - #{$frame-width * 2}cqh) * 5 / 8
+      );
+    }
+    &#stud-12,
+    &#stud-13 {
+      left: calc(
+        #{$frame-width}cqh + (100cqw - #{$frame-width * 2}cqh) * 3 / 4
+      );
+    }
+    &#stud-14,
+    &#stud-15 {
+      left: calc(
+        #{$frame-width}cqh + (100cqw - #{$frame-width * 2}cqh) * 7 / 8
+      );
+    }
 
-      /*
-        Long rails (top / bottom): half of inner width W; three studs per half at ⅛…⅞ of W from inner left.
-      */
-      &#stud-4,
-      &#stud-5 {
-        left: calc(#{$frame-width}cqw + (100cqw - #{$frame-width * 2}cqw) / 8);
-      }
-      &#stud-6,
-      &#stud-7 {
-        left: calc(#{$frame-width}cqw + (100cqw - #{$frame-width * 2}cqw) / 4);
-      }
-      &#stud-8,
-      &#stud-9 {
-        left: calc(
-          #{$frame-width}cqw + (100cqw - #{$frame-width * 2}cqw) * 3 / 8
-        );
-      }
-      &#stud-10,
-      &#stud-11 {
-        left: calc(
-          #{$frame-width}cqw + (100cqw - #{$frame-width * 2}cqw) * 5 / 8
-        );
-      }
-      &#stud-12,
-      &#stud-13 {
-        left: calc(
-          #{$frame-width}cqw + (100cqw - #{$frame-width * 2}cqw) * 3 / 4
-        );
-      }
-      &#stud-14,
-      &#stud-15 {
-        left: calc(
-          #{$frame-width}cqw + (100cqw - #{$frame-width * 2}cqw) * 7 / 8
-        );
-      }
-
-      &#stud-4,
-      &#stud-6,
-      &#stud-8,
-      &#stud-10,
-      &#stud-12,
-      &#stud-14 {
-        top: #{$frame-width * 0.5}cqw;
-      }
-      &#stud-5,
-      &#stud-7,
-      &#stud-9,
-      &#stud-11,
-      &#stud-13,
-      &#stud-15 {
-        top: calc(100cqh - #{$frame-width * 0.5}cqw);
-      }
+    &#stud-4,
+    &#stud-6,
+    &#stud-8,
+    &#stud-10,
+    &#stud-12,
+    &#stud-14 {
+      top: #{$frame-width * 0.5}cqh;
+    }
+    &#stud-5,
+    &#stud-7,
+    &#stud-9,
+    &#stud-11,
+    &#stud-13,
+    &#stud-15 {
+      top: calc(100cqh - #{$frame-width * 0.5}cqh);
     }
   }
 }

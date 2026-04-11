@@ -118,23 +118,16 @@ export function Comp() {
       activePoolComp && (
         <comp-actions>
           {!activePoolComp.started ? (
-            <button
-              className="small"
-              onClick={() => setIsPlayerModalOpen(true)}
-            >
+            <button onClick={() => setIsPlayerModalOpen(true)}>
               Add Players ({selectedPlayerCount})
             </button>
           ) : (
-            <button className="small" onClick={completeActivePoolComp}>
-              Complete Comp
-            </button>
+            <button onClick={completeActivePoolComp}>Complete Comp</button>
           )}
           {!activePoolComp.started ? (
-            <button className="small" onClick={startActivePoolComp}>
-              Start Comp
-            </button>
+            <button onClick={startActivePoolComp}>Start Comp</button>
           ) : null}
-          <button className="small danger" onClick={cancelActivePoolComp}>
+          <button className=" danger" onClick={cancelActivePoolComp}>
             Cancel Comp
           </button>
         </comp-actions>

@@ -1,0 +1,18 @@
+@use "sass:list";
+
+// Portrait → cqw, landscape → cqh (scale from container width vs height).
+@mixin cq-responsive($styles) {
+  @each $orientation, $unit in (portrait: cqw, landscape: cqh) {
+    .is-#{$orientation} & {
+      @each $prop, $value in $styles {
+        $new-values: ();
+
+        @each $item in $value {
+          $new-values: list.append($new-values, #{$item}#{$unit}, space);
+        }
+
+        #{$prop}: $new-values;
+      }
+    }
+  }
+}

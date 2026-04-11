@@ -1,21 +1,19 @@
 # Pool Comp History
 
-Capture historical comp records from the paper spreadsheet into searchable digital data.
+Digital record of **completed** pool comps: outcomes and metadata the app persists and shows everywhere (for example after **Complete Comp** on an active comp). The app is the **primary** system for this history; there is no separate paper workflow the product must mirror.
 
 ## Purpose
 
-- Preserve completed comp outcomes for future comparison and reporting.
-- Keep the paper spreadsheet as the source of truth; the app is an optional mirror.
+- Preserve completed comp outcomes for comparison and reporting inside the app.
+- Keep one shared history backed by the backend so every connected client sees the same rows.
 
-## Input source (current direction)
+## How records appear today
 
-Data is entered **manually** in the app (or imported from persistence such as Google Sheets). There is no camera or OCR pipeline.
+When an **active comp is completed** in the app, that snapshot is appended to the historical list and persisted (for example via Google Sheets). Richer fields or bulk import can be added later with dedicated forms or imports without changing the idea that **the app store is authoritative**.
 
-Today, one way history appears in state is when an **active comp is completed** in the app: that snapshot is appended to the historical list. Richer rows that match every column on the paper ledger can be added later with dedicated forms or imports.
+## Legacy spreadsheet column reference
 
-## Paper ledger column reference (V1)
-
-If you add forms or imports later, these are the canonical field keys that match the usual paper columns:
+If you import rows from an older venue spreadsheet, these field keys can map familiar columns to structured data:
 
 - `Date` -> `date`
 - `#players` -> `playerCount`
@@ -27,25 +25,13 @@ If you add forms or imports later, these are the canonical field keys that match
 - `2nd place` -> `secondPlace`
 - `Monthly Jackpot` -> `monthlyJackpotWinnerNote`
 
-## Flow (target)
-
-1. Comp manager reads values from the paper history table.
-2. Enters or edits the corresponding row in the app (or syncs from a shared sheet).
-3. Backend persists and broadcasts so every connected client sees the same data.
-
 ## Data quality
 
 - Normalize dates, currency, and names before persistence.
-- Prefer matching winner names against the [Player Registry](player-registry.md).
-
-## Guiding constraints
-
-- Optional feature; pool comp can run without a full digital history.
-- Paper remains authoritative if the app and paper disagree.
+- Prefer matching winner names against the [Player registry](player-registry.md).
 
 ## Relates to
 
 - [Backend](backend.md) — storage and broadcast of historical records.
-- [Player Registry](player-registry.md) — consistent spelling for historical names.
-- [Prize Money](prize-money.md) — historical context for validation.
-- [Philosophy](philosophy.md) — paper remains the source of truth; app features remain optional.
+- [Player registry](player-registry.md) — consistent spelling for historical names.
+- [Prize money](prize-money.md) — historical context for prize outcomes over time.

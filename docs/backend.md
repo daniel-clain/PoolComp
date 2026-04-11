@@ -1,20 +1,23 @@
 # Backend
 
-The server that sits between the frontend and persistence. Handles data storage, real-time sync, and domain commands.
+The server between the frontend and persistence. It applies **domain commands**, persists the result, and pushes **shared state** to clients over WebSocket.
+
+For how frontend, backend, and the repo-root **`shared/`** TypeScript package divide responsibility, see [Frontend and backend architecture](frontend-backend-architecture.md).
 
 ## Responsibilities
 
-- **Persistence** — stores the player registry, active comp, and completed comps (for example in Google Sheets or in-memory when not configured).
-- **WebSocket** — real-time connection between the backend and the frontend. The frontend sends commands; the backend applies them, persists, and broadcasts updated state.
+- **Domain commands** — Validates and applies each client command (create comp, toggle players, start comp, etc.), runs authoritative business logic on the server, and rejects invalid transitions.
+- **Persistence** — Stores the player registry, active comp, and completed comps (for example in Google Sheets or in-memory when not configured).
+- **WebSocket** — Accepts commands from the frontend, broadcasts `stateSnapshot` / `stateUpdated` so every connected client sees the same data.
 
 ## Why WebSocket
 
-The app is used during a live comp where multiple people may be viewing on their own devices. WebSocket allows the backend to push state changes to all connected clients without polling.
+The app is used during a live comp where multiple people may be viewing on their own devices. WebSocket lets the backend push state changes to all connected clients without polling.
 
 ## Relates to
 
-- [Player Registry](player-registry.md) — the backend persists and serves the registry data.
-- [Bracket Scanner](bracket-scanner.md) — bracket mirroring updates comp state on the backend, which broadcasts to all connected clients via WebSocket.
-- [Pool Comp History](pool-comp-history.md) — backend stores historical comp records and broadcasts updates to connected clients.
-- [Prize Money](prize-money.md) — backend can compute and broadcast prize totals so every connected client sees the same amounts.
-- [Philosophy](philosophy.md) — the backend enables features but never makes them mandatory. If the server is down, the paper system is unaffected.
+- [Frontend and backend architecture](frontend-backend-architecture.md) — command flow and who owns which logic.
+- [Player registry](player-registry.md) — the backend persists and serves the registry data.
+- [Pool comp history](pool-comp-history.md) — historical comp records and broadcasts to clients.
+- [Prize money](prize-money.md) — prize preview derived from server state so every client sees the same amounts.
+- [First-round slot distribution](first-round-slot-distribution.md) — bracket fairness; enforced when the comp is started on the server.

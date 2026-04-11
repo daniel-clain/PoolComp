@@ -1,17 +1,17 @@
+@use "./mixins.scss" as *;
+
 $max-tablet-dimensions: 1366px;
 app-container {
   &.is-portrait {
     max-height: min($max-tablet-dimensions, 100cqh);
     app-content {
       aspect-ratio: 1 / 2;
-      gap: 1cqh;
     }
   }
   &.is-landscape {
     max-width: min($max-tablet-dimensions, 100cqw);
     app-content {
       aspect-ratio: 1.74 / 1;
-      gap: 1cqw;
     }
   }
 }
@@ -26,7 +26,6 @@ app-container {
     container-type: size;
     flex-direction: column;
     justify-content: start;
-    padding: 2cqi;
     box-sizing: border-box;
     display: flex;
     margin: auto;
@@ -44,4 +43,12 @@ app-container {
       max-height: 100cqh;
     }
   }
+}
+app-content {
+  @include cq-responsive(
+    (
+      gap: 1,
+      padding: 2,
+    )
+  );
 }
