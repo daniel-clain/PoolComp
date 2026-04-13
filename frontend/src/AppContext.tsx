@@ -2,109 +2,86 @@ import {
   createContext,
   useContext,
   useEffect,
-  useMemo,
   useRef,
   useState,
   type ReactNode,
 } from "react";
+import { poolCompConfig, type AllData } from "../../shared/domain";
+import type { MessageToBackend } from "../../shared/messageToBackend";
 import { useOrientation } from "./hooks/useOrientation";
-import type { MessageToServer, SharedAppState } from "./realtime/messages";
-import { EMPTY_SHARED_STATE } from "./realtime/messages";
+import { createPoolCompService } from "./services/poolComp.service";
 import {
-  createSocketClient,
+  createWebSocketService,
   type ConnectionStatus,
-} from "./realtime/socketClient";
+} from "./services/websockets.service";
 
 export type View = "Pool Comp" | "Players" | "Comp History";
-export type { PoolComp } from "./realtime/messages";
 
-type AppContextValue = SharedAppState & {
-  orientation: "portrait" | "landscape";
-  currentView: View;
-  connectionStatus: ConnectionStatus;
-  setView: (view: View) => void;
-  createPoolComp: () => void;
-  cancelActivePoolComp: () => void;
-  togglePlayerInActivePoolComp: (name: string) => void;
-  startActivePoolComp: () => void;
-  completeActivePoolComp: () => void;
-  addGlobalPlayer: (name: string) => void;
-  removeGlobalPlayer: (name: string) => void;
-};
+type AppContextValue = AllData &
+  ReturnType<typeof createPoolCompService> & {
+    orientation: "portrait" | "landscape";
+    activeView: View;
+    setActiveView: (view: View) => void;
+    connectionStatus: ConnectionStatus;
+  };
 
 const AppContext = createContext<AppContextValue | undefined>(undefined);
 
 export function AppProvider({ children }: { children: ReactNode }) {
-  const [sharedState, setSharedState] =
-    useState<SharedAppState>(EMPTY_SHARED_STATE);
-  const [currentView, setCurrentView] = useState<View>("Pool Comp");
+  const [allData, setAllData] = useState<AllData>({
+    activePoolComp: null,
+    compHistory: [],
+    players: [],
+    poolCompConfig,
+  });
+
+  const [activeView, setActiveView] = useState<View>("Pool Comp");
+
   const [connectionStatus, setConnectionStatus] =
     useState<ConnectionStatus>("connecting");
-  const socketRef = useRef<ReturnType<typeof createSocketClient> | null>(null);
+
+  const sendMessageToBackendRef = useRef<
+    ((message: MessageToBackend) => void) | null
+  >(null);
+
+  const poolCompService = createPoolCompService(
+    sendMessageToBackendRef.current,
+  );
+
   const { orientation } = useOrientation();
 
   useEffect(() => {
-    const client = createSocketClient({
-      onMessage: (message) => {
-        switch (message.type) {
-          case "stateSnapshot":
-          case "stateUpdated":
-            setSharedState(message.state);
-            return;
-          case "commandRejected":
-            console.log(message.reason);
-            return;
-          case "serverError":
-            console.log(message.message);
-        }
+    const { sendMessageToBackend, closeConnection } = createWebSocketService(
+      (stateUpdateFromBackend: AllData) => {
+        setAllData(stateUpdateFromBackend);
       },
-      onStatusChange: setConnectionStatus,
-    });
+      (connectionStatus: ConnectionStatus) => {
+        setConnectionStatus(connectionStatus);
+      },
+    );
 
-    socketRef.current = client;
+    sendMessageToBackendRef.current = sendMessageToBackend;
 
     return () => {
-      socketRef.current = null;
-      client.close();
+      sendMessageToBackendRef.current = null;
+      closeConnection();
     };
   }, []);
 
-  const value = useMemo<AppContextValue>(() => {
-    const send = (message: MessageToServer) => {
-      if (!socketRef.current?.send(message)) {
-        console.log(
-          "Not connected to server. Try again when the connection is ready.",
-        );
-      }
-    };
-
-    return {
-      ...sharedState,
-      orientation,
-      currentView,
-      connectionStatus,
-      setView: setCurrentView,
-      createPoolComp: () => {
-        setCurrentView("Pool Comp");
-        send({ type: "createPoolComp" });
-      },
-      cancelActivePoolComp: () => {
-        setCurrentView("Pool Comp");
-        send({ type: "cancelActivePoolComp" });
-      },
-      togglePlayerInActivePoolComp: (name) =>
-        send({ type: "togglePlayerInActivePoolComp", name }),
-      startActivePoolComp: () => send({ type: "startActivePoolComp" }),
-      completeActivePoolComp: () => {
-        setCurrentView("Pool Comp");
-        send({ type: "completeActivePoolComp" });
-      },
-      addGlobalPlayer: (name) => send({ type: "addPlayer", name }),
-      removeGlobalPlayer: (name) => send({ type: "removePlayer", name }),
-    };
-  }, [connectionStatus, currentView, sharedState, orientation]);
-
-  return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
+  return (
+    <AppContext.Provider
+      value={{
+        ...allData,
+        orientation,
+        activeView,
+        setActiveView,
+        connectionStatus,
+        ...poolCompService,
+      }}
+    >
+      {children}
+    </AppContext.Provider>
+  );
 }
 
 export function useAppContext(): AppContextValue {

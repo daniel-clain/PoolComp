@@ -4,33 +4,33 @@ import ballImage from "../../assets/8ball.png";
 import leavesImage from "../../assets/crossleaves.png";
 import crownImage from "../../assets/crown.png";
 import { ScalingImage } from "../../components/ScalingImage/ScalingImage";
-import { formatAud } from "../../utils/utils";
-import { BracketSvg } from "./components/BracketSvg";
 import { PlayerSelectModal } from "./components/PlayerSelectModal";
+import { TournamentStructure } from "./components/TournamentStructure/TournamentStructure";
 
 export function Comp() {
   const {
     activePoolComp,
     cancelActivePoolComp,
     completeActivePoolComp,
-    players: globalPlayers,
+    players,
     startActivePoolComp,
     togglePlayerInActivePoolComp,
-    weeklyPrizePreview,
     orientation,
+    calculateFirstPrizeMoney,
   } = useAppContext();
   const [isPlayerModalOpen, setIsPlayerModalOpen] = useState(false);
 
   if (!activePoolComp) return null;
 
-  const sortedPlayers = [...globalPlayers].sort((a, b) => a.localeCompare(b));
-  const selectedPlayerCount = activePoolComp.players.length;
-  const compDate = new Date(activePoolComp.createdAt).toLocaleDateString();
+  const sortedPlayers = [...players].sort((a, b) =>
+    a.name.localeCompare(b.name),
+  );
 
-  const firstPrizeDisplay = weeklyPrizePreview
-    ? formatAud(weeklyPrizePreview.firstPrize)
-    : "—";
+  const compDate = new Date(activePoolComp.date).toLocaleDateString();
 
+  const firstPrizeMoney = calculateFirstPrizeMoney(
+    activePoolComp.registerdPlayers,
+  );
   return (
     <comp-view>
       {orientation === "portrait" ? (
@@ -43,13 +43,13 @@ export function Comp() {
             {textBoxes()}
           </comp-details>
           {compActions()}
-          {tournamentBrackets()}
+          <TournamentStructure />
         </>
       ) : orientation === "landscape" ? (
         <>
           <left-container>
             {compActions()}
-            {tournamentBrackets()}
+            <TournamentStructure />
           </left-container>
           <right-container>
             {
@@ -67,9 +67,6 @@ export function Comp() {
       <PlayerSelectModal
         open={isPlayerModalOpen}
         onClose={() => setIsPlayerModalOpen(false)}
-        players={sortedPlayers}
-        selectedPlayerNames={activePoolComp.players}
-        onTogglePlayer={togglePlayerInActivePoolComp}
       />
     </comp-view>
   );
@@ -85,7 +82,7 @@ export function Comp() {
           <text-box-label>
             <ScalingImage id="crown-image" src={crownImage} />
           </text-box-label>
-          <text-box-value>{firstPrizeDisplay}</text-box-value>
+          <text-box-value>{firstPrizeMoney}</text-box-value>
         </text-box>
         <text-box>
           <text-box-label>SECOND PRIZE</text-box-label>
@@ -103,23 +100,13 @@ export function Comp() {
     return <ScalingImage id="eight-ball-image" src={ballImage} />;
   }
 
-  function tournamentBrackets() {
-    return (
-      activePoolComp && (
-        <tournament-brackets>
-          <BracketSvg playerNames={activePoolComp.players} />
-        </tournament-brackets>
-      )
-    );
-  }
-
   function compActions() {
     return (
       activePoolComp && (
         <comp-actions>
           {!activePoolComp.started ? (
             <button onClick={() => setIsPlayerModalOpen(true)}>
-              Add Players ({selectedPlayerCount})
+              Add Players ({activePoolComp.registerdPlayers.length})
             </button>
           ) : (
             <button onClick={completeActivePoolComp}>Complete Comp</button>
@@ -127,7 +114,7 @@ export function Comp() {
           {!activePoolComp.started ? (
             <button onClick={startActivePoolComp}>Start Comp</button>
           ) : null}
-          <button className=" danger" onClick={cancelActivePoolComp}>
+          <button className="danger" onClick={cancelActivePoolComp}>
             Cancel Comp
           </button>
         </comp-actions>

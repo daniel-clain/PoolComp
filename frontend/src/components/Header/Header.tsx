@@ -8,7 +8,7 @@ export function Header() {
         {(["Pool Comp", "Players", "Comp History"] as const).map((viewName) => (
           <button
             key={viewName}
-            className={currentView === viewName ? "is-active" : ""}
+            className={currentView === viewName ? "active" : ""}
             onClick={() => setView(viewName)}
           >
             {viewName}

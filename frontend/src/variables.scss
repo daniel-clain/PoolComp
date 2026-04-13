@@ -1,1 +1,81 @@
 $frame-width: 6;
+
+/* App shell */
+$color-app-bg: #121212;
+$color-body-text: #1f1f1f;
+
+/* Buttons */
+$color-button-border: #4a4a4a;
+$color-button-bg: #2b2b2b;
+$color-button-fg: #f5f5f5;
+$color-button-active-bg: #43d393;
+$color-button-active-fg: #1f1f1f;
+$color-button-active-border: #108f57;
+$color-button-danger-bg: #7f1d1d;
+$color-button-danger-border: #991b1b;
+
+/* Emphasis text (bye labels, danger tone on light surfaces) */
+$color-danger-text: #7f1d1d;
+
+/* Pool table */
+$color-table-frame-stop-1: #5c3d26;
+$color-table-frame-stop-2: #6e4a2c;
+$color-table-frame-stop-3: #5a3b24;
+$color-table-frame-stop-4: #6b452b;
+$color-table-frame-stop-5: #52321f;
+$color-table-frame-stop-6: #634028;
+$color-table-felt-border: #1a4d30;
+$color-table-felt-stop-1: #11965a;
+$color-table-felt-stop-2: #0d7d4d;
+$color-table-felt-stop-3: #0a6b42;
+$color-table-pocket-rim: #b8c4d0;
+$color-table-pocket-dark-1: #2a2a2a;
+$color-table-pocket-dark-2: #0a0a0a;
+$color-table-pocket-dark-3: #000;
+$color-table-stud-light: #f0f4f8;
+$color-table-stud-mid: #9aa8b5;
+$color-table-stud-dark: #5c6b7a;
+
+/* Bracket SVG */
+$color-bracket-connector: #2a2a2a;
+$color-bracket-slot-fill: #ffffff;
+$color-bracket-slot-stroke: #252525;
+$color-bracket-name: #1f1f1f;
+
+/* Comp view — prize / date fields */
+$color-comp-field-border: #8aaa9c;
+$color-comp-field-bg: #fff;
+$color-comp-field-fg: #333;
+
+/* Header — connection status */
+$color-header-muted: #d4d4d4;
+$color-status-connected: #34d399;
+$color-status-connecting: #fbbf24;
+$color-status-disconnected: #f87171;
+
+/* Shared panel / card surfaces */
+$color-panel-border: #3a3a3a;
+$color-panel-bg: #1c1c1c;
+$color-panel-fg: #f5f5f5;
+$color-panel-muted: #b0b0b0;
+$color-panel-row-bg: #262626;
+$color-input-border: #4a4a4a;
+$color-input-bg: #2b2b2b;
+
+/* Overlays & translucent accents (pool table, modal) */
+$color-modal-overlay: rgba(0, 0, 0, 0.45);
+$color-table-frame-gloss: rgba(255, 255, 255, 0.12);
+$color-table-frame-fibers-light: rgba(255, 255, 255, 0.04);
+$color-table-frame-fibers-dark: rgba(0, 0, 0, 0.06);
+$color-table-frame-inset-warm: rgba(255, 230, 200, 0.35);
+$color-table-frame-shadow-inset-deep: rgba(0, 0, 0, 0.45);
+$color-table-frame-shadow-drop: rgba(0, 0, 0, 0.55);
+$color-table-frame-shadow-edge: rgba(0, 0, 0, 0.25);
+$color-table-felt-spotlight: rgba(52, 200, 120, 0.2);
+$color-table-felt-inset-dark: rgba(0, 0, 0, 0.6);
+$color-table-felt-inset-highlight: rgba(255, 255, 255, 0.06);
+$color-table-felt-inset-shade: rgba(0, 0, 0, 0.15);
+$color-table-pocket-inset-light: rgba(255, 255, 255, 0.08);
+$color-table-pocket-inset-dark: rgba(0, 0, 0, 0.75);
+$color-table-stud-highlight: rgba(255, 255, 255, 0.9);
+$color-table-stud-shadow: rgba(0, 0, 0, 0.5);

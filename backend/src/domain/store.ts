@@ -1,4 +1,9 @@
 import { randomUUID } from "node:crypto";
+import {
+  bracketLeafCount,
+  buildStartedFirstRoundLabels,
+} from "../../../shared/bracket.js";
+import type { ClientCommand } from "../ws/protocol.js";
 import { withWeeklyPrizePreview } from "./prizeMoney.js";
 import {
   type PoolComp,
@@ -6,21 +11,9 @@ import {
   type SharedAppStateCore,
   toSharedAppStateCore,
 } from "./types.js";
-import type { ClientCommand } from "../ws/protocol.js";
 
 function cleanName(name: string): string {
   return name.trim();
-}
-
-function shuffle(players: string[]): string[] {
-  for (let index = players.length - 1; index > 0; index -= 1) {
-    const swapIndex = Math.floor(Math.random() * (index + 1));
-    const current = players[index];
-    players[index] = players[swapIndex]!;
-    players[swapIndex] = current!;
-  }
-
-  return players;
 }
 
 export type DomainError = Error & { __domainError: true };
@@ -41,7 +34,9 @@ export type AppStateStore = {
   apply(command: ClientCommand): SharedAppState;
 };
 
-export function createAppStateStore(initialState: SharedAppState): AppStateStore {
+export function createAppStateStore(
+  initialState: SharedAppState,
+): AppStateStore {
   let state: SharedAppStateCore = toSharedAppStateCore(initialState);
 
   function getState(): SharedAppState {
@@ -107,10 +102,18 @@ export function createAppStateStore(initialState: SharedAppState): AppStateStore
       throw domainError("The active comp has already started.");
     }
 
+    const roster = [...state.activePoolComp.players];
+    const leafCount = bracketLeafCount(roster.length);
+    const firstRoundSlots = buildStartedFirstRoundLabels(
+      roster,
+      leafCount,
+      Math.random,
+    );
+
     state.activePoolComp = {
       ...state.activePoolComp,
       started: true,
-      players: shuffle([...state.activePoolComp.players]),
+      firstRoundSlots,
     };
 
     return getState();
@@ -141,6 +144,7 @@ export function createAppStateStore(initialState: SharedAppState): AppStateStore
 
   function togglePlayerInActivePoolComp(name: string): SharedAppState {
     const clean = cleanName(name);
+    console.log(" name", clean);
 
     if (!clean) {
       throw domainError("Player name cannot be empty.");
@@ -193,7 +197,9 @@ export function createAppStateStore(initialState: SharedAppState): AppStateStore
 
     const activePlayers = state.activePoolComp?.players ?? [];
     if (state.activePoolComp?.started && activePlayers.includes(clean)) {
-      throw domainError("You cannot remove a player from a started active comp.");
+      throw domainError(
+        "You cannot remove a player from a started active comp.",
+      );
     }
 
     state.players = state.players.filter((player) => player !== clean);
@@ -201,7 +207,9 @@ export function createAppStateStore(initialState: SharedAppState): AppStateStore
     if (state.activePoolComp && !state.activePoolComp.started) {
       state.activePoolComp = {
         ...state.activePoolComp,
-        players: state.activePoolComp.players.filter((player) => player !== clean),
+        players: state.activePoolComp.players.filter(
+          (player) => player !== clean,
+        ),
       };
     }
 

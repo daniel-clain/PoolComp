@@ -7,7 +7,7 @@ import { LandingPage } from "./views/LandingPage/LandingPage";
 import { Players } from "./views/Players/Players";
 
 export function App() {
-  const { activePoolComp, currentView, orientation } = useAppContext();
+  const { activePoolComp, activeView, orientation } = useAppContext();
 
   return (
     <app-container className={`is-${orientation}`}>
@@ -15,7 +15,7 @@ export function App() {
         <Header />
         <ViewContainer>
           {(() => {
-            switch (currentView) {
+            switch (activeView) {
               case "Pool Comp":
                 return activePoolComp ? <Comp /> : <LandingPage />;
               case "Comp History":

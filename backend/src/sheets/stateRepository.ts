@@ -28,19 +28,47 @@ function toBoolean(value: string | undefined): boolean {
   return value?.toLowerCase() === "true";
 }
 
-function parsePlayersJson(raw: string | undefined): string[] {
+type CompPlayersPayload = {
+  players: string[];
+  firstRoundSlots?: string[];
+};
+
+function parseCompPlayersPayload(raw: string | undefined): CompPlayersPayload {
   if (!raw) {
-    return [];
+    return { players: [] };
   }
 
   try {
     const parsed = JSON.parse(raw) as unknown;
-    return Array.isArray(parsed)
-      ? parsed.filter((item): item is string => typeof item === "string")
-      : [];
+    if (Array.isArray(parsed)) {
+      return {
+        players: parsed.filter((item): item is string => typeof item === "string"),
+      };
+    }
+    if (parsed && typeof parsed === "object" && "players" in parsed) {
+      const record = parsed as { players?: unknown; firstRoundSlots?: unknown };
+      const players = Array.isArray(record.players)
+        ? record.players.filter((item): item is string => typeof item === "string")
+        : [];
+      const firstRoundSlots = Array.isArray(record.firstRoundSlots)
+        ? record.firstRoundSlots.filter((item): item is string => typeof item === "string")
+        : undefined;
+      return {
+        players,
+        ...(firstRoundSlots !== undefined ? { firstRoundSlots } : {}),
+      };
+    }
   } catch {
-    return [];
+    return { players: [] };
   }
+  return { players: [] };
+}
+
+function serializeCompPlayersPayload(comp: PoolComp): string {
+  return JSON.stringify({
+    players: comp.players,
+    ...(comp.firstRoundSlots !== undefined ? { firstRoundSlots: comp.firstRoundSlots } : {}),
+  });
 }
 
 type PlayerMetadata = {
@@ -162,26 +190,37 @@ export function createStateRepository(
       });
 
     const activeRow = activeCompRows[0];
+    const activePayload =
+      activeRow && activeRow[0] ? parseCompPlayersPayload(activeRow[3]) : null;
     const activePoolComp =
       activeRow && activeRow[0]
         ? {
             id: activeRow[0],
             createdAt: activeRow[1] ?? new Date().toISOString(),
             started: toBoolean(activeRow[2]),
-            players: parsePlayersJson(activeRow[3]),
+            players: activePayload?.players ?? [],
+            ...(activePayload?.firstRoundSlots
+              ? { firstRoundSlots: activePayload.firstRoundSlots }
+              : {}),
           }
         : null;
 
     const historicalMatches: PoolComp[] = historyRows
       .filter((row) => row[0])
-      .map((row) => ({
-        id: row[0] ?? "",
-        createdAt: row[1] ?? new Date().toISOString(),
-        completedAt: row[2] ?? row[1] ?? new Date().toISOString(),
-        players: parsePlayersJson(row[3]),
-        started: true,
-        status: "completed" as const,
-      }));
+      .map((row) => {
+        const payload = parseCompPlayersPayload(row[3]);
+        return {
+          id: row[0] ?? "",
+          createdAt: row[1] ?? new Date().toISOString(),
+          completedAt: row[2] ?? row[1] ?? new Date().toISOString(),
+          players: payload.players,
+          started: true,
+          status: "completed" as const,
+          ...(payload.firstRoundSlots
+            ? { firstRoundSlots: payload.firstRoundSlots }
+            : {}),
+        };
+      });
 
     return withWeeklyPrizePreview({
       ...EMPTY_CORE,
@@ -207,7 +246,7 @@ export function createStateRepository(
             appState.activePoolComp.id,
             appState.activePoolComp.createdAt,
             String(appState.activePoolComp.started),
-            JSON.stringify(appState.activePoolComp.players),
+            serializeCompPlayersPayload(appState.activePoolComp),
           ],
         ]
       : [];
@@ -216,7 +255,7 @@ export function createStateRepository(
       comp.id,
       comp.createdAt,
       comp.completedAt ?? comp.createdAt,
-      JSON.stringify(comp.players),
+      serializeCompPlayersPayload(comp),
       comp.status ?? "completed",
     ]);
 

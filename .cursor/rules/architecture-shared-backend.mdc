@@ -1,0 +1,9 @@
+---
+description: Shared package, backend authority, and where types live
+alwaysApply: false
+globs: "**/*.{ts,tsx}"
+---
+
+- **Cross-app contracts** (WebSocket command/message unions, snapshot/domain shapes like `PoolComp` and `SharedAppState`) live only under the root `shared/` package. Do not duplicate them in `frontend/src` or `backend/src`.
+- **Authoritative business logic** for comps (validation, transitions, random first-round layout) runs on the backend. The frontend sends commands and renders replicated state.
+- **Pure bracket math** used by both preview and server belongs in `shared/` (e.g. `bracket.ts`), not a second copy under the frontend.

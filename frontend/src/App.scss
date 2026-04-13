@@ -47,8 +47,8 @@ app-container {
 app-content {
   @include cq-responsive(
     (
-      gap: 1,
-      padding: 2,
+      gap: 3,
+      padding: 3,
     )
   );
 }

@@ -1,4 +1,5 @@
 @use "../../mixins.scss" as *;
+@use "../../variables.scss" as *;
 header {
   display: flex;
   align-items: center;
@@ -29,16 +30,16 @@ header {
         font-size: 3,
       )
     );
-    color: #d4d4d4;
+    color: $color-header-muted;
     text-transform: capitalize;
     &[data-status="connected"] {
-      color: #34d399;
+      color: $color-status-connected;
     }
     &[data-status="connecting"] {
-      color: #fbbf24;
+      color: $color-status-connecting;
     }
     &[data-status="disconnected"] {
-      color: #f87171;
+      color: $color-status-disconnected;
     }
   }
 }

@@ -1,9 +1,11 @@
+@use "../../variables.scss" as *;
+
 player-view {
-  border: 1px solid #3a3a3a;
+  border: 1px solid $color-panel-border;
   border-radius: 10px;
-  background: #1c1c1c;
+  background: $color-panel-bg;
   padding: 12px;
-  color: #f5f5f5;
+  color: $color-panel-fg;
   box-sizing: border-box;
   display: block;
 }
@@ -24,9 +26,9 @@ player-input-row {
     width: 240px;
     max-width: calc(100vw - 176px);
     border-radius: 8px;
-    border: 1px solid #4a4a4a;
-    background: #2b2b2b;
-    color: #f5f5f5;
+    border: 1px solid $color-input-border;
+    background: $color-input-bg;
+    color: $color-panel-fg;
     padding: 10px 12px;
     font-size: 14px;
     min-height: 44px;
@@ -44,7 +46,7 @@ player-list {
 }
 
 player-empty {
-  color: #b0b0b0;
+  color: $color-panel-muted;
   font-size: 14px;
 }
 
@@ -54,7 +56,7 @@ player-row {
   align-items: center;
   padding: 10px 12px;
   border-radius: 8px;
-  background: #262626;
+  background: $color-panel-row-bg;
   gap: 10px;
 }
 

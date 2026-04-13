@@ -1,7 +1,9 @@
+@use "../../../variables.scss" as *;
+
 player-modal-overlay {
   position: absolute;
   inset: 0;
-  background: rgba(0, 0, 0, 0.45);
+  background: $color-modal-overlay;
   z-index: 5;
   display: grid;
   place-items: center;
@@ -12,8 +14,8 @@ player-modal {
   width: min(100%, 48rem);
   max-height: 80%;
   overflow: auto;
-  background: #1c1c1c;
-  border: 0.0625rem solid #3a3a3a;
+  background: $color-panel-bg;
+  border: 0.0625rem solid $color-panel-border;
   border-radius: 0.5rem;
   padding: 0.75rem;
   box-sizing: border-box;
@@ -21,7 +23,7 @@ player-modal {
 
 player-modal-title {
   margin: 0 0 0.5rem;
-  color: #f5f5f5;
+  color: $color-panel-fg;
 }
 
 player-grid {

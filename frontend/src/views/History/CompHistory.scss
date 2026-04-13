@@ -1,9 +1,11 @@
+@use "../../variables.scss" as *;
+
 history-view {
-  border: 1px solid #3a3a3a;
+  border: 1px solid $color-panel-border;
   border-radius: 10px;
-  background: #1c1c1c;
+  background: $color-panel-bg;
   padding: 12px;
-  color: #f5f5f5;
+  color: $color-panel-fg;
   box-sizing: border-box;
   display: block;
 }
@@ -22,7 +24,7 @@ history-list {
 }
 
 history-empty {
-  color: #b0b0b0;
+  color: $color-panel-muted;
   font-size: 14px;
 }
 

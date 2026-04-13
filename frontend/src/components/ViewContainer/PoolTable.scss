@@ -24,28 +24,34 @@ view-container {
     height: 100cqh;
     width: 100cqw;
     background:
-      linear-gradient(180deg, rgba(255, 255, 255, 0.12) 0%, transparent 35%),
+      linear-gradient(180deg, $color-table-frame-gloss 0%, transparent 35%),
       linear-gradient(
         90deg,
-        #5c3d26 0%,
-        #6e4a2c 18%,
-        #5a3b24 38%,
-        #6b452b 55%,
-        #52321f 78%,
-        #634028 100%
+        $color-table-frame-stop-1 0%,
+        $color-table-frame-stop-2 18%,
+        $color-table-frame-stop-3 38%,
+        $color-table-frame-stop-4 55%,
+        $color-table-frame-stop-5 78%,
+        $color-table-frame-stop-6 100%
       ),
       repeating-linear-gradient(
         0deg,
-        rgba(255, 255, 255, 0.04) 0 1px,
+        $color-table-frame-fibers-light 0 1px,
         transparent 1px 5px,
-        rgba(0, 0, 0, 0.06) 5px 6px
+        $color-table-frame-fibers-dark 5px 6px
       );
     box-shadow:
-      inset 0 2px 1px rgba(255, 230, 200, 0.35),
-      inset 0 -3px 6px rgba(0, 0, 0, 0.45),
-      0 16px 40px rgba(0, 0, 0, 0.55),
-      0 2px 0 rgba(0, 0, 0, 0.25);
+      inset 0 2px 1px $color-table-frame-inset-warm,
+      inset 0 -3px 6px $color-table-frame-shadow-inset-deep,
+      0 16px 40px $color-table-frame-shadow-drop,
+      0 2px 0 $color-table-frame-shadow-edge;
     display: block;
+
+    @include cq-responsive(
+      (
+        border-radius: $frame-width * 0.75,
+      )
+    );
   }
 
   /* Recessed cloth + thin cushion line */
@@ -56,25 +62,30 @@ view-container {
         right: $frame-width,
         top: $frame-width,
         bottom: $frame-width,
-        border-radius: 3,
+        border-radius: $frame-width * 0.5,
         border-width: 0.15,
       )
     );
     border-style: solid;
-    border-color: #1a4d30;
+    border-color: $color-table-felt-border;
     z-index: 1;
     position: absolute;
     background:
       radial-gradient(
         ellipse 70% 60% at 48% 42%,
-        rgba(52, 200, 120, 0.2),
+        $color-table-felt-spotlight,
         transparent 55%
       ),
-      linear-gradient(165deg, #11965a 0%, #0d7d4d 45%, #0a6b42 100%);
+      linear-gradient(
+        165deg,
+        $color-table-felt-stop-1 0%,
+        $color-table-felt-stop-2 45%,
+        $color-table-felt-stop-3 100%
+      );
     box-shadow:
-      inset 0 2px 7px rgba(0, 0, 0, 0.6),
-      inset 2px 2px 0 rgba(255, 255, 255, 0.06),
-      inset -2px -2px 8px rgba(0, 0, 0, 0.15);
+      inset 0 2px 7px $color-table-felt-inset-dark,
+      inset 2px 2px 0 $color-table-felt-inset-highlight,
+      inset -2px -2px 8px $color-table-felt-inset-shade;
     display: block;
   }
 
@@ -90,16 +101,16 @@ view-container {
     aspect-ratio: 1 / 1;
     border-radius: 50%;
     border-style: solid;
-    border-color: #b8c4d0;
+    border-color: $color-table-pocket-rim;
     background: radial-gradient(
       circle at 35% 30%,
-      #2a2a2a 0%,
-      #0a0a0a 50%,
-      #000 100%
+      $color-table-pocket-dark-1 0%,
+      $color-table-pocket-dark-2 50%,
+      $color-table-pocket-dark-3 100%
     );
     box-shadow:
-      inset 0 2px 4px rgba(255, 255, 255, 0.08),
-      inset 0 -8px 14px rgba(0, 0, 0, 0.75);
+      inset 0 2px 4px $color-table-pocket-inset-light,
+      inset 0 -8px 14px $color-table-pocket-inset-dark;
   }
   rail-stud {
     @include cq-responsive(
@@ -112,13 +123,13 @@ view-container {
     border-radius: 50%;
     background: radial-gradient(
       circle at 32% 28%,
-      #f0f4f8,
-      #9aa8b5 45%,
-      #5c6b7a 100%
+      $color-table-stud-light,
+      $color-table-stud-mid 45%,
+      $color-table-stud-dark 100%
     );
     box-shadow:
-      inset 0 1px 1px rgba(255, 255, 255, 0.9),
-      0 1px 2px rgba(0, 0, 0, 0.5);
+      inset 0 1px 1px $color-table-stud-highlight,
+      0 1px 2px $color-table-stud-shadow;
     transform: translate(-50%, -50%);
     display: block;
   }

@@ -1,4 +1,5 @@
 @use "../../mixins.scss" as *;
+@use "../../variables.scss" as *;
 
 comp-view {
   display: flex;
@@ -161,13 +162,13 @@ comp-view {
         width: 100%;
         font-weight: 600;
         border-style: solid;
-        border-color: #8aaa9c;
+        border-color: $color-comp-field-border;
         box-sizing: border-box;
         display: flex;
         align-items: center;
-        background: #fff;
+        background: $color-comp-field-bg;
         justify-content: center;
-        color: #333;
+        color: $color-comp-field-fg;
       }
     }
   }

@@ -11,6 +11,8 @@
 @use "./views/History/CompHistory.scss";
 @use "./views/Players/Players.scss";
 @use "./views/Comp/Comp.scss";
+@use "./views/Comp/components/BracketSvg.scss";
+@use "./views/Comp/components/TournamentStructure/TournamentStructure.scss";
 
 @use "@fontsource/oswald/400.css" as *;
 @use "@fontsource/oswald/500.css" as *;
