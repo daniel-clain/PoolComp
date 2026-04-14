@@ -1,5 +1,6 @@
 import { useAppContext } from "./AppContext";
 import { Header } from "./components/Header/Header";
+import { ModalHost } from "./components/Modal/ModalHost";
 import { ViewContainer } from "./components/ViewContainer/ViewContainer";
 import { Comp } from "./views/Comp/Comp";
 import { CompHistory } from "./views/History/CompHistory";
@@ -7,7 +8,7 @@ import { LandingPage } from "./views/LandingPage/LandingPage";
 import { Players } from "./views/Players/Players";
 
 export function App() {
-  const { activePoolComp, activeView, orientation } = useAppContext();
+  const { activePoolComp, activeHistoricalComp, activeView, orientation } = useAppContext();
 
   return (
     <app-container className={`is-${orientation}`}>
@@ -17,7 +18,7 @@ export function App() {
           {(() => {
             switch (activeView) {
               case "Pool Comp":
-                return activePoolComp ? <Comp /> : <LandingPage />;
+                return (activePoolComp || activeHistoricalComp) ? <Comp /> : <LandingPage />;
               case "Comp History":
                 return <CompHistory />;
               case "Players":
@@ -25,6 +26,7 @@ export function App() {
             }
           })()}
         </ViewContainer>
+        <ModalHost />
       </app-content>
     </app-container>
   );

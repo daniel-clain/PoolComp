@@ -1,36 +1,35 @@
-import { useState } from "react";
 import { useAppContext } from "../../AppContext";
 import ballImage from "../../assets/8ball.png";
 import leavesImage from "../../assets/crossleaves.png";
 import crownImage from "../../assets/crown.png";
 import { ScalingImage } from "../../components/ScalingImage/ScalingImage";
-import { PlayerSelectModal } from "./components/PlayerSelectModal";
 import { TournamentStructure } from "./components/TournamentStructure/TournamentStructure";
 
 export function Comp() {
   const {
     activePoolComp,
+    activeHistoricalComp,
     cancelActivePoolComp,
     completeActivePoolComp,
-    players,
     startActivePoolComp,
-    togglePlayerInActivePoolComp,
+    clearHistoricalComp,
     orientation,
     calculateFirstPrizeMoney,
+    openModal,
   } = useAppContext();
-  const [isPlayerModalOpen, setIsPlayerModalOpen] = useState(false);
 
-  if (!activePoolComp) return null;
+  const displayComp = activeHistoricalComp ?? activePoolComp;
+  const isHistorical = activeHistoricalComp !== null;
 
-  const sortedPlayers = [...players].sort((a, b) =>
-    a.name.localeCompare(b.name),
-  );
+  if (!displayComp) return null;
 
-  const compDate = new Date(activePoolComp.date).toLocaleDateString();
+  const compDate = new Date(displayComp.date).toLocaleDateString();
 
-  const firstPrizeMoney = calculateFirstPrizeMoney(
-    activePoolComp.registerdPlayers,
-  );
+  const firstPrizeMoney =
+    !isHistorical && activePoolComp
+      ? calculateFirstPrizeMoney(activePoolComp.registeredPlayers)
+      : null;
+
   return (
     <comp-view>
       {orientation === "portrait" ? (
@@ -40,39 +39,35 @@ export function Comp() {
               {compTitle()}
               {eightBallImage()}
             </comp-details-header>
-            {textBoxes()}
+            {!isHistorical && textBoxes()}
           </comp-details>
           {compActions()}
-          <TournamentStructure />
+          <TournamentStructure comp={displayComp} />
         </>
       ) : orientation === "landscape" ? (
         <>
           <left-container>
             {compActions()}
-            <TournamentStructure />
+            <TournamentStructure comp={displayComp} />
           </left-container>
           <right-container>
-            {
-              <comp-details>
-                {compTitle()}
-                {textBoxes()}
-                {eightBallImage()}
-              </comp-details>
-            }
+            <comp-details>
+              {compTitle()}
+              {!isHistorical && textBoxes()}
+              {eightBallImage()}
+            </comp-details>
           </right-container>
         </>
       ) : null}
       <ScalingImage id="bg-leaves-image" src={leavesImage} />
-
-      <PlayerSelectModal
-        open={isPlayerModalOpen}
-        onClose={() => setIsPlayerModalOpen(false)}
-      />
     </comp-view>
   );
 
   function compTitle() {
-    return <comp-title>Comp Brackets</comp-title>;
+    if (isHistorical) {
+      return <view-title>Historical Comp ({compDate})</view-title>;
+    }
+    return <view-title>Comp Brackets</view-title>;
   }
 
   function textBoxes() {
@@ -101,12 +96,20 @@ export function Comp() {
   }
 
   function compActions() {
+    if (isHistorical) {
+      return (
+        <comp-actions>
+          <button onClick={clearHistoricalComp}>Back to Active Comp</button>
+        </comp-actions>
+      );
+    }
+
     return (
       activePoolComp && (
         <comp-actions>
           {!activePoolComp.started ? (
-            <button onClick={() => setIsPlayerModalOpen(true)}>
-              Add Players ({activePoolComp.registerdPlayers.length})
+            <button onClick={() => openModal({ kind: "selectRegisteredPlayers" })}>
+              Add Players ({activePoolComp.registeredPlayers.length})
             </button>
           ) : (
             <button onClick={completeActivePoolComp}>Complete Comp</button>

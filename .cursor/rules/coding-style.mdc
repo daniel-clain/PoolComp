@@ -9,3 +9,4 @@ alwaysApply: true
 - Function components as `export function Name(){}` (no default exports).
 - Use SCSS files for styling, organized by feature folder. No TypeScript style objects.
 - Do not use `aria-*`, `role`, or `alt` attributes anywhere in this app.
+- Never use abbreviations or acronyms in variable names, function names, or type names. Every name must be fully descriptive so a human can understand its meaning at a glance. Code is read far more than it is written — optimise for cognitive ease, not keystroke economy. `slotWithPosition` not `swp`, `aspectRatio` not `ar`, `connector` not `conn`, `repository` not `repo`.

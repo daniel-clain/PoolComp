@@ -2,16 +2,20 @@ import { useState, type ChangeEvent, type KeyboardEvent } from "react";
 import { useAppContext } from "../../AppContext";
 
 export function Players() {
-  const { players, addGlobalPlayer, removeGlobalPlayer } = useAppContext();
+  const { players, addPlayer, openModal } = useAppContext();
   const [playerName, setPlayerName] = useState("");
-  const commitNewPlayer = () => {
+  const [showDeactivated, setShowDeactivated] = useState(false);
+
+  const visiblePlayers = showDeactivated
+    ? players
+    : players.filter((player) => !player.deactivated);
+
+  function commitNewPlayer() {
     const trimmed = playerName.trim();
-    if (!trimmed) {
-      return;
-    }
-    addGlobalPlayer(trimmed);
+    if (!trimmed) return;
+    addPlayer(trimmed);
     setPlayerName("");
-  };
+  }
 
   function handleChange(event: ChangeEvent<HTMLInputElement>): void {
     setPlayerName(event.target.value);
@@ -26,32 +30,48 @@ export function Players() {
 
   return (
     <player-view>
-      <player-title>Players</player-title>
+      <player-header>
+        <view-title>Players</view-title>
+      </player-header>
       <player-input-row>
         <input
           type="text"
           value={playerName}
           onChange={handleChange}
           onKeyDown={handleKeyDown}
+          placeholder="New player name"
         />
         <button type="button" onClick={commitNewPlayer}>
           Add Player
         </button>
       </player-input-row>
-      <player-list>
-        {players.length === 0 ? (
-          <player-empty>No players added yet.</player-empty>
-        ) : (
-          players.map((player) => (
-            <player-row key={player}>
-              <player-name>{player}</player-name>
-              <button type="button" onClick={() => removeGlobalPlayer(player)}>
-                Remove
+      <player-grid-container>
+        <player-filter>
+          <label>
+            <input
+              type="checkbox"
+              checked={showDeactivated}
+              onChange={(event) => setShowDeactivated(event.target.checked)}
+            />
+            Show deactivated
+          </label>
+        </player-filter>
+        <player-grid>
+          {visiblePlayers.length === 0 ? (
+            <player-empty>No players added yet.</player-empty>
+          ) : (
+            visiblePlayers.map((player) => (
+              <button
+                key={player.id}
+                className={player.deactivated ? "is-deactivated" : ""}
+                onClick={() => openModal({ kind: "updatePlayer", playerId: player.id })}
+              >
+                {player.name}
               </button>
-            </player-row>
-          ))
-        )}
-      </player-list>
+            ))
+          )}
+        </player-grid>
+      </player-grid-container>
     </player-view>
   );
 }

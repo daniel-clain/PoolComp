@@ -1,6 +1,7 @@
 export type Player = {
   id: string;
   name: string;
+  deactivated: boolean;
 };
 
 export type PoolComp = {
@@ -10,17 +11,17 @@ export type PoolComp = {
 };
 
 export type ActivePoolComp = PoolComp & {
-  registerdPlayers: RegisteredPlayer[];
+  registeredPlayers: RegisteredPlayer[];
   started: boolean;
 };
 
 export type RegisteredPlayer = Player & {
   paid: boolean;
 };
-export type Slot = {
-  id: string;
-  playerId: string | null;
-};
+export type Slot =
+  | { id: string; kind: "empty" }
+  | { id: string; kind: "bye" }
+  | { id: string; kind: "player"; playerId: string };
 
 export type PoolCompConfig = {
   buyIn: number;

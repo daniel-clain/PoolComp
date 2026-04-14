@@ -1,32 +1,94 @@
-/* Your CSS with container queries */
+@use "../../../../variables.scss" as *;
+
 tournament-structure {
-  container-type: size;
-  display: block;
-  position: relative;
-  width: 100%;
-  height: 100%;
-}
-
-tournament-slot {
-  position: absolute;
   display: flex;
-  align-items: center;
-  justify-content: center;
-  background: var(--slot-bg);
-  border: 0.2cqw solid var(--slot-border);
-  border-radius: 0.5cqw;
-  cursor: pointer;
-  transition: all 0.2s;
-}
+  align-items: start;
+  justify-content: start;
+  flex: 1 1 0;
+  min-height: 0;
+  width: 100%;
+  z-index: 1;
+  position: relative;
+  container-type: size;
 
-tournament-slot:hover {
-  background: var(--slot-hover);
-}
+  tournament-structure-inner {
+    position: relative;
+    container-type: size;
+    width: min(100cqw, calc(var(--tournament-structure-aspect-ratio) * 100cqh));
+    height: min(100cqh, calc(100cqw / var(--tournament-structure-aspect-ratio)));
 
-/* SVG connectors scale automatically because SVG uses percentages */
-svg path {
-  stroke: var(--connector-color);
-  stroke-width: 0.3;
-  fill: none;
-  vector-effect: non-scaling-stroke; /* Keeps stroke consistent at all scales */
+    svg {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+
+      path {
+        stroke: $color-bracket-connector;
+        stroke-width: 1.4;
+        fill: none;
+        stroke-linecap: square;
+        vector-effect: non-scaling-stroke;
+      }
+    }
+
+    tournament-slot {
+      position: absolute;
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+      box-sizing: border-box;
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      padding: 0 0.6cqw;
+      background: $color-bracket-slot-fill;
+      border: 1px solid $color-bracket-slot-stroke;
+      border-radius: 0.3cqh;
+      color: $color-bracket-name;
+      cursor: pointer;
+      font-weight: 500;
+      transition: background 0.15s;
+
+      &:hover {
+        background: #ebebeb;
+      }
+
+      &.is-bye {
+        color: $color-danger-text;
+        font-weight: 700;
+      }
+    }
+
+    slot-matchup-select {
+      position: absolute;
+      display: flex;
+      flex-direction: column;
+      z-index: 10;
+      background: rgba(0, 0, 0, 0.75);
+      backdrop-filter: blur(8px);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 0.3cqh;
+      overflow: hidden;
+
+      button {
+        display: block;
+        width: 100%;
+        text-align: left;
+        padding: 0.4cqh 0.6cqw;
+        font-size: inherit;
+        border: none;
+        background: transparent;
+        color: #f0f0f0;
+        cursor: pointer;
+
+        &:hover {
+          background: rgba(255, 255, 255, 0.12);
+        }
+
+        & + button {
+          border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+      }
+    }
+  }
 }

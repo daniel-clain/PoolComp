@@ -6,12 +6,12 @@
 @use "./components/ViewContainer/PoolTable.scss";
 @use "./components/ScalingImage/ScalingImage.scss";
 @use "./components/Header/Header.scss";
+@use "./components/Modal/Modal.scss";
 
 @use "./views/LandingPage/LandingPage.scss";
 @use "./views/History/CompHistory.scss";
 @use "./views/Players/Players.scss";
 @use "./views/Comp/Comp.scss";
-@use "./views/Comp/components/BracketSvg.scss";
 @use "./views/Comp/components/TournamentStructure/TournamentStructure.scss";
 
 @use "@fontsource/oswald/400.css" as *;

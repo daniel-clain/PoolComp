@@ -60,7 +60,18 @@ $color-panel-fg: #f5f5f5;
 $color-panel-muted: #b0b0b0;
 $color-panel-row-bg: #262626;
 $color-input-border: #4a4a4a;
-$color-input-bg: #2b2b2b;
+$color-input-bg: #f5f5f5;
+
+/* View title */
+$color-view-title: #1f1f1f;
+
+/* View surface — content resting on the felt */
+$color-view-surface-bg: rgba(0, 0, 0, 0.55);
+$color-view-surface-border: rgba(255, 255, 255, 0.12);
+$color-view-surface-fg: #f0f0f0;
+$color-view-surface-muted: #b0b0b0;
+$color-view-surface-row-bg: rgba(255, 255, 255, 0.06);
+$color-view-surface-row-hover: rgba(255, 255, 255, 0.1);
 
 /* Overlays & translucent accents (pool table, modal) */
 $color-modal-overlay: rgba(0, 0, 0, 0.45);

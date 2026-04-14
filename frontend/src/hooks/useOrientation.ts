@@ -6,11 +6,11 @@ export function useOrientation() {
   );
 
   useEffect(() => {
-    const mql = window.matchMedia("(orientation: portrait)");
-    const update = () => setOrientation(mql.matches ? "portrait" : "landscape");
+    const mediaQueryList = window.matchMedia("(orientation: portrait)");
+    const update = () => setOrientation(mediaQueryList.matches ? "portrait" : "landscape");
     update();
-    mql.addEventListener("change", update);
-    return () => mql.removeEventListener("change", update);
+    mediaQueryList.addEventListener("change", update);
+    return () => mediaQueryList.removeEventListener("change", update);
   }, []);
 
   return { orientation };

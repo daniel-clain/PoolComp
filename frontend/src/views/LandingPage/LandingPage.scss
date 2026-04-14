@@ -1,20 +1,78 @@
+@use "../../mixins.scss" as *;
 @use "../../variables.scss" as *;
 
-home-view {
-  border: 1px solid $color-panel-border;
-  border-radius: 10px;
-  background: $color-panel-bg;
-  padding: 12px;
-  color: $color-panel-fg;
-  height: 100%;
-  display: grid;
-  place-items: center;
-  box-sizing: border-box;
+@keyframes shimmer {
+  0% {
+    background-position: -200% center;
+  }
+  100% {
+    background-position: 200% center;
+  }
 }
 
-home-view button {
-  border-radius: 8px;
-  font-size: 18px;
-  min-height: 56px;
-  min-width: 220px;
+home-view {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  height: 100%;
+  box-sizing: border-box;
+  @include cq-responsive(
+    (
+      padding-top: 8,
+    )
+  );
+
+  home-button-container {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    button {
+      position: relative;
+      z-index: 1;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      cursor: pointer;
+      background: linear-gradient(
+        110deg,
+        $color-button-active-bg 0%,
+        $color-button-active-bg 30%,
+        lighten($color-button-active-bg, 18%) 50%,
+        $color-button-active-bg 70%,
+        $color-button-active-bg 100%
+      );
+      background-size: 200% 100%;
+      animation: shimmer 3s ease-in-out infinite;
+      color: $color-button-active-fg;
+      border-color: $color-button-active-border;
+      box-shadow:
+        0 0 20px rgba($color-button-active-bg, 0.35),
+        0 0 60px rgba($color-button-active-bg, 0.15);
+      transition:
+        box-shadow 0.3s,
+        transform 0.15s;
+
+      @include cq-responsive(
+        (
+          font-size: 8,
+          padding: 4 10,
+          border-radius: 2,
+          border-width: 0.4,
+        )
+      );
+
+      &:hover {
+        box-shadow:
+          0 0 30px rgba($color-button-active-bg, 0.5),
+          0 0 80px rgba($color-button-active-bg, 0.25);
+        transform: scale(1.03);
+      }
+
+      &:active {
+        transform: scale(0.98);
+      }
+    }
+  }
 }

@@ -3,29 +3,33 @@ import type { SlotWithPosition } from "../../../../../services/tournamentStructu
 
 type Props = {
   slotWithPosition: SlotWithPosition;
-  setSlotPlayerSelectionModalOpen: (slotId: string) => void;
+  onSelect: () => void;
 };
 
-export function Slot({
-  slotWithPosition,
-  setSlotPlayerSelectionModalOpen,
-}: Props) {
+export function Slot({ slotWithPosition, onSelect }: Props) {
   const { players } = useAppContext();
-  const { slot, slotPosition, slotSize, fontSize } = slotWithPosition;
-  const playerName = players.find((p) => p.id === slot.playerId)?.name;
+  const { slot, x, y, width, height, fontSize } = slotWithPosition;
+
+  let label = "";
+  if (slot.kind === "player") {
+    label = players.find((player) => player.id === slot.playerId)?.name ?? "";
+  } else if (slot.kind === "bye") {
+    label = "BYE";
+  }
+
   return (
     <tournament-slot
-      key={slot.id}
       style={{
-        left: `${slotPosition.x}cqw`,
-        top: `${slotPosition.y}cqh`,
-        width: `${slotSize.width}cqw`,
-        height: `${slotSize.height}cqh`,
-        fontSize: `${fontSize}cqw`,
+        left: `${x}cqw`,
+        top: `${y}cqh`,
+        width: `${width}cqw`,
+        height: `${height}cqh`,
+        fontSize: `${fontSize}cqh`,
       }}
-      onClick={() => setSlotPlayerSelectionModalOpen(slot.id)}
+      className={`is-${slot.kind}`}
+      onClick={onSelect}
     >
-      {playerName}
+      {label}
     </tournament-slot>
   );
 }

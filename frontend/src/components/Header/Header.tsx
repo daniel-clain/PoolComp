@@ -1,15 +1,15 @@
 import { useAppContext } from "../../AppContext";
 
 export function Header() {
-  const { connectionStatus, currentView, setView } = useAppContext();
+  const { connectionStatus, activeView, setActiveView } = useAppContext();
   return (
     <header>
       <nav-tabs>
         {(["Pool Comp", "Players", "Comp History"] as const).map((viewName) => (
           <button
             key={viewName}
-            className={currentView === viewName ? "active" : ""}
-            onClick={() => setView(viewName)}
+            className={activeView === viewName ? "active" : ""}
+            onClick={() => setActiveView(viewName)}
           >
             {viewName}
           </button>

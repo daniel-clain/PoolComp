@@ -29,6 +29,8 @@ comp-view {
 }
 ```
 
+- never use `data-*` attributes for styling. Use classes instead, eg `.is-empty`, `.is-bye`, `.is-player`, `.is-active`, `.is-disabled`.
+
 - when the layout changes from media queries or classes that represent the layout in a different state, the styles should be applied in a copy of the same structure but only for that state context. Eg
 
 ```

@@ -33,15 +33,13 @@ comp-view {
   }
   .is-landscape & {
     flex-direction: row;
+    justify-content: space-between;
     left-container {
       display: flex;
       flex-direction: column;
-      gap: 2cqh;
       flex: 1;
-      tournament-brackets {
-        flex: 1;
-        min-height: 0;
-      }
+      min-width: 0;
+      gap: 2cqh;
     }
     right-container {
       display: flex;
@@ -97,34 +95,6 @@ comp-view {
         )
       );
     }
-  }
-
-  tournament-brackets {
-    position: relative;
-    z-index: 1;
-    box-sizing: border-box;
-    gap: 2%;
-    position: relative;
-    width: 100%;
-
-    svg {
-      display: block;
-      height: 100%;
-      max-width: 100%;
-      max-height: 100%;
-    }
-  }
-
-  comp-title {
-    font-weight: 700;
-    text-transform: uppercase;
-    white-space: nowrap;
-    letter-spacing: -0.01em;
-    @include cq-responsive(
-      (
-        font-size: 10,
-      )
-    );
   }
 
   text-box-container {
