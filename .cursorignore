@@ -2,4 +2,4 @@
 
 docs/archive/
 frontend/archive/
-!backend/.env
+!**/.env

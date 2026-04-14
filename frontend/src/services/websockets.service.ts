@@ -12,7 +12,7 @@ export type PendingAction = { requestId: string; action: MessageName } | null;
 const ACTION_TIMEOUT_MS = 10_000;
 
 function resolveWebSocketUrl(): string {
-  const configured = import.meta.env.VITE_WS_URL;
+  const configured = import.meta.env.VITE_WS_URL?.trim();
   if (configured) return configured;
   const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
   return `${protocol}//${window.location.host}/ws`;
