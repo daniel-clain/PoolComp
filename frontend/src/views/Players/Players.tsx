@@ -30,9 +30,7 @@ export function Players() {
 
   return (
     <player-view>
-      <player-header>
-        <view-title>Players</view-title>
-      </player-header>
+      <view-title>Players</view-title>
       <player-input-row>
         <input
           type="text"
@@ -64,7 +62,9 @@ export function Players() {
               <button
                 key={player.id}
                 className={player.deactivated ? "is-deactivated" : ""}
-                onClick={() => openModal({ kind: "updatePlayer", playerId: player.id })}
+                onClick={() =>
+                  openModal({ kind: "updatePlayer", playerId: player.id })
+                }
               >
                 {player.name}
               </button>

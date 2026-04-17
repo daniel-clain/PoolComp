@@ -5,7 +5,7 @@ type Props = {
   playerId: string;
 };
 
-export function UpdatePlayerContent({ playerId }: Props) {
+export function UpdatePlayerModal({ playerId }: Props) {
   const {
     players,
     updatePlayer,

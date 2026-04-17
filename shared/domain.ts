@@ -12,7 +12,6 @@ export type PoolComp = {
 
 export type ActivePoolComp = PoolComp & {
   registeredPlayers: RegisteredPlayer[];
-  started: boolean;
 };
 
 export type RegisteredPlayer = Player & {
@@ -23,13 +22,6 @@ export type Slot =
   | { id: string; kind: "bye" }
   | { id: string; kind: "player"; playerId: string };
 
-export type PoolCompConfig = {
-  buyIn: number;
-  barInput: number;
-  xmasCut: number;
-  bigCompContribution: number;
-};
-
 export type AllData = {
   activePoolComp: ActivePoolComp | null;
   compHistory: PoolComp[];
@@ -37,9 +29,14 @@ export type AllData = {
   poolCompConfig: PoolCompConfig;
 };
 
-export const poolCompConfig: PoolCompConfig = {
+export const poolCompConfig = {
   buyIn: 10,
   barInput: 50,
   xmasCut: 20,
-  bigCompContribution: 0.5,
+  bigComp: {
+    weeklyContributionPercentage: 0.5,
+    mainCompPercentage: 0.7,
+    mainCompFirstPlacePercentage: 0.7,
+  },
 };
+export type PoolCompConfig = typeof poolCompConfig;

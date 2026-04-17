@@ -8,7 +8,9 @@ type ModalProps = {
 export function Modal({ onClose, children }: ModalProps) {
   return (
     <app-modal-overlay onClick={onClose}>
-      <app-modal onClick={(event: MouseEvent<HTMLElement>) => event.stopPropagation()}>
+      <app-modal
+        onClick={(event: MouseEvent<HTMLElement>) => event.stopPropagation()}
+      >
         {children}
       </app-modal>
     </app-modal-overlay>

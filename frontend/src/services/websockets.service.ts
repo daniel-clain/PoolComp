@@ -9,14 +9,9 @@ import type {
 export type ConnectionStatus = "connecting" | "connected" | "disconnected";
 export type PendingAction = { requestId: string; action: MessageName } | null;
 
-const ACTION_TIMEOUT_MS = 10_000;
+const WS_URL = import.meta.env.VITE_WS_URL;
 
-function resolveWebSocketUrl(): string {
-  const configured = import.meta.env.VITE_WS_URL?.trim();
-  if (configured) return configured;
-  const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
-  return `${protocol}//${window.location.host}/ws`;
-}
+const ACTION_TIMEOUT_MS = 10_000;
 
 export function createWebSocketService(
   onStateUpdate: (state: AllData) => void,
@@ -30,7 +25,11 @@ export function createWebSocketService(
 
   function connect() {
     onConnectionStatusChange("connecting");
-    socket = new WebSocket(resolveWebSocketUrl());
+    if (!WS_URL) {
+      console.error("VITE_WS_URL is not configured in .env file.");
+      return;
+    }
+    socket = new WebSocket(WS_URL);
 
     socket.addEventListener("open", () => {
       onConnectionStatusChange("connected");
@@ -76,6 +75,8 @@ export function createWebSocketService(
         }
         if (serverMessage.data.ok) {
           onStateUpdate(serverMessage.data.state);
+        } else {
+          window.alert(serverMessage.data.reason);
         }
         onPendingActionChange(null);
         break;

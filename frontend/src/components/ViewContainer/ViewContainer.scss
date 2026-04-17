@@ -17,13 +17,20 @@ view-container {
         right: $frame-width,
         top: $frame-width,
         bottom: $frame-width,
-        padding: 6 6,
+        padding: 6 4,
       )
     );
 
     & > * {
       width: 100cqw;
       height: 100cqh;
+      display: flex;
+      flex-direction: column;
+      @include cq-responsive(
+        (
+          gap: 4,
+        )
+      );
     }
   }
 }

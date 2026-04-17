@@ -1,5 +1,10 @@
-import type { MutableRefObject } from "react";
-import { poolCompConfig, type Player, type RegisteredPlayer, type Slot } from "../../../shared/domain";
+import type { RefObject } from "react";
+import {
+  poolCompConfig,
+  type Player,
+  type RegisteredPlayer,
+  type Slot,
+} from "../../../shared/domain";
 import type { MessageToBackend } from "../../../shared/messageToBackend";
 
 export type SlotPlayerChoice = {
@@ -7,16 +12,17 @@ export type SlotPlayerChoice = {
   playerName: string;
 };
 
-export function canSelectWinnerForSlot(
-  slotId: string,
-  slots: Slot[],
-): boolean {
+export function canSelectWinnerForSlot(slotId: string, slots: Slot[]): boolean {
   const slot = slots.find((candidate) => candidate.id === slotId);
   if (!slot || slot.kind !== "empty") return false;
 
   const slotNumber = parseInt(slotId.slice(1));
-  const leftChild = slots.find((candidate) => candidate.id === `s${slotNumber * 2}`);
-  const rightChild = slots.find((candidate) => candidate.id === `s${slotNumber * 2 + 1}`);
+  const leftChild = slots.find(
+    (candidate) => candidate.id === `s${slotNumber * 2}`,
+  );
+  const rightChild = slots.find(
+    (candidate) => candidate.id === `s${slotNumber * 2 + 1}`,
+  );
   if (!leftChild || !rightChild) return false;
 
   return leftChild.kind === "player" && rightChild.kind === "player";
@@ -36,7 +42,9 @@ export function getPlayerChoicesForSlot(
   const choices: SlotPlayerChoice[] = [];
   for (const child of [leftChild, rightChild]) {
     if (child?.kind === "player") {
-      const player = players.find((candidate) => candidate.id === child.playerId);
+      const player = players.find(
+        (candidate) => candidate.id === child.playerId,
+      );
       if (player) {
         choices.push({ playerId: player.id, playerName: player.name });
       }
@@ -47,15 +55,28 @@ export function getPlayerChoicesForSlot(
 
 export function countPlayersInComp(slots: Slot[]): number {
   const uniquePlayerIds = new Set(
-    slots.filter((slot): slot is Extract<typeof slot, { kind: "player" }> => slot.kind === "player")
+    slots
+      .filter(
+        (slot): slot is Extract<typeof slot, { kind: "player" }> =>
+          slot.kind === "player",
+      )
       .map((slot) => slot.playerId),
   );
   return uniquePlayerIds.size;
 }
 
-export function getFinalistPlayerIds(slots: Slot[]): { firstPlaceId: string | null; secondPlaceId: string | null } {
+export function activePoolCompHasChampionPlayer(slots: Slot[]): boolean {
+  const rootSlot = slots.find((candidate) => candidate.id === "s1");
+  return rootSlot?.kind === "player";
+}
+
+export function getFinalistPlayerIds(slots: Slot[]): {
+  firstPlaceId: string | null;
+  secondPlaceId: string | null;
+} {
   const root = slots.find((slot) => slot.id === "s1");
-  if (!root || root.kind !== "player") return { firstPlaceId: null, secondPlaceId: null };
+  if (!root || root.kind !== "player")
+    return { firstPlaceId: null, secondPlaceId: null };
 
   const firstPlaceId = root.playerId;
   const leftChild = slots.find((slot) => slot.id === "s2");
@@ -64,19 +85,30 @@ export function getFinalistPlayerIds(slots: Slot[]): { firstPlaceId: string | nu
   let secondPlaceId: string | null = null;
   if (leftChild?.kind === "player" && leftChild.playerId !== firstPlaceId) {
     secondPlaceId = leftChild.playerId;
-  } else if (rightChild?.kind === "player" && rightChild.playerId !== firstPlaceId) {
+  } else if (
+    rightChild?.kind === "player" &&
+    rightChild.playerId !== firstPlaceId
+  ) {
     secondPlaceId = rightChild.playerId;
   }
 
   return { firstPlaceId, secondPlaceId };
 }
 
-export function calculatePrizeMoneyFromPlayerCount(playerCount: number): number {
-  return (playerCount * poolCompConfig.buyIn) / poolCompConfig.bigCompContribution + poolCompConfig.barInput;
+export function calculatePrizeMoneyFromPlayerCount(
+  playerCount: number,
+): number {
+  return (
+    (playerCount * poolCompConfig.buyIn) /
+      poolCompConfig.bigComp.weeklyContributionPercentage +
+    poolCompConfig.barInput
+  );
 }
 
 export function createPoolCompService(
-  sendMessageToBackendRef: MutableRefObject<((message: MessageToBackend) => void) | null>,
+  sendMessageToBackendRef: RefObject<
+    ((message: MessageToBackend) => void) | null
+  >,
 ) {
   function send(message: MessageToBackend) {
     sendMessageToBackendRef.current?.(message);
@@ -85,7 +117,7 @@ export function createPoolCompService(
   function calculateFirstPrizeMoney(registeredPlayers: RegisteredPlayer[]) {
     return (
       (registeredPlayers.length * poolCompConfig.buyIn) /
-        poolCompConfig.bigCompContribution +
+        poolCompConfig.bigComp.weeklyContributionPercentage +
       poolCompConfig.barInput
     );
   }
@@ -97,14 +129,17 @@ export function createPoolCompService(
     cancelActivePoolComp: () => {
       send({ message: "cancelActivePoolComp" });
     },
-    startActivePoolComp: () => {
-      send({ message: "startActivePoolComp" });
+    createMatchups: () => {
+      send({ message: "createMatchups" });
     },
     completeActivePoolComp: () => {
       send({ message: "completeActivePoolComp" });
     },
     togglePlayerInActivePoolComp: (playerId: string) => {
       send({ message: "togglePlayerInActivePoolComp", data: { playerId } });
+    },
+    toggleRegisteredPlayerPaid: (playerId: string) => {
+      send({ message: "toggleRegisteredPlayerPaid", data: { playerId } });
     },
     addPlayer: (name: string) => {
       send({ message: "addPlayer", data: { name } });
@@ -118,8 +153,14 @@ export function createPoolCompService(
     activatePlayer: (playerId: string) => {
       send({ message: "activatePlayer", data: { playerId } });
     },
-    assignWinnerToBracketSlot: (parentSlotId: string, winningPlayerId: string) => {
-      send({ message: "assignWinnerToBracketSlot", data: { parentSlotId, winningPlayerId } });
+    assignWinnerToBracketSlot: (
+      parentSlotId: string,
+      winningPlayerId: string,
+    ) => {
+      send({
+        message: "assignWinnerToBracketSlot",
+        data: { parentSlotId, winningPlayerId },
+      });
     },
   };
 

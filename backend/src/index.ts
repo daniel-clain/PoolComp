@@ -16,7 +16,8 @@ async function bootstrap(): Promise<void> {
     serverConfig.mongoDbName,
   );
   const repository = createRepository(database);
-  const actions = createPoolCompService();
+  await repository.ensureIndexes();
+  const actions = createPoolCompService(repository);
   const validMessages = new Set(Object.keys(actions));
 
   let state: AllData = await repository.load();
@@ -41,12 +42,11 @@ async function bootstrap(): Promise<void> {
           });
 
           try {
-            const nextState = actions[messageName](
+            const nextState = await actions[messageName](
               state,
               (envelope as any).data,
             );
-            await repository.save(nextState);
-            state = await repository.load();
+            state = nextState;
             console.log(`[action] success: ${messageName}`);
 
             webSocketService.broadcast({

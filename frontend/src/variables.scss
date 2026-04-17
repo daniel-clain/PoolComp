@@ -1,21 +1,37 @@
 $frame-width: 6;
 
-/* App shell */
+/* text */
+$color-dark-text: #1f1f1f;
+$color-white-text: #f5f5f5;
+
+/* Background colors */
 $color-app-bg: #121212;
-$color-body-text: #1f1f1f;
+$color-dark-bg: #2b2b2b;
+
+$color-dark-border: #252525;
 
 /* Buttons */
 $color-button-border: #4a4a4a;
-$color-button-bg: #2b2b2b;
-$color-button-fg: #f5f5f5;
 $color-button-active-bg: #43d393;
-$color-button-active-fg: #1f1f1f;
 $color-button-active-border: #108f57;
-$color-button-danger-bg: #7f1d1d;
+$color-button-danger-bg: #eb9292;
 $color-button-danger-border: #991b1b;
 
-/* Emphasis text (bye labels, danger tone on light surfaces) */
 $color-danger-text: #7f1d1d;
+
+/* Comp view — prize / date fields */
+$color-comp-field-border: #8aaa9c;
+
+/* Header — connection status */
+$color-status-connected: #34d399;
+$color-status-connecting: #fbbf24;
+$color-status-disconnected: #f87171;
+
+$color-view-title: #1f1f1f;
+$color-panel-bg: #383838;
+
+/* Overlays & translucent accents (pool table, modal) */
+$color-modal-overlay: rgba(0, 0, 0, 0.45);
 
 /* Pool table */
 $color-table-frame-stop-1: #5c3d26;
@@ -36,45 +52,6 @@ $color-table-stud-light: #f0f4f8;
 $color-table-stud-mid: #9aa8b5;
 $color-table-stud-dark: #5c6b7a;
 
-/* Bracket SVG */
-$color-bracket-connector: #2a2a2a;
-$color-bracket-slot-fill: #ffffff;
-$color-bracket-slot-stroke: #252525;
-$color-bracket-name: #1f1f1f;
-
-/* Comp view — prize / date fields */
-$color-comp-field-border: #8aaa9c;
-$color-comp-field-bg: #fff;
-$color-comp-field-fg: #333;
-
-/* Header — connection status */
-$color-header-muted: #d4d4d4;
-$color-status-connected: #34d399;
-$color-status-connecting: #fbbf24;
-$color-status-disconnected: #f87171;
-
-/* Shared panel / card surfaces */
-$color-panel-border: #3a3a3a;
-$color-panel-bg: #1c1c1c;
-$color-panel-fg: #f5f5f5;
-$color-panel-muted: #b0b0b0;
-$color-panel-row-bg: #262626;
-$color-input-border: #4a4a4a;
-$color-input-bg: #f5f5f5;
-
-/* View title */
-$color-view-title: #1f1f1f;
-
-/* View surface — content resting on the felt */
-$color-view-surface-bg: rgba(0, 0, 0, 0.55);
-$color-view-surface-border: rgba(255, 255, 255, 0.12);
-$color-view-surface-fg: #f0f0f0;
-$color-view-surface-muted: #b0b0b0;
-$color-view-surface-row-bg: rgba(255, 255, 255, 0.06);
-$color-view-surface-row-hover: rgba(255, 255, 255, 0.1);
-
-/* Overlays & translucent accents (pool table, modal) */
-$color-modal-overlay: rgba(0, 0, 0, 0.45);
 $color-table-frame-gloss: rgba(255, 255, 255, 0.12);
 $color-table-frame-fibers-light: rgba(255, 255, 255, 0.04);
 $color-table-frame-fibers-dark: rgba(0, 0, 0, 0.06);

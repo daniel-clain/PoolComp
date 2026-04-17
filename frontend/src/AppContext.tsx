@@ -6,16 +6,20 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import { poolCompConfig, type AllData, type PoolComp } from "../../shared/domain";
+import {
+  poolCompConfig,
+  type AllData,
+  type PoolComp,
+} from "../../shared/domain";
 import type { MessageToBackend } from "../../shared/messageToBackend";
 import { useOrientation } from "./hooks/useOrientation";
 import type { ModalState } from "./services/modal.service";
 import { createPoolCompService } from "./services/poolComp.service";
-import {
-  createWebSocketService,
-  type ConnectionStatus,
-  type PendingAction,
+import type {
+  ConnectionStatus,
+  PendingAction,
 } from "./services/websockets.service";
+import { createWebSocketService } from "./services/websockets.service";
 
 export type View = "Pool Comp" | "Players" | "Comp History";
 
@@ -49,7 +53,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
     useState<ConnectionStatus>("connecting");
   const [pendingAction, setPendingAction] = useState<PendingAction>(null);
   const [modal, setModal] = useState<ModalState>(null);
-  const [activeHistoricalComp, setActiveHistoricalComp] = useState<PoolComp | null>(null);
+  const [activeHistoricalComp, setActiveHistoricalComp] =
+    useState<PoolComp | null>(null);
 
   function openModal(state: NonNullable<ModalState>) {
     setModal(state);

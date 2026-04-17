@@ -1,5 +1,6 @@
 @use "../../mixins.scss" as *;
 @use "../../variables.scss" as *;
+@use "sass:color";
 
 @keyframes shimmer {
   0% {
@@ -11,68 +12,54 @@
 }
 
 home-view {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  height: 100%;
-  box-sizing: border-box;
   @include cq-responsive(
     (
       padding-top: 8,
     )
   );
 
-  home-button-container {
+  button {
     position: relative;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    z-index: 1;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    cursor: pointer;
+    background: linear-gradient(
+      110deg,
+      $color-button-active-bg 0%,
+      $color-button-active-bg 30%,
+      color.adjust($color-button-active-bg, $lightness: 18%) 50%,
+      $color-button-active-bg 70%,
+      $color-button-active-bg 100%
+    );
+    background-size: 200% 100%;
+    animation: shimmer 3s ease-in-out infinite;
+    box-shadow:
+      0 0 20px rgba($color-button-active-bg, 0.35),
+      0 0 60px rgba($color-button-active-bg, 0.15);
+    transition:
+      box-shadow 0.3s,
+      transform 0.15s;
 
-    button {
-      position: relative;
-      z-index: 1;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.04em;
-      cursor: pointer;
-      background: linear-gradient(
-        110deg,
-        $color-button-active-bg 0%,
-        $color-button-active-bg 30%,
-        lighten($color-button-active-bg, 18%) 50%,
-        $color-button-active-bg 70%,
-        $color-button-active-bg 100%
-      );
-      background-size: 200% 100%;
-      animation: shimmer 3s ease-in-out infinite;
-      color: $color-button-active-fg;
-      border-color: $color-button-active-border;
+    @include cq-responsive(
+      (
+        font-size: 8,
+        padding: 4 10,
+        border-radius: 2,
+        border-width: 0.4,
+      )
+    );
+
+    &:hover {
       box-shadow:
-        0 0 20px rgba($color-button-active-bg, 0.35),
-        0 0 60px rgba($color-button-active-bg, 0.15);
-      transition:
-        box-shadow 0.3s,
-        transform 0.15s;
+        0 0 30px rgba($color-button-active-bg, 0.5),
+        0 0 80px rgba($color-button-active-bg, 0.25);
+      transform: scale(1.03);
+    }
 
-      @include cq-responsive(
-        (
-          font-size: 8,
-          padding: 4 10,
-          border-radius: 2,
-          border-width: 0.4,
-        )
-      );
-
-      &:hover {
-        box-shadow:
-          0 0 30px rgba($color-button-active-bg, 0.5),
-          0 0 80px rgba($color-button-active-bg, 0.25);
-        transform: scale(1.03);
-      }
-
-      &:active {
-        transform: scale(0.98);
-      }
+    &:active {
+      transform: scale(0.98);
     }
   }
 }

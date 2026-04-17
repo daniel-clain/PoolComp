@@ -5,11 +5,9 @@ export function LandingPage() {
 
   return (
     <home-view>
-      <home-button-container>
-        <button className="is-primary" onClick={createPoolComp}>
-          New Pool Comp
-        </button>
-      </home-button-container>
+      <button className="active" onClick={createPoolComp}>
+        New Pool Comp
+      </button>
     </home-view>
   );
 }

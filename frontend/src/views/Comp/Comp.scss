@@ -2,12 +2,7 @@
 @use "../../variables.scss" as *;
 
 comp-view {
-  display: flex;
-
   .is-portrait & {
-    flex-direction: column;
-    gap: 4cqh;
-
     comp-details {
       comp-details-header {
         display: flex;
@@ -39,6 +34,7 @@ comp-view {
       flex-direction: column;
       flex: 1;
       min-width: 0;
+      min-height: 0;
       gap: 2cqh;
     }
     right-container {
@@ -78,6 +74,19 @@ comp-view {
     }
   }
 
+  comp-main-panel {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-height: 0;
+    min-width: 0;
+    @include cq-responsive(
+      (
+        gap: 2,
+      )
+    );
+  }
+
   comp-actions {
     display: flex;
     @include cq-responsive(
@@ -85,16 +94,16 @@ comp-view {
         gap: 2,
       )
     );
-    button {
-      @include cq-responsive(
-        (
-          font-size: 3,
-          padding: 1.8 4,
-          border-radius: 1,
-          border-width: 0.3,
-        )
-      );
-    }
+  }
+
+  comp-actions-bottom {
+    display: flex;
+    flex-shrink: 0;
+    @include cq-responsive(
+      (
+        gap: 2,
+      )
+    );
   }
 
   text-box-container {
@@ -136,15 +145,16 @@ comp-view {
         box-sizing: border-box;
         display: flex;
         align-items: center;
-        background: $color-comp-field-bg;
+        background: white;
         justify-content: center;
-        color: $color-comp-field-fg;
       }
     }
   }
 
   #bg-leaves-image {
     position: absolute;
+    z-index: -1;
+    opacity: 0.28;
     left: 50%;
     top: 50%;
     transform: translate(-50%, -50%);
@@ -154,7 +164,5 @@ comp-view {
         max-height: 80,
       )
     );
-
-    opacity: 0.28;
   }
 }

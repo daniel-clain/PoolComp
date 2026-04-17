@@ -1,9 +1,19 @@
+import { useState } from "react";
+import {
+  collectPlayerIdsPlacedInSlots,
+  registrationSlotsMatchGeneratedLayout,
+} from "../../../../shared/bracketLayout";
 import { useAppContext } from "../../AppContext";
 import ballImage from "../../assets/8ball.png";
 import leavesImage from "../../assets/crossleaves.png";
 import crownImage from "../../assets/crown.png";
 import { ScalingImage } from "../../components/ScalingImage/ScalingImage";
+import { TabBar } from "../../components/TabBar/TabBar";
+import { activePoolCompHasChampionPlayer } from "../../services/poolComp.service";
+import { CompPlayers } from "./components/CompPlayers/CompPlayers";
 import { TournamentStructure } from "./components/TournamentStructure/TournamentStructure";
+
+type CompPanel = "players" | "tournament";
 
 export function Comp() {
   const {
@@ -11,24 +21,41 @@ export function Comp() {
     activeHistoricalComp,
     cancelActivePoolComp,
     completeActivePoolComp,
-    startActivePoolComp,
+    createMatchups,
     clearHistoricalComp,
     orientation,
     calculateFirstPrizeMoney,
-    openModal,
   } = useAppContext();
 
-  const displayComp = activeHistoricalComp ?? activePoolComp;
-  const isHistorical = activeHistoricalComp !== null;
-
-  if (!displayComp) return null;
-
-  const compDate = new Date(displayComp.date).toLocaleDateString();
+  const [compPanel, setCompPanel] = useState<CompPanel>("players");
 
   const firstPrizeMoney =
-    !isHistorical && activePoolComp
+    !activeHistoricalComp && activePoolComp
       ? calculateFirstPrizeMoney(activePoolComp.registeredPlayers)
       : null;
+
+  const completeCompDisabled =
+    !activePoolComp || !activePoolCompHasChampionPlayer(activePoolComp.slots);
+
+  const createMatchupsDisabled = (() => {
+    if (!activePoolComp) return true;
+    const registeredPlayerIds = activePoolComp.registeredPlayers.map(
+      (registeredPlayer) => registeredPlayer.id,
+    );
+    if (
+      registrationSlotsMatchGeneratedLayout(
+        activePoolComp.slots,
+        registeredPlayerIds,
+      )
+    ) {
+      return registeredPlayerIds.length < 5;
+    }
+    const placedPlayerIds = collectPlayerIdsPlacedInSlots(activePoolComp.slots);
+    const pendingPlayerIds = registeredPlayerIds.filter(
+      (playerId) => !placedPlayerIds.has(playerId),
+    );
+    return pendingPlayerIds.length === 0;
+  })();
 
   return (
     <comp-view>
@@ -39,21 +66,23 @@ export function Comp() {
               {compTitle()}
               {eightBallImage()}
             </comp-details-header>
-            {!isHistorical && textBoxes()}
+            {textBoxes()}
           </comp-details>
           {compActions()}
-          <TournamentStructure comp={displayComp} />
+          {compMainPanel()}
+          {compActionsBottom()}
         </>
       ) : orientation === "landscape" ? (
         <>
           <left-container>
             {compActions()}
-            <TournamentStructure comp={displayComp} />
+            {compMainPanel()}
+            {compActionsBottom()}
           </left-container>
           <right-container>
             <comp-details>
               {compTitle()}
-              {!isHistorical && textBoxes()}
+              {textBoxes()}
               {eightBallImage()}
             </comp-details>
           </right-container>
@@ -63,14 +92,37 @@ export function Comp() {
     </comp-view>
   );
 
+  function compMainPanel() {
+    if (activeHistoricalComp) {
+      return <TournamentStructure comp={activeHistoricalComp} />;
+    }
+
+    if (activePoolComp) {
+      return (
+        <comp-main-panel>
+          {compPanel === "players" ? (
+            <CompPlayers />
+          ) : (
+            <TournamentStructure comp={activePoolComp} />
+          )}
+        </comp-main-panel>
+      );
+    }
+  }
+
   function compTitle() {
-    if (isHistorical) {
+    if (activeHistoricalComp) {
+      const compDate = new Date(activeHistoricalComp.date).toLocaleDateString();
       return <view-title>Historical Comp ({compDate})</view-title>;
     }
     return <view-title>Comp Brackets</view-title>;
   }
 
   function textBoxes() {
+    const compDate = (activeHistoricalComp ?? activePoolComp)?.date;
+    const compDateString = compDate
+      ? new Date(compDate).toLocaleDateString()
+      : "";
     return (
       <text-box-container>
         <text-box>
@@ -85,7 +137,7 @@ export function Comp() {
         </text-box>
         <text-box>
           <text-box-label>DATE</text-box-label>
-          <text-box-value>{compDate}</text-box-value>
+          <text-box-value>{compDateString}</text-box-value>
         </text-box>
       </text-box-container>
     );
@@ -96,7 +148,7 @@ export function Comp() {
   }
 
   function compActions() {
-    if (isHistorical) {
+    if (activeHistoricalComp) {
       return (
         <comp-actions>
           <button onClick={clearHistoricalComp}>Back to Active Comp</button>
@@ -107,21 +159,50 @@ export function Comp() {
     return (
       activePoolComp && (
         <comp-actions>
-          {!activePoolComp.started ? (
-            <button onClick={() => openModal({ kind: "selectRegisteredPlayers" })}>
-              Add Players ({activePoolComp.registeredPlayers.length})
-            </button>
-          ) : (
-            <button onClick={completeActivePoolComp}>Complete Comp</button>
-          )}
-          {!activePoolComp.started ? (
-            <button onClick={startActivePoolComp}>Start Comp</button>
-          ) : null}
-          <button className="danger" onClick={cancelActivePoolComp}>
-            Cancel Comp
+          <TabBar
+            tabLabels={["Players", "Tournament"]}
+            selectedTabIndex={compPanel === "players" ? 0 : 1}
+            onTabSelected={(selectedTabIndex) => {
+              if (selectedTabIndex === 0) {
+                setCompPanel("players");
+              } else {
+                setCompPanel("tournament");
+              }
+            }}
+          />
+          <button
+            type="button"
+            disabled={createMatchupsDisabled}
+            onClick={() => {
+              createMatchups();
+              setCompPanel("tournament");
+            }}
+          >
+            Create Matchups
           </button>
         </comp-actions>
       )
+    );
+  }
+
+  function compActionsBottom() {
+    if (activeHistoricalComp) {
+      return null;
+    }
+
+    return (
+      <comp-actions-bottom>
+        <button
+          type="button"
+          disabled={completeCompDisabled}
+          onClick={completeActivePoolComp}
+        >
+          Complete Comp
+        </button>
+        <button className="danger" onClick={cancelActivePoolComp}>
+          Cancel Comp
+        </button>
+      </comp-actions-bottom>
     );
   }
 }

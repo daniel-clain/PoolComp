@@ -9,7 +9,13 @@ import { poolCompConfig } from "../../../shared/domain.js";
 
 export type Repository = {
   load(): Promise<AllData>;
-  save(state: AllData): Promise<void>;
+  ensureIndexes(): Promise<void>;
+  insertPlayer(player: Player): Promise<void>;
+  replacePlayerByPlayerId(playerId: string, player: Player): Promise<void>;
+  insertActivePoolComp(activePoolComp: ActivePoolComp): Promise<void>;
+  replaceActivePoolComp(activePoolComp: ActivePoolComp): Promise<void>;
+  deleteActivePoolCompById(activePoolCompId: string): Promise<void>;
+  insertCompHistoryEntry(poolComp: PoolComp): Promise<void>;
 };
 
 export async function connectMongo(
@@ -29,7 +35,8 @@ export async function connectMongo(
       console.log(`MongoDB connected to "${dbName}".`);
       return { database, client };
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
+      const errorMessage =
+        error instanceof Error ? error.message : String(error);
       console.error(
         `MongoDB connection attempt ${attempt}/${MAX_RETRIES} failed: ${errorMessage}`,
       );
@@ -44,15 +51,17 @@ export async function connectMongo(
 
 export function createRepository(database: Db): Repository {
   const playersCollection = database.collection<Player>("Players");
-  const activeCompCollection = database.collection<ActivePoolComp>("ActiveComp");
+  const activeCompCollection =
+    database.collection<ActivePoolComp>("ActiveComp");
   const compHistoryCollection = database.collection<PoolComp>("CompHistory");
 
   async function load(): Promise<AllData> {
-    const [playerDocuments, activeCompDocument, historyDocuments] = await Promise.all([
-      playersCollection.find().toArray(),
-      activeCompCollection.findOne(),
-      compHistoryCollection.find().sort({ date: -1 }).toArray(),
-    ]);
+    const [playerDocuments, activeCompDocument, historyDocuments] =
+      await Promise.all([
+        playersCollection.find().toArray(),
+        activeCompCollection.findOne(),
+        compHistoryCollection.find().sort({ date: -1 }).toArray(),
+      ]);
 
     const players: Player[] = playerDocuments.map((document) => ({
       id: document.id,
@@ -66,7 +75,6 @@ export function createRepository(database: Db): Repository {
           date: activeCompDocument.date,
           slots: activeCompDocument.slots,
           registeredPlayers: activeCompDocument.registeredPlayers,
-          started: activeCompDocument.started,
         }
       : null;
 
@@ -79,22 +87,71 @@ export function createRepository(database: Db): Repository {
     return { players, activePoolComp, compHistory, poolCompConfig };
   }
 
-  async function save(state: AllData): Promise<void> {
-    await playersCollection.deleteMany({});
-    if (state.players.length > 0) {
-      await playersCollection.insertMany(state.players);
-    }
+  async function ensureIndexes(): Promise<void> {
+    await playersCollection.createIndex({ id: 1 }, { unique: true });
+    await activeCompCollection.createIndex({ id: 1 }, { unique: true });
+    await compHistoryCollection.createIndex({ id: 1 }, { unique: true });
+  }
 
-    await activeCompCollection.deleteMany({});
-    if (state.activePoolComp) {
-      await activeCompCollection.insertOne(state.activePoolComp);
-    }
+  async function insertPlayer(player: Player): Promise<void> {
+    await playersCollection.insertOne(player);
+  }
 
-    await compHistoryCollection.deleteMany({});
-    if (state.compHistory.length > 0) {
-      await compHistoryCollection.insertMany(state.compHistory);
+  async function replacePlayerByPlayerId(
+    playerId: string,
+    player: Player,
+  ): Promise<void> {
+    const result = await playersCollection.replaceOne({ id: playerId }, player);
+    if (result.matchedCount === 0) {
+      throw new Error("Player not found.");
     }
   }
 
-  return { load, save };
+  async function insertActivePoolComp(
+    activePoolComp: ActivePoolComp,
+  ): Promise<void> {
+    const count = await activeCompCollection.countDocuments();
+    if (count > 0) {
+      throw new Error("An active comp already exists in the database.");
+    }
+    await activeCompCollection.insertOne(activePoolComp);
+  }
+
+  async function replaceActivePoolComp(
+    activePoolComp: ActivePoolComp,
+  ): Promise<void> {
+    const result = await activeCompCollection.replaceOne(
+      { id: activePoolComp.id },
+      activePoolComp,
+    );
+    if (result.matchedCount === 0) {
+      throw new Error("Active comp not found.");
+    }
+  }
+
+  async function deleteActivePoolCompById(
+    activePoolCompId: string,
+  ): Promise<void> {
+    const result = await activeCompCollection.deleteOne({
+      id: activePoolCompId,
+    });
+    if (result.deletedCount === 0) {
+      throw new Error("Active comp not found.");
+    }
+  }
+
+  async function insertCompHistoryEntry(poolComp: PoolComp): Promise<void> {
+    await compHistoryCollection.insertOne(poolComp);
+  }
+
+  return {
+    load,
+    ensureIndexes,
+    insertPlayer,
+    replacePlayerByPlayerId,
+    insertActivePoolComp,
+    replaceActivePoolComp,
+    deleteActivePoolCompById,
+    insertCompHistoryEntry,
+  };
 }

@@ -12,16 +12,6 @@ header {
         gap: 2,
       )
     );
-    button {
-      @include cq-responsive(
-        (
-          font-size: 2.8,
-          padding: 1.4 3.6,
-          border-radius: 1,
-          border-width: 0.4,
-        )
-      );
-    }
   }
 
   connection-status {
@@ -30,7 +20,7 @@ header {
         font-size: 3,
       )
     );
-    color: $color-header-muted;
+    color: $color-white-text;
     text-transform: capitalize;
     &[data-status="connected"] {
       color: $color-status-connected;

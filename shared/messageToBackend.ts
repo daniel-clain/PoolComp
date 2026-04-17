@@ -3,9 +3,10 @@ import type { AllData } from "./domain.js";
 export type BackendApi = {
   createPoolComp: null;
   cancelActivePoolComp: null;
-  startActivePoolComp: null;
+  createMatchups: null;
   completeActivePoolComp: null;
   togglePlayerInActivePoolComp: { playerId: string };
+  toggleRegisteredPlayerPaid: { playerId: string };
   addPlayer: { name: string };
   updatePlayer: { playerId: string; name: string };
   deactivatePlayer: { playerId: string };
@@ -25,7 +26,10 @@ export type ClientEnvelope = MessageToBackend & { requestId: string };
 
 export type ServerMessage =
   | { message: "stateSnapshot"; data: AllData }
-  | { message: "asyncPending"; data: { requestId: string; action: MessageName } }
+  | {
+      message: "asyncPending";
+      data: { requestId: string; action: MessageName };
+    }
   | { message: "actionSettled"; data: ActionSettledData }
   | { message: "databaseUnavailable" };
 

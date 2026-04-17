@@ -7,7 +7,7 @@ For how frontend, backend, and the repo-root **`shared/`** TypeScript package di
 ## Responsibilities
 
 - **Domain commands** — Validates and applies each client command (create comp, toggle players, start comp, etc.), runs authoritative business logic on the server, and rejects invalid transitions.
-- **Persistence** — Stores the player registry, active comp, and completed comps (for example in Google Sheets or in-memory when not configured).
+- **Persistence** — Stores the player registry, active comp, and completed comps in **MongoDB**. Each command updates **only the documents that change** (for example `insertOne` / `replaceOne` / `deleteOne` on a single player or the single active-comp document). The server does **not** replace entire collections on every action. After a successful write, it **reloads** snapshot state from the database and broadcasts it so every client matches persisted data. **Multi-document steps** (for example completing a comp: append history, then remove the active comp) run as sequential writes; use a replica set and transactions in production if you need atomicity across both.
 - **WebSocket** — Accepts commands from the frontend, broadcasts `stateSnapshot` / `stateUpdated` so every connected client sees the same data.
 
 ## Why WebSocket

@@ -1,4 +1,5 @@
 @use "../../../../variables.scss" as *;
+@use "sass:color";
 
 tournament-structure {
   display: flex;
@@ -15,7 +16,10 @@ tournament-structure {
     position: relative;
     container-type: size;
     width: min(100cqw, calc(var(--tournament-structure-aspect-ratio) * 100cqh));
-    height: min(100cqh, calc(100cqw / var(--tournament-structure-aspect-ratio)));
+    height: min(
+      100cqh,
+      calc(100cqw / var(--tournament-structure-aspect-ratio))
+    );
 
     svg {
       position: absolute;
@@ -23,7 +27,7 @@ tournament-structure {
       pointer-events: none;
 
       path {
-        stroke: $color-bracket-connector;
+        stroke: $color-dark-border;
         stroke-width: 1.4;
         fill: none;
         stroke-linecap: square;
@@ -41,16 +45,16 @@ tournament-structure {
       white-space: nowrap;
       text-overflow: ellipsis;
       padding: 0 0.6cqw;
-      background: $color-bracket-slot-fill;
-      border: 1px solid $color-bracket-slot-stroke;
+      background: color.adjust(white, $blackness: 10%);
+      border: 1px solid $color-dark-border;
       border-radius: 0.3cqh;
-      color: $color-bracket-name;
+      color: $color-dark-text;
       cursor: pointer;
       font-weight: 500;
       transition: background 0.15s;
 
       &:hover {
-        background: #ebebeb;
+        background: white;
       }
 
       &.is-bye {
