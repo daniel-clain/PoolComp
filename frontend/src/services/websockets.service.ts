@@ -1,9 +1,7 @@
 import type { AllData } from "../../../shared/domain";
 import type {
-  ClientEnvelope,
   MessageName,
   MessageToBackend,
-  ServerMessage,
 } from "../../../shared/messageToBackend";
 
 export type ConnectionStatus = "connecting" | "connected" | "disconnected";
@@ -11,17 +9,14 @@ export type PendingAction = { requestId: string; action: MessageName } | null;
 
 const WS_URL = import.meta.env.VITE_WS_URL;
 
-const ACTION_TIMEOUT_MS = 10_000;
 
 export function createWebSocketService(
   onStateUpdate: (state: AllData) => void,
   onConnectionStatusChange: (status: ConnectionStatus) => void,
-  onPendingActionChange: (pending: PendingAction) => void,
 ) {
   let socket: WebSocket | null = null;
   let reconnectTimer: number | undefined;
   let closedManually = false;
-  const pendingRequests = new Map<string, { timer: number }>();
 
   function connect() {
     onConnectionStatusChange("connecting");
@@ -35,9 +30,9 @@ export function createWebSocketService(
       onConnectionStatusChange("connected");
     });
 
-    socket.addEventListener("message", (event) => {
-      const serverMessage = JSON.parse(event.data as string) as ServerMessage;
-      handleServerMessage(serverMessage);
+    socket.addEventListener("message", (event: MessageEvent<string>) => {
+      const allData: AllData = JSON.parse(event.data);
+      onStateUpdate(allData);
     });
 
     socket.addEventListener("close", () => {
@@ -54,53 +49,10 @@ export function createWebSocketService(
     });
   }
 
-  function handleServerMessage(serverMessage: ServerMessage) {
-    switch (serverMessage.message) {
-      case "stateSnapshot":
-        onStateUpdate(serverMessage.data);
-        break;
 
-      case "asyncPending":
-        onPendingActionChange({
-          requestId: serverMessage.data.requestId,
-          action: serverMessage.data.action,
-        });
-        break;
-
-      case "actionSettled": {
-        const entry = pendingRequests.get(serverMessage.data.requestId);
-        if (entry) {
-          clearTimeout(entry.timer);
-          pendingRequests.delete(serverMessage.data.requestId);
-        }
-        if (serverMessage.data.ok) {
-          onStateUpdate(serverMessage.data.state);
-        } else {
-          window.alert(serverMessage.data.reason);
-        }
-        onPendingActionChange(null);
-        break;
-      }
-
-      case "databaseUnavailable":
-        onConnectionStatusChange("disconnected");
-        break;
-    }
-  }
-
-  function sendMessageToBackend(message: MessageToBackend): void {
-    if (!socket || socket.readyState !== WebSocket.OPEN) return;
-
-    const requestId = crypto.randomUUID();
-    const envelope: ClientEnvelope = { ...message, requestId };
-
-    const timer = window.setTimeout(() => {
-      pendingRequests.delete(requestId);
-      onPendingActionChange(null);
-    }, ACTION_TIMEOUT_MS);
-
-    pendingRequests.set(requestId, { timer });
-    socket.send(JSON.stringify(envelope));
+  function send(message: MessageToBackend): void {
+    if (!socket) throw new Error("Socket not connected");
+    socket.send(JSON.stringify(message));
   }
 
   function closeConnection() {
@@ -111,5 +63,5 @@ export function createWebSocketService(
 
   connect();
 
-  return { sendMessageToBackend, closeConnection };
+  return { send, closeConnection };
 }

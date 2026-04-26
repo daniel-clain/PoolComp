@@ -18,20 +18,18 @@ export function generateSlots(playerIds: string[]): Slot[] {
     if (isLeaf && leafIndex < playerIds.length) {
       slots.push({
         id: `s${index}`,
-        kind: "player",
         playerId: playerIds[leafIndex]!,
       });
     } else {
-      slots.push({ id: `s${index}`, kind: "empty" });
+      slots.push({ id: `s${index}` });
     }
   }
   return slots;
 }
 
 function slotEquals(first: Slot, second: Slot): boolean {
-  if (first.kind !== second.kind) return false;
   if (first.id !== second.id) return false;
-  if (first.kind === "player" && second.kind === "player") {
+  if (first.playerId && second.playerId) {
     return first.playerId === second.playerId;
   }
   return true;
@@ -52,7 +50,7 @@ export function registrationSlotsMatchGeneratedLayout(
 export function collectPlayerIdsPlacedInSlots(slots: Slot[]): Set<string> {
   const playerIds = new Set<string>();
   for (const slot of slots) {
-    if (slot.kind === "player") {
+    if (slot.playerId) {
       playerIds.add(slot.playerId);
     }
   }

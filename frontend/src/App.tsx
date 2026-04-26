@@ -3,7 +3,7 @@ import { Header } from "./components/Header/Header";
 import { ModalHost } from "./components/Modal/ModalHost";
 import { ViewContainer } from "./components/ViewContainer/ViewContainer";
 import { Comp } from "./views/Comp/Comp";
-import { CompHistory } from "./views/History/CompHistory";
+import { CompHistory } from "./views/CompHistory/CompHistory";
 import { LandingPage } from "./views/LandingPage/LandingPage";
 import { Players } from "./views/Players/Players";
 

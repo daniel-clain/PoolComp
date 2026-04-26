@@ -29,7 +29,6 @@ type AppContextValue = AllData &
     activeView: View;
     setActiveView: (view: View) => void;
     connectionStatus: ConnectionStatus;
-    pendingAction: PendingAction;
     modal: ModalState;
     openModal: (modal: NonNullable<ModalState>) => void;
     closeModal: () => void;
@@ -51,7 +50,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [activeView, setActiveView] = useState<View>("Pool Comp");
   const [connectionStatus, setConnectionStatus] =
     useState<ConnectionStatus>("connecting");
-  const [pendingAction, setPendingAction] = useState<PendingAction>(null);
   const [modal, setModal] = useState<ModalState>(null);
   const [activeHistoricalComp, setActiveHistoricalComp] =
     useState<PoolComp | null>(null);
@@ -82,14 +80,13 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const { orientation } = useOrientation();
 
   useEffect(() => {
-    const { sendMessageToBackend, closeConnection } = createWebSocketService(
+    const { send: sendMessageToBackend, closeConnection } = createWebSocketService(
       (stateUpdateFromBackend: AllData) => {
         setAllData(stateUpdateFromBackend);
       },
       (connectionStatus: ConnectionStatus) => {
         setConnectionStatus(connectionStatus);
       },
-      setPendingAction,
     );
 
     sendMessageToBackendRef.current = sendMessageToBackend;
@@ -108,7 +105,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
         activeView,
         setActiveView,
         connectionStatus,
-        pendingAction,
         modal,
         openModal,
         closeModal,

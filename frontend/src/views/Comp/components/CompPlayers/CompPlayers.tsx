@@ -5,7 +5,7 @@ export function CompPlayers() {
     players,
     activePoolComp,
     togglePlayerInActivePoolComp,
-    toggleRegisteredPlayerPaid,
+    send,
   } = useAppContext();
 
   if (!activePoolComp) return null;
@@ -28,7 +28,7 @@ export function CompPlayers() {
                   type="button"
                   className="active"
                   onClick={() =>
-                    togglePlayerInActivePoolComp(registeredPlayer.id)
+                    send({ message: 'removePlayerFromComp', data: { playerId: registeredPlayer.id } })
                   }
                 >
                   {registeredPlayer.name}
@@ -49,15 +49,15 @@ export function CompPlayers() {
         <comp-players-heading>All players</comp-players-heading>
         <player-grid>
           {databasePlayersForGrid.map((player) => {
-            const isSelected = activePoolComp?.registeredPlayers.some(
+            const isRegistered = activePoolComp?.registeredPlayers.some(
               (registeredPlayer) => registeredPlayer.id === player.id,
             );
             return (
               <button
                 key={player.id}
                 type="button"
-                onClick={() => togglePlayerInActivePoolComp(player.id)}
-                className={isSelected ? "active" : ""}
+                onClick={() => send({ message: isRegistered ? 'removePlayerFromComp' : 'addPlayerToComp', data: { playerId: player.id } })}
+                className={isRegistered ? "active" : ""}
               >
                 {player.name}
               </button>

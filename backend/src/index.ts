@@ -1,86 +1,29 @@
 import express from "express";
-import { existsSync } from "node:fs";
 import http from "node:http";
-import path from "node:path";
-import { WebSocketServer } from "ws";
 import type { AllData } from "../../shared/domain.js";
-import type { MessageName } from "../../shared/messageToBackend.js";
-import { serverConfig } from "./config.js";
-import { connectMongo, createRepository } from "./mongo/repository.js";
-import { createPoolCompService } from "./services/poolComp.service.js";
-import { createWebSocketService } from "./ws/websockets.service.js";
+import { createMongoDbService } from "./services/mongo-db.service.js";
+import { createWebSocketService } from "./services/websockets.service.js";
+import { poolCompConfig } from "../../shared/domain.js";
+import { createBackendService } from "./services/backend.service.js";
+import { MessageToBackend } from "../../shared/messageToBackend.js";
+import { getMessageHandler } from "./messages-from-frontend/messages-from-frontend.js";
 
 async function bootstrap(): Promise<void> {
-  const { database } = await connectMongo(
-    serverConfig.mongoUri,
-    serverConfig.mongoDbName,
-  );
-  const repository = createRepository(database);
-  await repository.ensureIndexes();
-  const actions = createPoolCompService(repository);
-  const validMessages = new Set(Object.keys(actions));
-
-  let state: AllData = await repository.load();
-  let mutationQueue = Promise.resolve();
-
   const app = express();
   const httpServer = http.createServer(app);
-  const webSocketServer = new WebSocketServer({ server: httpServer, path: "/ws" });
-
-  const webSocketService = createWebSocketService(webSocketServer, {
-    validMessages,
-    getState: () => state,
-    onMessage(envelope) {
-      mutationQueue = mutationQueue
-        .then(async () => {
-          const messageName = envelope.message as MessageName;
-          console.log(`[action] processing: ${messageName}`);
-
-          webSocketService.broadcast({
-            message: "asyncPending",
-            data: { requestId: envelope.requestId, action: messageName },
-          });
-
-          try {
-            const nextState = await actions[messageName](
-              state,
-              (envelope as any).data,
-            );
-            state = nextState;
-            console.log(`[action] success: ${messageName}`);
-
-            webSocketService.broadcast({
-              message: "actionSettled",
-              data: { requestId: envelope.requestId, ok: true, state },
-            });
-          } catch (error) {
-            const reason =
-              error instanceof Error ? error.message : "Unknown error";
-            console.error(`[action] failed: ${messageName} — ${reason}`);
-            webSocketService.broadcast({
-              message: "actionSettled",
-              data: { requestId: envelope.requestId, ok: false, reason },
-            });
-          }
-        })
-        .catch((error: unknown) => {
-          console.error("Unhandled mutation queue error:", error);
-        });
-    },
-  });
-
-  if (existsSync(serverConfig.frontendDistPath)) {
-    app.use(express.static(serverConfig.frontendDistPath));
-    app.get(/.*/, (_request, response) => {
-      response.sendFile(path.join(serverConfig.frontendDistPath, "index.html"));
-    });
+  const backendState: AllData = {
+    players: [],
+    activePoolComp: null,
+    compHistory: [],
+    poolCompConfig: poolCompConfig,
   }
+  const mongoDbService = await createMongoDbService();
+  const websocketService = createWebSocketService(httpServer);
+  const backendService = createBackendService(mongoDbService, websocketService, backendState);
 
-  httpServer.listen(serverConfig.port, () => {
-    console.log(
-      `PoolComp backend listening on http://localhost:${serverConfig.port}`,
-    );
-  });
+  websocketService.onMessageFromFrontend.subscribe(({ message, data }: MessageToBackend) => {
+    getMessageHandler(message)(backendService, data)
+  })
 }
 
 bootstrap().catch((error: unknown) => {

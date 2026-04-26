@@ -17,10 +17,8 @@ export type ActivePoolComp = PoolComp & {
 export type RegisteredPlayer = Player & {
   paid: boolean;
 };
-export type Slot =
-  | { id: string; kind: "empty" }
-  | { id: string; kind: "bye" }
-  | { id: string; kind: "player"; playerId: string };
+export type Slot = { id: string; isBye?: boolean; playerId?: string };
+export type Matchup = { slot1: Slot; slot2: Slot };
 
 export type AllData = {
   activePoolComp: ActivePoolComp | null;

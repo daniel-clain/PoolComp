@@ -1,4 +1,4 @@
-import { MongoClient, type Db } from "mongodb";
+import { Collection, MongoClient, type Db } from "mongodb";
 import type {
   ActivePoolComp,
   AllData,
@@ -6,6 +6,7 @@ import type {
   PoolComp,
 } from "../../../shared/domain.js";
 import { poolCompConfig } from "../../../shared/domain.js";
+import { serverConfig } from "../config.js";
 
 export type Repository = {
   load(): Promise<AllData>;
@@ -18,44 +19,53 @@ export type Repository = {
   insertCompHistoryEntry(poolComp: PoolComp): Promise<void>;
 };
 
-export async function connectMongo(
-  uri: string,
-  dbName: string,
-): Promise<{ database: Db; client: MongoClient }> {
-  const client = new MongoClient(uri);
+export async function createMongoDbService(): Promise<{ playersCollection: Collection<Player>; activeCompCollection: Collection<ActivePoolComp>; compHistoryCollection: Collection<PoolComp> }> {
 
-  const MAX_RETRIES = 5;
-  const BASE_DELAY_MS = 1000;
-
-  for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
-    try {
-      await client.connect();
-      const database = client.db(dbName);
-      await database.command({ ping: 1 });
-      console.log(`MongoDB connected to "${dbName}".`);
-      return { database, client };
-    } catch (error) {
-      const errorMessage =
-        error instanceof Error ? error.message : String(error);
-      console.error(
-        `MongoDB connection attempt ${attempt}/${MAX_RETRIES} failed: ${errorMessage}`,
-      );
-      if (attempt === MAX_RETRIES) throw error;
-      const delay = BASE_DELAY_MS * Math.pow(2, attempt - 1);
-      await new Promise((resolve) => setTimeout(resolve, delay));
-    }
-  }
-
-  throw new Error("MongoDB connection failed after all retries.");
-}
-
-export function createRepository(database: Db): Repository {
+  const database = await connectToDatabase();
+  
   const playersCollection = database.collection<Player>("Players");
   const activeCompCollection =
     database.collection<ActivePoolComp>("ActiveComp");
   const compHistoryCollection = database.collection<PoolComp>("CompHistory");
 
-  async function load(): Promise<AllData> {
+  
+
+  return { playersCollection, activeCompCollection, compHistoryCollection}
+  
+  async function connectToDatabase(): Promise<Db> {
+    const client = new MongoClient(serverConfig.mongoUri);
+  
+    const MAX_RETRIES = 5;
+    const BASE_DELAY_MS = 1000;
+  
+    for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
+      try {
+        await client.connect();
+        const database = client.db(serverConfig.mongoDbName);
+        await database.command({ ping: 1 });
+        console.log(`MongoDB connected to "${serverConfig.mongoDbName}".`);
+        return database
+      } catch (error) {
+        const errorMessage =
+          error instanceof Error ? error.message : String(error);
+        console.error(
+          `MongoDB connection attempt ${attempt}/${MAX_RETRIES} failed: ${errorMessage}`,
+        );
+        if (attempt === MAX_RETRIES) throw error;
+        const delay = BASE_DELAY_MS * Math.pow(2, attempt - 1);
+        await new Promise((resolve) => setTimeout(resolve, delay));
+      }
+    }
+  
+    throw new Error("MongoDB connection failed after all retries.");
+  }
+  
+}
+export type MongoDbService = Awaited<ReturnType<typeof createMongoDbService>>;
+
+/* export function createRepository(database: Db): Repository {
+  
+async function load(): Promise<AllData> {
     const [playerDocuments, activeCompDocument, historyDocuments] =
       await Promise.all([
         playersCollection.find().toArray(),
@@ -84,9 +94,8 @@ export function createRepository(database: Db): Repository {
       slots: document.slots,
     }));
 
-    return { players, activePoolComp, compHistory, poolCompConfig };
+    return { players, activePoolComp, compHistory};
   }
-
   async function ensureIndexes(): Promise<void> {
     await playersCollection.createIndex({ id: 1 }, { unique: true });
     await activeCompCollection.createIndex({ id: 1 }, { unique: true });
@@ -154,4 +163,4 @@ export function createRepository(database: Db): Repository {
     deleteActivePoolCompById,
     insertCompHistoryEntry,
   };
-}
+} */

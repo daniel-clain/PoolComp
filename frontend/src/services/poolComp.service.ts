@@ -14,7 +14,7 @@ export type SlotPlayerChoice = {
 
 export function canSelectWinnerForSlot(slotId: string, slots: Slot[]): boolean {
   const slot = slots.find((candidate) => candidate.id === slotId);
-  if (!slot || slot.kind !== "empty") return false;
+  if (!slot || slot.playerId === undefined) return false;
 
   const slotNumber = parseInt(slotId.slice(1));
   const leftChild = slots.find(
@@ -25,7 +25,7 @@ export function canSelectWinnerForSlot(slotId: string, slots: Slot[]): boolean {
   );
   if (!leftChild || !rightChild) return false;
 
-  return leftChild.kind === "player" && rightChild.kind === "player";
+  return leftChild.playerId !== undefined && rightChild.playerId !== undefined;
 }
 
 export function getPlayerChoicesForSlot(
@@ -41,7 +41,7 @@ export function getPlayerChoicesForSlot(
 
   const choices: SlotPlayerChoice[] = [];
   for (const child of [leftChild, rightChild]) {
-    if (child?.kind === "player") {
+    if (child?.playerId !== undefined) {
       const player = players.find(
         (candidate) => candidate.id === child.playerId,
       );
@@ -57,17 +57,17 @@ export function countPlayersInComp(slots: Slot[]): number {
   const uniquePlayerIds = new Set(
     slots
       .filter(
-        (slot): slot is Extract<typeof slot, { kind: "player" }> =>
-          slot.kind === "player",
+        (slot): slot is Extract<typeof slot, { playerId: string }> =>
+          slot.playerId !== undefined,
       )
-      .map((slot) => slot.playerId),
+      .map((slot: Slot) => slot.playerId),
   );
   return uniquePlayerIds.size;
 }
 
 export function activePoolCompHasChampionPlayer(slots: Slot[]): boolean {
   const rootSlot = slots.find((candidate) => candidate.id === "s1");
-  return rootSlot?.kind === "player";
+  return rootSlot?.playerId !== undefined;
 }
 
 export function getFinalistPlayerIds(slots: Slot[]): {
@@ -75,7 +75,7 @@ export function getFinalistPlayerIds(slots: Slot[]): {
   secondPlaceId: string | null;
 } {
   const root = slots.find((slot) => slot.id === "s1");
-  if (!root || root.kind !== "player")
+  if (!root || root.playerId === undefined)
     return { firstPlaceId: null, secondPlaceId: null };
 
   const firstPlaceId = root.playerId;
@@ -83,10 +83,10 @@ export function getFinalistPlayerIds(slots: Slot[]): {
   const rightChild = slots.find((slot) => slot.id === "s3");
 
   let secondPlaceId: string | null = null;
-  if (leftChild?.kind === "player" && leftChild.playerId !== firstPlaceId) {
+  if (leftChild?.playerId !== undefined && leftChild.playerId !== firstPlaceId) {
     secondPlaceId = leftChild.playerId;
   } else if (
-    rightChild?.kind === "player" &&
+    rightChild?.playerId !== undefined &&
     rightChild.playerId !== firstPlaceId
   ) {
     secondPlaceId = rightChild.playerId;
@@ -100,7 +100,7 @@ export function calculatePrizeMoneyFromPlayerCount(
 ): number {
   return (
     (playerCount * poolCompConfig.buyIn) /
-      poolCompConfig.bigComp.weeklyContributionPercentage +
+    poolCompConfig.bigComp.weeklyContributionPercentage +
     poolCompConfig.barInput
   );
 }
@@ -117,55 +117,14 @@ export function createPoolCompService(
   function calculateFirstPrizeMoney(registeredPlayers: RegisteredPlayer[]) {
     return (
       (registeredPlayers.length * poolCompConfig.buyIn) /
-        poolCompConfig.bigComp.weeklyContributionPercentage +
+      poolCompConfig.bigComp.weeklyContributionPercentage +
       poolCompConfig.barInput
     );
   }
 
-  const messagesToBackend = {
-    createPoolComp: () => {
-      send({ message: "createPoolComp" });
-    },
-    cancelActivePoolComp: () => {
-      send({ message: "cancelActivePoolComp" });
-    },
-    createMatchups: () => {
-      send({ message: "createMatchups" });
-    },
-    completeActivePoolComp: () => {
-      send({ message: "completeActivePoolComp" });
-    },
-    togglePlayerInActivePoolComp: (playerId: string) => {
-      send({ message: "togglePlayerInActivePoolComp", data: { playerId } });
-    },
-    toggleRegisteredPlayerPaid: (playerId: string) => {
-      send({ message: "toggleRegisteredPlayerPaid", data: { playerId } });
-    },
-    addPlayer: (name: string) => {
-      send({ message: "addPlayer", data: { name } });
-    },
-    updatePlayer: (playerId: string, name: string) => {
-      send({ message: "updatePlayer", data: { playerId, name } });
-    },
-    deactivatePlayer: (playerId: string) => {
-      send({ message: "deactivatePlayer", data: { playerId } });
-    },
-    activatePlayer: (playerId: string) => {
-      send({ message: "activatePlayer", data: { playerId } });
-    },
-    assignWinnerToBracketSlot: (
-      parentSlotId: string,
-      winningPlayerId: string,
-    ) => {
-      send({
-        message: "assignWinnerToBracketSlot",
-        data: { parentSlotId, winningPlayerId },
-      });
-    },
-  };
 
   return {
-    ...messagesToBackend,
+    send,
     calculateFirstPrizeMoney,
   };
 }
