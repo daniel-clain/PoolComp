@@ -1,17 +1,19 @@
 import type { AllData } from "../../../shared/domain";
 import type {
-  MessageName,
+  MessageFromFrontendName,
   MessageToBackend,
 } from "../../../shared/messageToBackend";
+import type { MessageToFrontend } from "../../../shared/messageToFrontend";
 
 export type ConnectionStatus = "connecting" | "connected" | "disconnected";
-export type PendingAction = { requestId: string; action: MessageName } | null;
+export type PendingAction = { requestId: string; action: MessageFromFrontendName } | null;
 
 const WS_URL = import.meta.env.VITE_WS_URL;
 
 
 export function createWebSocketService(
   onStateUpdate: (state: AllData) => void,
+  onActionInProgress: (actionInProgress: boolean) => void,
   onConnectionStatusChange: (status: ConnectionStatus) => void,
 ) {
   let socket: WebSocket | null = null;
@@ -31,8 +33,16 @@ export function createWebSocketService(
     });
 
     socket.addEventListener("message", (event: MessageEvent<string>) => {
-      const allData: AllData = JSON.parse(event.data);
-      onStateUpdate(allData);
+      console.log("message from backend:", event.data);
+      const { message, data }: MessageToFrontend = JSON.parse(event.data);
+      switch (message) {
+        case "allData":
+          onStateUpdate(data);
+          break;
+        case "actionInProgress":
+          onActionInProgress(data);
+          break;
+      }
     });
 
     socket.addEventListener("close", () => {
@@ -50,7 +60,7 @@ export function createWebSocketService(
   }
 
 
-  function send(message: MessageToBackend): void {
+  function send(message: MessageToBackend): void {    
     if (!socket) throw new Error("Socket not connected");
     socket.send(JSON.stringify(message));
   }

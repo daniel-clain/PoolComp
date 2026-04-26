@@ -1,13 +1,13 @@
 import { randomUUID } from "node:crypto";
 import { generateSlots } from "../../../shared/bracketLayout.js";
 import type { AllData, Player, PoolComp } from "../../../shared/domain.js";
-import type { MessageName } from "../../../shared/messageToBackend.js";
+import type { MessageFromFrontendName } from "../../../shared/messageToBackend.js";
 import type { Repository } from "./mongo-db.service.js";
 import { assignMatchups } from "./matchup-generation.service.js";
 
 export function createPoolCompService(
   repository: Repository,
-): Record<MessageName, AsyncPoolCompActionHandler> {
+): Record<MessageFromFrontendName, AsyncPoolCompActionHandler> {
   return {
     async createPoolComp(state) {
       if (state.activePoolComp)
@@ -212,10 +212,10 @@ export function createPoolCompService(
       const updatedSlots = state.activePoolComp.slots.map((slot) =>
         slot.id === data.parentSlotId
           ? {
-              id: slot.id,
-              kind: "player" as const,
-              playerId: data.winningPlayerId,
-            }
+            id: slot.id,
+            kind: "player" as const,
+            playerId: data.winningPlayerId,
+          }
           : slot,
       );
 

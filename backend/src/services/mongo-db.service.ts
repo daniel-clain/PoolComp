@@ -19,25 +19,25 @@ export type Repository = {
   insertCompHistoryEntry(poolComp: PoolComp): Promise<void>;
 };
 
-export async function createMongoDbService(): Promise<{ playersCollection: Collection<Player>; activeCompCollection: Collection<ActivePoolComp>; compHistoryCollection: Collection<PoolComp> }> {
+export async function createMongoDbService() {
 
   const database = await connectToDatabase();
-  
+
   const playersCollection = database.collection<Player>("Players");
   const activeCompCollection =
     database.collection<ActivePoolComp>("ActiveComp");
   const compHistoryCollection = database.collection<PoolComp>("CompHistory");
 
-  
 
-  return { playersCollection, activeCompCollection, compHistoryCollection}
-  
+
+  return { playersCollection, activeCompCollection, compHistoryCollection, getAllData }
+
   async function connectToDatabase(): Promise<Db> {
     const client = new MongoClient(serverConfig.mongoUri);
-  
+
     const MAX_RETRIES = 5;
     const BASE_DELAY_MS = 1000;
-  
+
     for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
       try {
         await client.connect();
@@ -56,10 +56,20 @@ export async function createMongoDbService(): Promise<{ playersCollection: Colle
         await new Promise((resolve) => setTimeout(resolve, delay));
       }
     }
-  
+
     throw new Error("MongoDB connection failed after all retries.");
   }
-  
+
+  async function getAllData(): Promise<[Player[], ActivePoolComp | null, PoolComp[]]> {
+    const [playerDocuments, activeCompDocument, historyDocuments] =
+      await Promise.all([
+        playersCollection.find().toArray(),
+        activeCompCollection.findOne(),
+        compHistoryCollection.find().sort({ date: -1 }).toArray(),
+      ]);
+    return [playerDocuments, activeCompDocument, historyDocuments];
+  }
+
 }
 export type MongoDbService = Awaited<ReturnType<typeof createMongoDbService>>;
 

@@ -1,11 +1,11 @@
 import { useAppContext } from "../../AppContext";
 
 export function LandingPage() {
-  const { createPoolComp } = useAppContext();
+  const { send } = useAppContext();
 
   return (
     <home-view>
-      <button className="active" onClick={createPoolComp}>
+      <button className="active" onClick={() => send({ message: 'createPoolComp' })}>
         New Pool Comp
       </button>
     </home-view>

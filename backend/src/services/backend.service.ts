@@ -3,11 +3,12 @@ import type { ActivePoolComp, AllData, Player } from "../../../shared/domain.js"
 import type { MongoDbService } from "./mongo-db.service.js";
 import type { WebSocketService } from "./websockets.service.js";
 import type { RegisteredPlayer } from "../../../shared/domain.js";
+import { MessageToFrontend } from "../../../shared/messageToFrontend.js";
+import { WebSocket } from "ws";
 
 
 export function createBackendService(mongoDbService: MongoDbService, websocketService: WebSocketService, backendState: AllData) {
 
-  broadcastBackendStateToAllFrontends()
 
   return {
     mongoDbService,
@@ -15,7 +16,9 @@ export function createBackendService(mongoDbService: MongoDbService, websocketSe
     getActiveComp,
     getPlayerById,
     getRegisteredPlayerById,
-    broadcastBackendStateToAllFrontends
+    loadDatabaseDataIntoBackendState,
+    sentToClient,
+    sendToAllClients
   }
 
   function getActiveComp(): ActivePoolComp {
@@ -32,9 +35,22 @@ export function createBackendService(mongoDbService: MongoDbService, websocketSe
     if (!player) throw new Error("Registered Player not found");
     return player;
   }
+  async function loadDatabaseDataIntoBackendState() {
+    const [players, activePoolComp, compHistory] = await mongoDbService.getAllData();
+    backendState.activePoolComp = activePoolComp;
+    backendState.compHistory = compHistory;
+    backendState.players = players;
+  }
 
-  function broadcastBackendStateToAllFrontends() {
-    websocketService.broadcast(backendState);
+  function sentToClient(socket: WebSocket, message: MessageToFrontend) {
+    socket.send(JSON.stringify(message));
+  }
+  function sendToAllClients(message: MessageToFrontend) {
+    for (const socket of websocketService.webSocketServer.clients) {
+      if (socket.readyState === WebSocket.OPEN) {
+        socket.send(JSON.stringify(message));
+      }
+    }
   }
 }
 

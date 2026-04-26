@@ -1,7 +1,7 @@
 import { useAppContext } from "../../AppContext";
 
 export function Header() {
-  const { connectionStatus, activeView, setActiveView } = useAppContext();
+  const { connectionStatus, activeView, setActiveView, actionInProgress } = useAppContext();
   return (
     <header>
       <nav-tabs>
@@ -15,6 +15,7 @@ export function Header() {
           </button>
         ))}
       </nav-tabs>
+      <action-in-progress className={actionInProgress ? "active" : ""} />
       <connection-status data-status={connectionStatus}>
         {connectionStatus}
       </connection-status>

@@ -1,21 +1,36 @@
 import { addPlayerToComp } from "./addPlayerToComp/addPlayerToComp.js";
+import { addPlayer } from "./addPlayer/addPlayer.js";
+import { activatePlayer } from "./activatePlayer/activatePlayer.js";
+import { assignMatchups } from "./assignMatchups/assignMatchups.js";
+import { cancelActivePoolComp } from "./cancelActivePoolComp/cancelActivePoolComp.js";
+import { completeActivePoolComp } from "./completeActivePoolComp/completeActivePoolComp.js";
+import { createPoolComp } from "./createPoolComp/createPoolComp.js";
+import { deactivatePlayer } from "./deactivatePlayer/deactivatePlayer.js";
+import { manualAssignPlayerToSlot } from "./manualAssignPlayerToSlot/manualAssignPlayerToSlot.js";
 import { removePlayerFromComp } from "./removePlayerFromComp/removePlayerFromComp.js";
-import type { BackendService } from "../services/backend.service.js";
-import type { MessageData } from "../../../shared/messageToBackend.js";
-import type { MessageName } from "../../../shared/messageToBackend.js";
+import { setRegisteredPlayerPaid } from "./setRegisteredPlayerPaid/setRegisteredPlayerPaid.js";
+import { unsetRegisteredPlayerPaid } from "./unsetRegisteredPlayerPaid/unsetRegisteredPlayerPaid.js";
+import { updatePlayer } from "./updatePlayer/updatePlayer.js";
+import { MessageFromFrontend } from "../services/websockets.service.js";
+
 
 export const messagesFromFrontend = {
+    createPoolComp,
+    cancelActivePoolComp,
+    assignMatchups,
+    completeActivePoolComp,
     addPlayerToComp,
     removePlayerFromComp,
+    setRegisteredPlayerPaid,
+    unsetRegisteredPlayerPaid,
+    addPlayer,
+    updatePlayer,
+    deactivatePlayer,
+    activatePlayer,
+    manualAssignPlayerToSlot,
 }
 export type MessagesFromFrontend = typeof messagesFromFrontend
-
-export function getMessageHandler<T extends MessageName>(message: T): (
-    backendService: BackendService,
-    data: MessageData<MessagesFromFrontend[T]>
-) => void {
-    return messagesFromFrontend[message] as (
-        backendService: BackendService,
-        data: MessageData<MessagesFromFrontend[T]>
-    ) => void
+export type MessageFromFrontendName = keyof MessagesFromFrontend
+export function getMessageHandler({ message }: MessageFromFrontend) {
+    return messagesFromFrontend[message]
 }

@@ -1,5 +1,6 @@
 @use "../../mixins.scss" as *;
 @use "../../variables.scss" as *;
+
 header {
   display: flex;
   align-items: center;
@@ -7,29 +8,40 @@ header {
 
   nav-tabs {
     display: flex;
-    @include cq-responsive(
-      (
-        gap: 2,
-      )
-    );
+    @include cq-responsive((gap: 2,
+      ));
   }
 
   connection-status {
-    @include cq-responsive(
-      (
-        font-size: 3,
-      )
-    );
+    @include cq-responsive((font-size: 3,
+      ));
     color: $color-white-text;
     text-transform: capitalize;
+
     &[data-status="connected"] {
       color: $color-status-connected;
     }
+
     &[data-status="connecting"] {
       color: $color-status-connecting;
     }
+
     &[data-status="disconnected"] {
       color: $color-status-disconnected;
+    }
+  }
+
+  action-in-progress {
+    display: block;
+    @include cq-responsive((width: 3,
+        height: 3,
+      ));
+    border-radius: 50%;
+    border: 1px solid $color-dark-border;
+    background-color: $color-status-disconnected;
+
+    &.active {
+      background-color: $color-status-connected;
     }
   }
 }

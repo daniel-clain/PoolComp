@@ -19,12 +19,10 @@ export function Comp() {
   const {
     activePoolComp,
     activeHistoricalComp,
-    cancelActivePoolComp,
-    completeActivePoolComp,
-    createMatchups,
     clearHistoricalComp,
     orientation,
     calculateFirstPrizeMoney,
+    send,
   } = useAppContext();
 
   const [compPanel, setCompPanel] = useState<CompPanel>("players");
@@ -174,7 +172,7 @@ export function Comp() {
             type="button"
             disabled={createMatchupsDisabled}
             onClick={() => {
-              createMatchups();
+              send({ message: 'assignMatchups' });
               setCompPanel("tournament");
             }}
           >
@@ -195,11 +193,11 @@ export function Comp() {
         <button
           type="button"
           disabled={completeCompDisabled}
-          onClick={completeActivePoolComp}
+          onClick={() => send({ message: 'completeActivePoolComp' })}
         >
           Complete Comp
         </button>
-        <button className="danger" onClick={cancelActivePoolComp}>
+        <button className="danger" onClick={() => send({ message: 'cancelActivePoolComp' })}>
           Cancel Comp
         </button>
       </comp-actions-bottom>

@@ -1,0 +1,37 @@
+---
+description: WebSocket messages from frontend — registry, derived types, send shape
+alwaysApply: false
+globs: "backend/src/messages-from-frontend/**/*.ts,shared/messageToBackend.ts,**/websockets.service.ts,backend/src/index.ts"
+---
+
+# WebSocket messages from frontend
+
+Complements `.cursor/rules/architecture-shared-backend.mdc` (shared contracts). This rule is the handler registry + derived `MessageToBackend` pattern.
+
+## Source of truth (do not bypass)
+
+- **Registry and lookup:** `backend/src/messages-from-frontend/messages-from-frontend.ts` — `messagesFromFrontend`, `MessagesFromFrontend`, `getMessageHandler`.
+- **Derived types:** `shared/messageToBackend.ts` — `MessageName`, `MessageData`, `MessageToBackend` inferred from `MessagesFromFrontend` and handler `(backendService, data)` signatures.
+- **Dispatcher:** `backend/src/index.ts` — keep generic: `getMessageHandler(message)(backendService, data)` with `MessageToBackend`; do not branch per message here.
+- **Frontend send:** `frontend/src/services/websockets.service.ts` — `send(message: MessageToBackend)`.
+- **Example call site:** `frontend/src/views/Comp/components/CompPlayers/CompPlayers.tsx` — `send({ message: "…", data: { … } })`.
+
+## Handler shape
+
+Each frontend-callable message is a **named export** with the same shape as existing handlers (e.g. `backend/src/messages-from-frontend/addPlayerToComp/addPlayerToComp.ts`):
+
+`(backendService: BackendService, data: PayloadObject) => void` (return type may be implicit).
+
+- **Payloads are objects only:** `data: { playerId: string }` — never positional arrays like `data: ["id"]`.
+
+## Adding a message
+
+1. Add the backend function under `backend/src/messages-from-frontend/<name>/`.
+2. Register it on `messagesFromFrontend` in `messages-from-frontend.ts`.
+3. Rely on types updating automatically; use `send({ message: "<key>", data: { … } })` on the frontend.
+
+## Do not
+
+- Wrapper functions around handlers for typing or dispatch.
+- Duplicate message names or manually define message/payload types that `messageToBackend.ts` already derives.
+- Extra type assertions outside **`getMessageHandler`** in `messages-from-frontend.ts` (one `as` there is allowed for TS’s indexed-access limitation).

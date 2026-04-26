@@ -12,8 +12,15 @@
     "resolveJsonModule": true,
     "noUncheckedIndexedAccess": true,
     "noFallthroughCasesInSwitch": true,
-    "types": ["node"]
+    "types": [
+      "node"
+    ]
   },
-  "include": ["src/**/*.ts", "../shared/**/*.ts"],
-  "exclude": ["../shared/**/*.test.ts"]
+  "include": [
+    "src/**/*.ts"
+  ],
+  "exclude": [
+    "src/**/*.test.ts",
+    "src/main.test.ts"
+  ]
 }

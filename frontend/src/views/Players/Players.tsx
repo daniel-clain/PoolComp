@@ -2,7 +2,7 @@ import { useState, type ChangeEvent, type KeyboardEvent } from "react";
 import { useAppContext } from "../../AppContext";
 
 export function Players() {
-  const { players, addPlayer, openModal } = useAppContext();
+  const { players, send, openModal } = useAppContext();
   const [playerName, setPlayerName] = useState("");
   const [showDeactivated, setShowDeactivated] = useState(false);
 
@@ -13,7 +13,7 @@ export function Players() {
   function commitNewPlayer() {
     const trimmed = playerName.trim();
     if (!trimmed) return;
-    addPlayer(trimmed);
+    send({ message: 'addPlayer', data: { name: trimmed } });
     setPlayerName("");
   }
 

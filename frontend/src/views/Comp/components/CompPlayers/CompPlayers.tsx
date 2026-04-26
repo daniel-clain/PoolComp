@@ -4,7 +4,6 @@ export function CompPlayers() {
   const {
     players,
     activePoolComp,
-    togglePlayerInActivePoolComp,
     send,
   } = useAppContext();
 
@@ -37,7 +36,12 @@ export function CompPlayers() {
                   type="checkbox"
                   checked={registeredPlayer.paid}
                   onChange={() =>
-                    toggleRegisteredPlayerPaid(registeredPlayer.id)
+                    send({
+                      message: registeredPlayer.paid
+                        ? "unsetRegisteredPlayerPaid"
+                        : "setRegisteredPlayerPaid",
+                      data: { playerId: registeredPlayer.id },
+                    })
                   }
                 />
               </registered-player-cell>

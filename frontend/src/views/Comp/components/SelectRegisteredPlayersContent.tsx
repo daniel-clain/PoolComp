@@ -1,7 +1,7 @@
 import { useAppContext } from "../../../AppContext";
 
 export function SelectRegisteredPlayersContent() {
-  const { players, activePoolComp, togglePlayerInActivePoolComp } =
+  const { players, activePoolComp, send } =
     useAppContext();
 
   return (
@@ -17,7 +17,12 @@ export function SelectRegisteredPlayersContent() {
             return (
               <button
                 key={player.id}
-                onClick={() => togglePlayerInActivePoolComp(player.id)}
+                onClick={() =>
+                  send({
+                    message: isSelected ? "removePlayerFromComp" : "addPlayerToComp",
+                    data: { playerId: player.id },
+                  })
+                }
                 className={isSelected ? "is-selected" : ""}
               >
                 {player.name}

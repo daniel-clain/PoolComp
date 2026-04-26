@@ -5,12 +5,15 @@ import {
   type RegisteredPlayer,
   type Slot,
 } from "../../../shared/domain";
+
 import type { MessageToBackend } from "../../../shared/messageToBackend";
+
 
 export type SlotPlayerChoice = {
   playerId: string;
   playerName: string;
 };
+
 
 export function canSelectWinnerForSlot(slotId: string, slots: Slot[]): boolean {
   const slot = slots.find((candidate) => candidate.id === slotId);
@@ -113,6 +116,7 @@ export function createPoolCompService(
   function send(message: MessageToBackend) {
     sendMessageToBackendRef.current?.(message);
   }
+
 
   function calculateFirstPrizeMoney(registeredPlayers: RegisteredPlayer[]) {
     return (

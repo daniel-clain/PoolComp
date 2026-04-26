@@ -11,15 +11,14 @@ import {
   type AllData,
   type PoolComp,
 } from "../../shared/domain";
-import type { MessageToBackend } from "../../shared/messageToBackend";
 import { useOrientation } from "./hooks/useOrientation";
 import type { ModalState } from "./services/modal.service";
 import { createPoolCompService } from "./services/poolComp.service";
 import type {
   ConnectionStatus,
-  PendingAction,
 } from "./services/websockets.service";
 import { createWebSocketService } from "./services/websockets.service";
+import type { MessageToBackend } from "../../shared/messageToBackend";
 
 export type View = "Pool Comp" | "Players" | "Comp History";
 
@@ -35,6 +34,7 @@ type AppContextValue = AllData &
     activeHistoricalComp: PoolComp | null;
     viewHistoricalComp: (comp: PoolComp) => void;
     clearHistoricalComp: () => void;
+    actionInProgress: boolean;
   };
 
 const AppContext = createContext<AppContextValue | undefined>(undefined);
@@ -53,7 +53,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [modal, setModal] = useState<ModalState>(null);
   const [activeHistoricalComp, setActiveHistoricalComp] =
     useState<PoolComp | null>(null);
-
+  const [actionInProgress, setActionInProgress] = useState(false);
   function openModal(state: NonNullable<ModalState>) {
     setModal(state);
   }
@@ -71,25 +71,26 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setActiveHistoricalComp(null);
   }
 
-  const sendMessageToBackendRef = useRef<
-    ((message: MessageToBackend) => void) | null
-  >(null);
+  const sendMessageToBackendRef = useRef<((message: MessageToBackend) => void) | null>(null);
 
   const poolCompService = createPoolCompService(sendMessageToBackendRef);
 
   const { orientation } = useOrientation();
 
   useEffect(() => {
-    const { send: sendMessageToBackend, closeConnection } = createWebSocketService(
+    const { send, closeConnection } = createWebSocketService(
       (stateUpdateFromBackend: AllData) => {
         setAllData(stateUpdateFromBackend);
+      },
+      (actionInProgress: boolean) => {
+        setActionInProgress(actionInProgress);
       },
       (connectionStatus: ConnectionStatus) => {
         setConnectionStatus(connectionStatus);
       },
     );
 
-    sendMessageToBackendRef.current = sendMessageToBackend;
+    sendMessageToBackendRef.current = send;
 
     return () => {
       sendMessageToBackendRef.current = null;
@@ -100,7 +101,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
   return (
     <AppContext.Provider
       value={{
-        ...allData,
         orientation,
         activeView,
         setActiveView,
@@ -111,7 +111,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
         activeHistoricalComp,
         viewHistoricalComp,
         clearHistoricalComp,
+        actionInProgress,
         ...poolCompService,
+        ...allData,
       }}
     >
       {children}
