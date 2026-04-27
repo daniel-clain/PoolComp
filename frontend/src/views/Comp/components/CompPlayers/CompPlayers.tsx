@@ -4,7 +4,6 @@ import { useAppContext } from "../../../../AppContext";
 export function CompPlayers({ registeredPlayers }: { registeredPlayers: RegisteredPlayer[] }) {
   const {
     players,
-    activePoolComp: activePoolComp,
     send,
   } = useAppContext();
 
@@ -16,7 +15,7 @@ export function CompPlayers({ registeredPlayers }: { registeredPlayers: Register
   return (
     <comp-players>
       <registered-players-panel className="players-panel">
-        <comp-players-heading>Registered for this comp</comp-players-heading>
+        <comp-players-heading>Registered for this comp ({registeredPlayers.length})</comp-players-heading>
         {registeredPlayers.length === 0 ? (
           <no-data-message>No players registered yet.</no-data-message>
         ) : (

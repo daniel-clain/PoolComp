@@ -5,6 +5,7 @@ import type { WebSocketService } from "./websockets.service.js";
 import type { RegisteredPlayer } from "../../../shared/domain.js";
 import { MessageToFrontend } from "../../../shared/messageToFrontend.js";
 import { WebSocket } from "ws";
+import _ from "lodash";
 
 
 export function createBackendService(mongoDbService: MongoDbService, websocketService: WebSocketService, backendState: AllData) {
@@ -39,7 +40,7 @@ export function createBackendService(mongoDbService: MongoDbService, websocketSe
     const [players, activePoolComp, compHistory] = await mongoDbService.getAllData();
     backendState.activePoolComp = activePoolComp;
     backendState.compHistory = compHistory;
-    backendState.players = players;
+    backendState.players = _.orderBy(players, ['name'], ['asc']);
   }
 
   function sentToClient(socket: WebSocket, message: MessageToFrontend) {

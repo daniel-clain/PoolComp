@@ -4,10 +4,14 @@
 header {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+
+
+  @include cq-responsive((gap: 4,
+    ));
 
   nav-tabs {
     display: flex;
+    margin-right: auto;
     @include cq-responsive((gap: 2,
       ));
   }
@@ -33,15 +37,17 @@ header {
 
   action-in-progress {
     display: block;
+    justify-self: 'end';
     @include cq-responsive((width: 3,
         height: 3,
       ));
     border-radius: 50%;
     border: 1px solid $color-dark-border;
-    background-color: $color-status-disconnected;
+
+    background-color: $color-status-connected;
 
     &.active {
-      background-color: $color-status-connected;
+      background-color: $color-status-disconnected;
     }
   }
 }

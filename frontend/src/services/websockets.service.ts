@@ -41,9 +41,12 @@ export function createWebSocketService(
           onStateUpdate(data);
           break;
         }
-        case "actionInProgress":
+        case "actionInProgress": {
+
+          console.log("actionInProgress:", data);
           onActionInProgress(data);
           break;
+        }
       }
     });
 

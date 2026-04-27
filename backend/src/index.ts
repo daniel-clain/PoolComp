@@ -35,6 +35,7 @@ async function bootstrap(): Promise<void> {
     console.log("message from frontend:", message, data ?? '');
 
     if (!actionQueue) {
+      console.log("actionInProgress: true");
       backendService.sendToAllClients({
         message: 'actionInProgress',
         data: true
@@ -60,6 +61,8 @@ async function bootstrap(): Promise<void> {
           data: false
         })
       })
+
+    actionQueue = null;
   })
   httpServer.listen(serverConfig.port, () => {
     console.log(

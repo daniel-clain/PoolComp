@@ -7,6 +7,7 @@ import type {
 } from "../../../shared/domain.js";
 import { poolCompConfig } from "../../../shared/domain.js";
 import { serverConfig } from "../config.js";
+import { orderBy } from "lodash";
 
 export type Repository = {
   load(): Promise<AllData>;
@@ -27,6 +28,7 @@ export async function createMongoDbService() {
   const activeCompCollection =
     database.collection<ActivePoolComp>("ActiveComp");
   const compHistoryCollection = database.collection<PoolComp>("CompHistory");
+
 
 
 
