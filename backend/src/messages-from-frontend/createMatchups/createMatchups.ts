@@ -1,7 +1,7 @@
 import type { BackendService } from "../../services/backend.service.js";
 import { assignMatchups as generateMatchups } from "../../services/matchup-generation.service.js";
 
-export async function assignMatchups(
+export async function createMatchups(
   backendService: BackendService
 ): Promise<void> {
   const activeComp = backendService.getActiveComp();

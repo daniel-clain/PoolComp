@@ -21,13 +21,11 @@ export type MessageFromFrontendData<T> =
 
 
 export type MessageToBackend = {
-  [K in MessageFromFrontendName]: { message: K } & (
-    Parameters<MessagesFromFrontend[K]> extends [BackendService, infer Data]
-    ? { data: Data }
-    : { data?: undefined }
-  )
+  [FuncName in MessageFromFrontendName]:
+  Parameters<MessagesFromFrontend[FuncName]> extends [BackendService, infer Data]
+  ? [FuncName, Data]
+  : [FuncName]
 }[MessageFromFrontendName]
-
 
 
 

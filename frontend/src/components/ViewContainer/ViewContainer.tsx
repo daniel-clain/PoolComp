@@ -1,6 +1,8 @@
 import { type ReactNode } from "react";
+import { useAppContext } from "../../AppContext";
 
 export function ViewContainer({ children }: { children: ReactNode }) {
+  const { userIsCompManager, setUserIsCompManager } = useAppContext();
   const pockets = 6;
   const studs = 18;
 
@@ -12,7 +14,18 @@ export function ViewContainer({ children }: { children: ReactNode }) {
           <table-felt />
           <table-pockets>
             {Array.from({ length: pockets }).map((_, i) => (
-              <table-pocket key={i + 1} id={`pocket-${i + 1}`} />
+              <table-pocket key={i + 1} id={`pocket-${i + 1}`} onClick={() => {
+                if (i === 0) {
+                  console.log('clicked')
+                  if (!userIsCompManager) {
+                    localStorage.setItem('userIsCompManager', 'true')
+                    setUserIsCompManager(true)
+                  } else {
+                    localStorage.removeItem('userIsCompManager')
+                    setUserIsCompManager(false)
+                  }
+                }
+              }} />
             ))}
           </table-pockets>
           <table-studs>

@@ -11,10 +11,12 @@ export function Slot({ slotWithPosition, onSelect }: Props) {
   const { slot, x, y, width, height, fontSize } = slotWithPosition;
 
   let label = "";
-  if (slot.kind === "player") {
+  if (slot.playerId) {
     label = players.find((player) => player.id === slot.playerId)?.name ?? "";
-  } else if (slot.kind === "bye") {
+  } else if (slot.isBye) {
     label = "BYE";
+  } else {
+    label = "";
   }
 
   return (
@@ -26,7 +28,7 @@ export function Slot({ slotWithPosition, onSelect }: Props) {
         height: `${height}cqh`,
         fontSize: `${fontSize}cqh`,
       }}
-      className={`is-${slot.kind}`}
+      className={`is-${slot.playerId ? "player" : slot.isBye ? "bye" : "empty"}`}
       onClick={onSelect}
     >
       {label}

@@ -36,7 +36,6 @@ export function assignMatchups(
       eachFirstRoundMatchupDoesntHaveAPlayer(firstRoundSlots)
     ) {
       const matchup = getRandomMatchupWithoutPlayer(firstRoundSlots);
-      getRandomMatchupWithoutPlayer(firstRoundSlots);
       console.log("matchup", matchup);
       const randomSlot = getRandomSlotFromMatchup(matchup);
       console.log("randomSlot", randomSlot);
@@ -64,5 +63,5 @@ export function assignMatchups(
       remainingSlot.playerId = playerId;
     }
   }
-  return firstRoundSlots;
+  return totalTournamentSlots;
 }

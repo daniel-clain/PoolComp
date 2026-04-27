@@ -1,8 +1,4 @@
 import { useState } from "react";
-import {
-  collectPlayerIdsPlacedInSlots,
-  registrationSlotsMatchGeneratedLayout,
-} from "../../../../shared/bracketLayout";
 import { useAppContext } from "../../AppContext";
 import ballImage from "../../assets/8ball.png";
 import leavesImage from "../../assets/crossleaves.png";
@@ -23,37 +19,21 @@ export function Comp() {
     orientation,
     calculateFirstPrizeMoney,
     send,
+    userIsCompManager,
   } = useAppContext();
+
+  const comp = activePoolComp!;
 
   const [compPanel, setCompPanel] = useState<CompPanel>("players");
 
   const firstPrizeMoney =
-    !activeHistoricalComp && activePoolComp
-      ? calculateFirstPrizeMoney(activePoolComp.registeredPlayers)
+    !activeHistoricalComp && comp
+      ? calculateFirstPrizeMoney(comp.registeredPlayers)
       : null;
 
-  const completeCompDisabled =
-    !activePoolComp || !activePoolCompHasChampionPlayer(activePoolComp.slots);
+  const completeCompDisabled = !activePoolCompHasChampionPlayer(comp.slots);
 
-  const createMatchupsDisabled = (() => {
-    if (!activePoolComp) return true;
-    const registeredPlayerIds = activePoolComp.registeredPlayers.map(
-      (registeredPlayer) => registeredPlayer.id,
-    );
-    if (
-      registrationSlotsMatchGeneratedLayout(
-        activePoolComp.slots,
-        registeredPlayerIds,
-      )
-    ) {
-      return registeredPlayerIds.length < 5;
-    }
-    const placedPlayerIds = collectPlayerIdsPlacedInSlots(activePoolComp.slots);
-    const pendingPlayerIds = registeredPlayerIds.filter(
-      (playerId) => !placedPlayerIds.has(playerId),
-    );
-    return pendingPlayerIds.length === 0;
-  })();
+  const createMatchupsDisabled = comp.registeredPlayers.length < 5
 
   return (
     <comp-view>
@@ -95,17 +75,15 @@ export function Comp() {
       return <TournamentStructure comp={activeHistoricalComp} />;
     }
 
-    if (activePoolComp) {
-      return (
-        <comp-main-panel>
-          {compPanel === "players" ? (
-            <CompPlayers />
-          ) : (
-            <TournamentStructure comp={activePoolComp} />
-          )}
-        </comp-main-panel>
-      );
-    }
+    return (
+      <comp-main-panel>
+        {compPanel === "players" ? (
+          <CompPlayers registeredPlayers={comp.registeredPlayers} />
+        ) : (
+          <TournamentStructure comp={comp} />
+        )}
+      </comp-main-panel>
+    );
   }
 
   function compTitle() {
@@ -117,7 +95,7 @@ export function Comp() {
   }
 
   function textBoxes() {
-    const compDate = (activeHistoricalComp ?? activePoolComp)?.date;
+    const compDate = (activeHistoricalComp ?? comp).date;
     const compDateString = compDate
       ? new Date(compDate).toLocaleDateString()
       : "";
@@ -145,7 +123,9 @@ export function Comp() {
     return <ScalingImage id="eight-ball-image" src={ballImage} />;
   }
 
+
   function compActions() {
+
     if (activeHistoricalComp) {
       return (
         <comp-actions>
@@ -154,37 +134,38 @@ export function Comp() {
       );
     }
 
+
     return (
-      activePoolComp && (
-        <comp-actions>
-          <TabBar
-            tabLabels={["Players", "Tournament"]}
-            selectedTabIndex={compPanel === "players" ? 0 : 1}
-            onTabSelected={(selectedTabIndex) => {
-              if (selectedTabIndex === 0) {
-                setCompPanel("players");
-              } else {
-                setCompPanel("tournament");
-              }
-            }}
-          />
+      <comp-actions>
+        <TabBar
+          tabLabels={["Players", "Tournament"]}
+          selectedTabIndex={compPanel === "players" ? 0 : 1}
+          onTabSelected={(selectedTabIndex) => {
+            if (selectedTabIndex === 0) {
+              setCompPanel("players");
+            } else {
+              setCompPanel("tournament");
+            }
+          }}
+        />
+        {userIsCompManager && (
           <button
             type="button"
             disabled={createMatchupsDisabled}
             onClick={() => {
-              send({ message: 'assignMatchups' });
+              send(['createMatchups']);
               setCompPanel("tournament");
             }}
           >
             Create Matchups
           </button>
-        </comp-actions>
-      )
-    );
+        )}
+      </comp-actions>
+    )
   }
 
   function compActionsBottom() {
-    if (activeHistoricalComp) {
+    if (activeHistoricalComp || !userIsCompManager) {
       return null;
     }
 
@@ -193,11 +174,11 @@ export function Comp() {
         <button
           type="button"
           disabled={completeCompDisabled}
-          onClick={() => send({ message: 'completeActivePoolComp' })}
+          onClick={() => send(['completeActivePoolComp'])}
         >
           Complete Comp
         </button>
-        <button className="danger" onClick={() => send({ message: 'cancelActivePoolComp' })}>
+        <button className="danger" onClick={() => send(['cancelActivePoolComp'])}>
           Cancel Comp
         </button>
       </comp-actions-bottom>

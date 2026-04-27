@@ -1,5 +1,4 @@
 import { randomUUID } from "node:crypto";
-import { generateSlots } from "../../../../shared/bracketLayout.js";
 import type { BackendService } from "../../services/backend.service.js";
 
 export async function createPoolComp(
@@ -8,7 +7,7 @@ export async function createPoolComp(
   await backendService.mongoDbService.activeCompCollection.insertOne({
     id: randomUUID(),
     date: new Date(),
-    slots: generateSlots([]),
+    slots: [],
     registeredPlayers: [],
   });
   const updatedActiveComp = await backendService.mongoDbService.activeCompCollection.findOne()

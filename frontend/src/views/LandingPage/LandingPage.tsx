@@ -5,7 +5,7 @@ export function LandingPage() {
 
   return (
     <home-view>
-      <button className="active" onClick={() => send({ message: 'createPoolComp' })}>
+      <button className="active" onClick={() => send(['createPoolComp'])}>
         New Pool Comp
       </button>
     </home-view>

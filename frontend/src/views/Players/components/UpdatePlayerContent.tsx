@@ -8,9 +8,7 @@ type Props = {
 export function UpdatePlayerModal({ playerId }: Props) {
   const {
     players,
-    updatePlayer,
-    deactivatePlayer,
-    activatePlayer,
+    send,
     closeModal,
   } = useAppContext();
   const player = players.find((candidate) => candidate.id === playerId);
@@ -23,15 +21,15 @@ export function UpdatePlayerModal({ playerId }: Props) {
 
   function handleSave() {
     if (!isDirty) return;
-    updatePlayer(playerId, trimmedName);
+    send(['updatePlayer', { playerId, name: trimmedName }]);
     closeModal();
   }
 
   function handleToggleActive() {
     if (player!.deactivated) {
-      activatePlayer(playerId);
+      send(['activatePlayer', { playerId }]);
     } else {
-      deactivatePlayer(playerId);
+      send(['deactivatePlayer', { playerId }]);
     }
     closeModal();
   }

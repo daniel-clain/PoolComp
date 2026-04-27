@@ -13,7 +13,7 @@ export function Players() {
   function commitNewPlayer() {
     const trimmed = playerName.trim();
     if (!trimmed) return;
-    send({ message: 'addPlayer', data: { name: trimmed } });
+    send(['addPlayer', { name: trimmed }]);
     setPlayerName("");
   }
 

@@ -4,14 +4,17 @@ import {
   getPlayerChoicesForSlot,
 } from "../../../../../services/poolComp.service";
 import type { SlotWithPosition } from "../../../../../services/tournamentStructure.service";
+import type { Slot } from "../../../../../../../shared/domain";
+
 
 type Props = {
   slotWithPosition: SlotWithPosition;
   onClose: () => void;
+  slots: Slot[];
 };
 
-export function SlotMatchupSelect({ slotWithPosition, onClose }: Props) {
-  const { activePoolComp, players, assignWinnerToBracketSlot } = useAppContext();
+export function SlotMatchupSelect({ slotWithPosition, onClose, slots }: Props) {
+  const { players, send } = useAppContext();
   const panelRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
@@ -24,18 +27,16 @@ export function SlotMatchupSelect({ slotWithPosition, onClose }: Props) {
     return () => document.removeEventListener("pointerdown", handlePointerDown);
   }, [onClose]);
 
-  if (!activePoolComp) return null;
-
   const choices = getPlayerChoicesForSlot(
     slotWithPosition.slot.id,
-    activePoolComp.slots,
+    slots,
     players,
   );
 
   if (choices.length === 0) return null;
 
   function handlePick(playerId: string) {
-    assignWinnerToBracketSlot(slotWithPosition.slot.id, playerId);
+    send(['manualAssignPlayerToSlot', { slotId: slotWithPosition.slot.id, playerId }]);
     onClose();
   }
 

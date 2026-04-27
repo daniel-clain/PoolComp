@@ -1,7 +1,7 @@
 import { addPlayerToComp } from "./addPlayerToComp/addPlayerToComp.js";
 import { addPlayer } from "./addPlayer/addPlayer.js";
 import { activatePlayer } from "./activatePlayer/activatePlayer.js";
-import { assignMatchups } from "./assignMatchups/assignMatchups.js";
+import { createMatchups } from "./createMatchups/createMatchups.js";
 import { cancelActivePoolComp } from "./cancelActivePoolComp/cancelActivePoolComp.js";
 import { completeActivePoolComp } from "./completeActivePoolComp/completeActivePoolComp.js";
 import { createPoolComp } from "./createPoolComp/createPoolComp.js";
@@ -11,13 +11,12 @@ import { removePlayerFromComp } from "./removePlayerFromComp/removePlayerFromCom
 import { setRegisteredPlayerPaid } from "./setRegisteredPlayerPaid/setRegisteredPlayerPaid.js";
 import { unsetRegisteredPlayerPaid } from "./unsetRegisteredPlayerPaid/unsetRegisteredPlayerPaid.js";
 import { updatePlayer } from "./updatePlayer/updatePlayer.js";
-import { MessageFromFrontend } from "../services/websockets.service.js";
 
-
+/* source of truth for frontend send messages */
 export const messagesFromFrontend = {
     createPoolComp,
     cancelActivePoolComp,
-    assignMatchups,
+    createMatchups,
     completeActivePoolComp,
     addPlayerToComp,
     removePlayerFromComp,
@@ -30,7 +29,4 @@ export const messagesFromFrontend = {
     manualAssignPlayerToSlot,
 }
 export type MessagesFromFrontend = typeof messagesFromFrontend
-export type MessageFromFrontendName = keyof MessagesFromFrontend
-export function getMessageHandler({ message }: MessageFromFrontend) {
-    return messagesFromFrontend[message]
-}
+

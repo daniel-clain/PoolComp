@@ -25,6 +25,8 @@ export type View = "Pool Comp" | "Players" | "Comp History";
 type AppContextValue = AllData &
   ReturnType<typeof createPoolCompService> & {
     orientation: "portrait" | "landscape";
+    userIsCompManager: boolean;
+    setUserIsCompManager: (userIsCompManager: boolean) => void;
     activeView: View;
     setActiveView: (view: View) => void;
     connectionStatus: ConnectionStatus;
@@ -54,6 +56,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [activeHistoricalComp, setActiveHistoricalComp] =
     useState<PoolComp | null>(null);
   const [actionInProgress, setActionInProgress] = useState(false);
+
+  const isCompManager = localStorage.getItem('userIsCompManager') === 'true'
+
+  const [userIsCompManager, setUserIsCompManager] = useState(isCompManager);
+
+
   function openModal(state: NonNullable<ModalState>) {
     setModal(state);
   }
@@ -112,6 +120,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
         viewHistoricalComp,
         clearHistoricalComp,
         actionInProgress,
+        userIsCompManager,
+        setUserIsCompManager,
         ...poolCompService,
         ...allData,
       }}

@@ -33,12 +33,14 @@ export function createWebSocketService(
     });
 
     socket.addEventListener("message", (event: MessageEvent<string>) => {
-      console.log("message from backend:", event.data);
+
       const { message, data }: MessageToFrontend = JSON.parse(event.data);
       switch (message) {
-        case "allData":
+        case "allData": {
+          console.log("slots:", data.activePoolComp?.slots);
           onStateUpdate(data);
           break;
+        }
         case "actionInProgress":
           onActionInProgress(data);
           break;
@@ -60,7 +62,7 @@ export function createWebSocketService(
   }
 
 
-  function send(message: MessageToBackend): void {    
+  function send(message: MessageToBackend): void {
     if (!socket) throw new Error("Socket not connected");
     socket.send(JSON.stringify(message));
   }

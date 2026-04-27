@@ -1,13 +1,13 @@
+import type { RegisteredPlayer } from "../../../../../../shared/domain";
 import { useAppContext } from "../../../../AppContext";
 
-export function CompPlayers() {
+export function CompPlayers({ registeredPlayers }: { registeredPlayers: RegisteredPlayer[] }) {
   const {
     players,
-    activePoolComp,
+    activePoolComp: activePoolComp,
     send,
   } = useAppContext();
 
-  if (!activePoolComp) return null;
 
   const databasePlayersForGrid = players.filter(
     (player) => !player.deactivated,
@@ -17,17 +17,17 @@ export function CompPlayers() {
     <comp-players>
       <registered-players-panel className="players-panel">
         <comp-players-heading>Registered for this comp</comp-players-heading>
-        {activePoolComp.registeredPlayers.length === 0 ? (
+        {registeredPlayers.length === 0 ? (
           <no-data-message>No players registered yet.</no-data-message>
         ) : (
           <player-grid>
-            {activePoolComp.registeredPlayers.map((registeredPlayer) => (
+            {registeredPlayers.map((registeredPlayer) => (
               <registered-player-cell key={registeredPlayer.id}>
                 <button
                   type="button"
                   className="active"
                   onClick={() =>
-                    send({ message: 'removePlayerFromComp', data: { playerId: registeredPlayer.id } })
+                    send(['removePlayerFromComp', { playerId: registeredPlayer.id }])
                   }
                 >
                   {registeredPlayer.name}
@@ -36,12 +36,7 @@ export function CompPlayers() {
                   type="checkbox"
                   checked={registeredPlayer.paid}
                   onChange={() =>
-                    send({
-                      message: registeredPlayer.paid
-                        ? "unsetRegisteredPlayerPaid"
-                        : "setRegisteredPlayerPaid",
-                      data: { playerId: registeredPlayer.id },
-                    })
+                    send([registeredPlayer.paid ? 'unsetRegisteredPlayerPaid' : 'setRegisteredPlayerPaid', { playerId: registeredPlayer.id }])
                   }
                 />
               </registered-player-cell>
@@ -53,14 +48,14 @@ export function CompPlayers() {
         <comp-players-heading>All players</comp-players-heading>
         <player-grid>
           {databasePlayersForGrid.map((player) => {
-            const isRegistered = activePoolComp?.registeredPlayers.some(
+            const isRegistered = registeredPlayers.some(
               (registeredPlayer) => registeredPlayer.id === player.id,
             );
             return (
               <button
                 key={player.id}
                 type="button"
-                onClick={() => send({ message: isRegistered ? 'removePlayerFromComp' : 'addPlayerToComp', data: { playerId: player.id } })}
+                onClick={() => send([isRegistered ? 'removePlayerFromComp' : 'addPlayerToComp', { playerId: player.id }])}
                 className={isRegistered ? "active" : ""}
               >
                 {player.name}

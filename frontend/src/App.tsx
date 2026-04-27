@@ -8,7 +8,7 @@ import { LandingPage } from "./views/LandingPage/LandingPage";
 import { Players } from "./views/Players/Players";
 
 export function App() {
-  const { activePoolComp, activeHistoricalComp, activeView, orientation } = useAppContext();
+  const { activePoolComp: activePoolComp, activeHistoricalComp, activeView, orientation } = useAppContext();
 
   return (
     <app-container className={`is-${orientation}`}>

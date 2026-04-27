@@ -2,18 +2,14 @@ import { WebSocket, WebSocketServer } from "ws";
 
 import { Subject } from "rxjs";
 import http from "node:http";
-import { MessageFromFrontendName, MessagesFromFrontend } from "../messages-from-frontend/messages-from-frontend.js";
+import { MessageToBackend } from "../../../shared/messageToBackend.js";
 
 
-export type MessageFromFrontend<T extends MessageFromFrontendName = any> = {
-  message: MessageFromFrontendName
-  data: MessagesFromFrontend[T]
-}
 
 
 export function createWebSocketService(httpServer: http.Server) {
   const webSocketServer = new WebSocketServer({ server: httpServer, path: "/ws" });
-  const onMessageFromClient: Subject<MessageFromFrontend> = new Subject<MessageFromFrontend>();
+  const onMessageFromClient: Subject<string> = new Subject<string>();
   const onClientConnected: Subject<WebSocket> = new Subject<WebSocket>();
 
 
@@ -22,8 +18,8 @@ export function createWebSocketService(httpServer: http.Server) {
     onClientConnected.next(socket);
 
     socket.on("message", (jsonString: string) => {
-      const message: MessageFromFrontend = JSON.parse(jsonString);
-      onMessageFromClient.next(message);
+
+      onMessageFromClient.next(jsonString);
     })
 
     socket.on("close", () => {

@@ -4,6 +4,7 @@
   "description": "Realtime backend for PoolComp",
   "scripts": {
     "dev": "tsx watch src/index.ts",
+    "debug": "tsx watch --inspect-brk src/index.ts",
     "build": "tsc -p tsconfig.json",
     "start": "node dist/backend/src/index.js",
     "test": "tsx src/main.test.ts"

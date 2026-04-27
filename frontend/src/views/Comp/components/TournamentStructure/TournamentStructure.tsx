@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { registrationSlotsMatchGeneratedLayout } from "../../../../../../shared/bracketLayout";
+
 import type { PoolComp } from "../../../../../../shared/domain";
 import { useAppContext } from "../../../../AppContext";
 import { canSelectWinnerForSlot } from "../../../../services/poolComp.service";
@@ -16,26 +16,19 @@ type Props = {
 };
 
 export function TournamentStructure({ comp }: Props) {
-  const { activePoolComp, activeHistoricalComp } = useAppContext();
   const [selectedSlot, setSelectedSlot] = useState<SlotWithPosition | null>(
     null,
   );
+  const { userIsCompManager } = useAppContext();
 
   if (comp.slots.length === 0) return null;
 
   const layout = calculateSlotPositions(comp.slots);
-  const isInteractive =
-    activeHistoricalComp === null &&
-    activePoolComp !== null &&
-    !registrationSlotsMatchGeneratedLayout(
-      activePoolComp.slots,
-      activePoolComp.registeredPlayers.map(
-        (registeredPlayer) => registeredPlayer.id,
-      ),
-    );
+  const isHistoricalComp = !('registeredPlayers' in comp)
+  const isInteractive = !isHistoricalComp && userIsCompManager
+
 
   function handleSlotSelect(slotWithPosition: SlotWithPosition) {
-    if (!isInteractive) return;
     if (!canSelectWinnerForSlot(slotWithPosition.slot.id, comp.slots)) return;
     setSelectedSlot(slotWithPosition);
   }
@@ -58,11 +51,12 @@ export function TournamentStructure({ comp }: Props) {
           <Slot
             key={slotWithPosition.slot.id}
             slotWithPosition={slotWithPosition}
-            onSelect={() => handleSlotSelect(slotWithPosition)}
+            onSelect={() => isInteractive && handleSlotSelect(slotWithPosition)}
           />
         ))}
-        {selectedSlot && isInteractive && (
+        {selectedSlot && (
           <SlotMatchupSelect
+            slots={comp.slots}
             slotWithPosition={selectedSlot}
             onClose={() => setSelectedSlot(null)}
           />
