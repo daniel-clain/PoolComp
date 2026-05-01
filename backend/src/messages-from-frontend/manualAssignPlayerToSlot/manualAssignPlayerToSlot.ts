@@ -1,13 +1,12 @@
 import type { BackendService } from "../../services/backend.service.js";
+import { handleManualAssignPlayerToSlot } from "../../services/tournament-slot-assignment/tournament-slot-assignment.service.js";
 
 export async function manualAssignPlayerToSlot(
   backendService: BackendService,
-  data: { slotId: string; playerId: string },
+  data: { slotId: number; playerId: string },
 ): Promise<void> {
   const activeComp = backendService.getActiveComp();
-  const slots = activeComp.slots.map((slot) =>
-    slot.id === data.slotId ? { ...slot, playerId: data.playerId } : slot,
-  );
+  const slots = handleManualAssignPlayerToSlot(activeComp, data.slotId, data.playerId);
 
   await backendService.mongoDbService.activeCompCollection.updateOne(
     { id: activeComp.id },
@@ -17,3 +16,4 @@ export async function manualAssignPlayerToSlot(
   if (!updatedActiveComp) throw new Error("Active comp not found");
   backendService.backendState.activePoolComp = updatedActiveComp;
 }
+/* Needs to accurately clear relative slots */

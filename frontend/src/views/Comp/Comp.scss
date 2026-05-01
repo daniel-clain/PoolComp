@@ -12,11 +12,14 @@ comp-view {
           width: 18cqw;
         }
       }
+
       text-box-container {
         align-items: end;
         justify-content: space-between;
+
         text-box {
           width: 32cqw;
+
           text-box-label {
             #crown-image {
               width: 22cqw;
@@ -26,9 +29,11 @@ comp-view {
       }
     }
   }
+
   .is-landscape & {
     flex-direction: row;
     justify-content: space-between;
+
     left-container {
       display: flex;
       flex-direction: column;
@@ -37,6 +42,7 @@ comp-view {
       min-height: 0;
       gap: 2cqh;
     }
+
     right-container {
       display: flex;
       flex-direction: column;
@@ -67,6 +73,7 @@ comp-view {
             }
           }
         }
+
         #eight-ball-image {
           width: 24cqh;
         }
@@ -79,31 +86,21 @@ comp-view {
     flex-direction: column;
     flex: 1;
     min-height: 0;
-    min-width: 0;
-    @include cq-responsive(
-      (
-        gap: 2,
-      )
-    );
+    @include cq-responsive((gap: 2,
+      ));
   }
 
   comp-actions {
     display: flex;
-    @include cq-responsive(
-      (
-        gap: 2,
-      )
-    );
+    @include cq-responsive((gap: 2,
+      ));
   }
 
   comp-actions-bottom {
     display: flex;
     flex-shrink: 0;
-    @include cq-responsive(
-      (
-        gap: 2,
-      )
-    );
+    @include cq-responsive((gap: 2,
+      ));
   }
 
   text-box-container {
@@ -114,29 +111,20 @@ comp-view {
       flex-direction: column;
       align-items: center;
 
-      @include cq-responsive(
-        (
-          gap: 1,
-        )
-      );
+      @include cq-responsive((gap: 1,
+        ));
 
       text-box-label {
         font-weight: 700;
         text-transform: uppercase;
         text-align: center;
-        @include cq-responsive(
-          (
-            font-size: 3,
-          )
-        );
+        @include cq-responsive((font-size: 3,
+          ));
       }
 
       text-box-value {
-        @include cq-responsive(
-          (
-            font-size: 3,
-          )
-        );
+        @include cq-responsive((font-size: 3,
+          ));
         aspect-ratio: 5 / 1;
         width: 100%;
         font-weight: 600;
@@ -158,11 +146,8 @@ comp-view {
     left: 50%;
     top: 50%;
     transform: translate(-50%, -50%);
-    @include cq-responsive(
-      (
-        max-width: 80,
+    @include cq-responsive((max-width: 80,
         max-height: 80,
-      )
-    );
+      ));
   }
 }

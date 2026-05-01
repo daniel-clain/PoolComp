@@ -20,6 +20,9 @@ export function createWebSocketService(
   let reconnectTimer: number | undefined;
   let closedManually = false;
 
+
+  let connected: boolean = false;
+
   function connect() {
     onConnectionStatusChange("connecting");
     if (!WS_URL) {
@@ -29,6 +32,7 @@ export function createWebSocketService(
     socket = new WebSocket(WS_URL);
 
     socket.addEventListener("open", () => {
+      connected = true;
       onConnectionStatusChange("connected");
     });
 
@@ -37,7 +41,7 @@ export function createWebSocketService(
       const { message, data }: MessageToFrontend = JSON.parse(event.data);
       switch (message) {
         case "allData": {
-          console.log("slots:", data.activePoolComp?.slots);
+          console.log("slots:", data?.activePoolComp?.slots.map(s => ({ slotId: s.id, player: data?.activePoolComp?.registeredPlayers.find(p => p.id == s.playerId)?.name })));
           onStateUpdate(data);
           break;
         }
@@ -51,6 +55,7 @@ export function createWebSocketService(
     });
 
     socket.addEventListener("close", () => {
+      connected = false;
       if (closedManually) {
         onConnectionStatusChange("disconnected");
         return;
@@ -78,5 +83,6 @@ export function createWebSocketService(
 
   connect();
 
-  return { send, closeConnection };
+
+  return { send, closeConnection, connected };
 }

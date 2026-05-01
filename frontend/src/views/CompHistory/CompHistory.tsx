@@ -1,3 +1,4 @@
+import { useCallback } from "react";
 import { useAppContext } from "../../AppContext";
 import {
   calculatePrizeMoneyFromPlayerCount,
@@ -7,11 +8,9 @@ import {
 
 export function CompHistory() {
   const { compHistory, players, viewHistoricalComp } = useAppContext();
-
-  function playerName(playerId: string | null): string {
-    if (!playerId) return "-";
-    return players.find((player) => player.id === playerId)?.name ?? "Unknown";
-  }
+  const playerName = useCallback((playerId: string): string => {
+    return players.find((player) => player.id === playerId)?.name!
+  }, [players])
 
   return (
     <history-view>

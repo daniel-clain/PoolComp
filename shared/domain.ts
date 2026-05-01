@@ -1,3 +1,5 @@
+import type { PoolCompConfig } from "./poolCompConfig.js";
+
 export type Player = {
   id: string;
   name: string;
@@ -17,7 +19,7 @@ export type ActivePoolComp = PoolComp & {
 export type RegisteredPlayer = Player & {
   paid: boolean;
 };
-export type Slot = { id: string; isBye?: boolean; playerId?: string };
+export type Slot = { id: number; isBye?: boolean; playerId?: string };
 export type Matchup = { slot1: Slot; slot2: Slot };
 
 export type AllData = {
@@ -27,14 +29,4 @@ export type AllData = {
   poolCompConfig: PoolCompConfig;
 };
 
-export const poolCompConfig = {
-  buyIn: 10,
-  barInput: 50,
-  xmasCut: 20,
-  bigComp: {
-    weeklyContributionPercentage: 0.5,
-    mainCompPercentage: 0.7,
-    mainCompFirstPlacePercentage: 0.7,
-  },
-};
-export type PoolCompConfig = typeof poolCompConfig;
+

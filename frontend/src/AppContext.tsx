@@ -7,7 +7,6 @@ import {
   type ReactNode,
 } from "react";
 import {
-  poolCompConfig,
   type AllData,
   type PoolComp,
 } from "../../shared/domain";
@@ -19,6 +18,7 @@ import type {
 } from "./services/websockets.service";
 import { createWebSocketService } from "./services/websockets.service";
 import type { MessageToBackend } from "../../shared/messageToBackend";
+import { poolCompConfig } from "../../shared/poolCompConfig";
 
 export type View = "Pool Comp" | "Players" | "Comp History";
 
@@ -86,7 +86,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const { orientation } = useOrientation();
 
   useEffect(() => {
-    const { send, closeConnection } = createWebSocketService(
+    const { send, closeConnection, connected } = createWebSocketService(
       (stateUpdateFromBackend: AllData) => {
         setAllData(stateUpdateFromBackend);
       },
@@ -102,7 +102,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
     return () => {
       sendMessageToBackendRef.current = null;
-      closeConnection();
+      if (connected) {
+        closeConnection();
+      }
     };
   }, []);
 

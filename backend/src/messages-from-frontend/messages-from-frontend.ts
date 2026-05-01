@@ -1,7 +1,7 @@
 import { addPlayerToComp } from "./addPlayerToComp/addPlayerToComp.js";
 import { addPlayer } from "./addPlayer/addPlayer.js";
 import { activatePlayer } from "./activatePlayer/activatePlayer.js";
-import { createMatchups } from "./createMatchups/createMatchups.js";
+import { randomiseMatchups } from "./randomiseMatchups/randomiseMatchups.js";
 import { cancelActivePoolComp } from "./cancelActivePoolComp/cancelActivePoolComp.js";
 import { completeActivePoolComp } from "./completeActivePoolComp/completeActivePoolComp.js";
 import { createPoolComp } from "./createPoolComp/createPoolComp.js";
@@ -16,7 +16,7 @@ import { updatePlayer } from "./updatePlayer/updatePlayer.js";
 export const messagesFromFrontend = {
     createPoolComp,
     cancelActivePoolComp,
-    createMatchups,
+    randomiseMatchups,
     completeActivePoolComp,
     addPlayerToComp,
     removePlayerFromComp,

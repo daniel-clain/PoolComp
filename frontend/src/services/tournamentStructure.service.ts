@@ -20,16 +20,6 @@ export type TournamentLayout = {
   aspectRatio: number;
 };
 
-type SlotWithDerivedNumber = {
-  slot: Slot;
-  derivedSlotNumber: number;
-};
-
-type RoundCenter = {
-  x: number;
-  y: number;
-};
-
 type LayoutSizing = {
   slotWidth: number;
   slotHeight: number;
@@ -39,49 +29,11 @@ type LayoutSizing = {
   padding: number;
 };
 
-type PositionedSlot = {
+type CenterAndRound = {
   centerX: number;
   centerY: number;
-  slotWithPosition: SlotWithPosition;
+  roundIndex: number;
 };
-
-function parseSlotNumber(slotId: string): number | null {
-  const parsedSlotNumber = Number.parseInt(slotId.slice(1), 10);
-  if (!Number.isFinite(parsedSlotNumber)) return null;
-  if (parsedSlotNumber < 0) return null;
-  return parsedSlotNumber;
-}
-
-function detectSlotNumberingOffset(parsedSlotNumbers: number[], totalSlots: number): number {
-  if (parsedSlotNumbers.length === 0) return 0;
-
-  const minimumSlotNumber = Math.min(...parsedSlotNumbers);
-  const maximumSlotNumber = Math.max(...parsedSlotNumbers);
-
-  const isZeroBasedContiguousRange =
-    minimumSlotNumber === 0 && maximumSlotNumber === totalSlots - 1;
-
-  return isZeroBasedContiguousRange ? 1 : 0;
-}
-
-function deriveSlotNumbers(slots: Slot[]): SlotWithDerivedNumber[] {
-  const parsedSlotNumbers = slots
-    .map((slot) => parseSlotNumber(slot.id))
-    .filter((parsedSlotNumber): parsedSlotNumber is number => parsedSlotNumber !== null);
-
-  const slotNumberingOffset = detectSlotNumberingOffset(parsedSlotNumbers, slots.length);
-
-  return slots.flatMap((slot) => {
-    const parsedSlotNumber = parseSlotNumber(slot.id);
-    if (parsedSlotNumber === null) return [];
-    return [
-      {
-        slot,
-        derivedSlotNumber: parsedSlotNumber + slotNumberingOffset,
-      },
-    ];
-  });
-}
 
 function calculateLayoutSizing(firstRoundSize: number): LayoutSizing {
   const scaleFactor = (firstRoundSize - 8) / 24;
@@ -89,159 +41,149 @@ function calculateLayoutSizing(firstRoundSize: number): LayoutSizing {
   const slotHeight = 34 - scaleFactor * 12;
   const verticalGap = 14 - scaleFactor * 8;
   const horizontalGap = 40 - scaleFactor * 14;
-  const verticalPitch = slotHeight + verticalGap;
 
   return {
     slotWidth,
     slotHeight,
     verticalGap,
     horizontalGap,
-    verticalPitch,
+    verticalPitch: slotHeight + verticalGap,
     padding: 4,
   };
+}
+
+/** Backend layout: ids are array indices; first round is the highest ids (slice tail). */
+function getBracketCellForSlotId(
+  slotId: number,
+  firstRoundSize: number,
+): { roundIndex: number; indexWithinRound: number } {
+  let roundIndex = 0;
+  let firstSlotIdInRound = firstRoundSize - 1;
+  let slotCountInRound = firstRoundSize;
+
+  while (slotId < firstSlotIdInRound) {
+    roundIndex += 1;
+    slotCountInRound /= 2;
+    firstSlotIdInRound -= slotCountInRound;
+  }
+
+  return { roundIndex, indexWithinRound: slotId - firstSlotIdInRound };
 }
 
 function buildRoundCenters(
   firstRoundSize: number,
   totalRounds: number,
   layoutSizing: LayoutSizing,
-): RoundCenter[][] {
-  const roundCenters: RoundCenter[][] = [];
-
-  roundCenters[0] = Array.from({ length: firstRoundSize }, (_, index) => ({
-    x: layoutSizing.padding + layoutSizing.slotWidth / 2,
-    y: layoutSizing.padding + index * layoutSizing.verticalPitch + layoutSizing.slotHeight / 2,
-  }));
+): { x: number; y: number }[][] {
+  const centersByRound: { x: number; y: number }[][] = [
+    Array.from({ length: firstRoundSize }, (_, rowIndex) => ({
+      x: layoutSizing.padding + layoutSizing.slotWidth / 2,
+      y:
+        layoutSizing.padding +
+        rowIndex * layoutSizing.verticalPitch +
+        layoutSizing.slotHeight / 2,
+    })),
+  ];
 
   for (let roundIndex = 1; roundIndex <= totalRounds; roundIndex++) {
-    const previousRoundCenters = roundCenters[roundIndex - 1]!;
-    const currentRoundCenters: RoundCenter[] = [];
+    const previousRound = centersByRound[roundIndex - 1]!;
+    const columnX =
+      layoutSizing.padding +
+      roundIndex * (layoutSizing.slotWidth + layoutSizing.horizontalGap) +
+      layoutSizing.slotWidth / 2;
 
-    for (let index = 0; index < previousRoundCenters.length; index += 2) {
-      currentRoundCenters.push({
-        x:
-          layoutSizing.padding +
-          roundIndex * (layoutSizing.slotWidth + layoutSizing.horizontalGap) +
-          layoutSizing.slotWidth / 2,
-        y: (previousRoundCenters[index]!.y + previousRoundCenters[index + 1]!.y) / 2,
-      });
-    }
-
-    roundCenters[roundIndex] = currentRoundCenters;
+    centersByRound.push(
+      Array.from({ length: previousRound.length / 2 }, (__, pairIndex) => {
+        const top = previousRound[pairIndex * 2]!;
+        const bottom = previousRound[pairIndex * 2 + 1]!;
+        return { x: columnX, y: (top.y + bottom.y) / 2 };
+      }),
+    );
   }
 
-  return roundCenters;
+  return centersByRound;
 }
 
-function calculateRoundIndex(derivedSlotNumber: number, totalRounds: number): number {
-  return totalRounds - Math.floor(Math.log2(derivedSlotNumber));
-}
+export function calculateSlotPositions(slots: Slot[]): TournamentLayout {
+  if (slots.length === 0) {
+    return {
+      slotWithPositions: [],
+      connectors: [],
+      viewBox: "0 0 1 1",
+      aspectRatio: 1,
+    };
+  }
 
-function calculateIntrinsicDimensions(
-  firstRoundSize: number,
-  totalRounds: number,
-  layoutSizing: LayoutSizing,
-): { width: number; height: number } {
+  const firstRoundSize = (slots.length + 1) / 2;
+  const totalRounds = Math.log2(firstRoundSize);
+  const layoutSizing = calculateLayoutSizing(firstRoundSize);
+  const roundCenters = buildRoundCenters(firstRoundSize, totalRounds, layoutSizing);
+
   const roundColumnCount = totalRounds + 1;
-  const intrinsicWidth =
+  const layoutWidth =
     roundColumnCount * layoutSizing.slotWidth +
     (roundColumnCount - 1) * layoutSizing.horizontalGap +
     layoutSizing.padding * 2;
-  const intrinsicHeight =
+  const layoutHeight =
     firstRoundSize * layoutSizing.slotHeight +
     (firstRoundSize - 1) * layoutSizing.verticalGap +
     layoutSizing.padding * 2;
 
-  return { width: intrinsicWidth, height: intrinsicHeight };
-}
+  function widthAsPercent(pixels: number) {
+    return (pixels / layoutWidth) * 100;
+  }
+  function heightAsPercent(pixels: number) {
+    return (pixels / layoutHeight) * 100;
+  }
 
-export function calculateSlotPositions(slots: Slot[]): TournamentLayout {
-  const empty: TournamentLayout = {
-    slotWithPositions: [],
-    connectors: [],
-    viewBox: "0 0 1 1",
-    aspectRatio: 1,
-  };
-
-  if (slots.length === 0) return empty;
-
-  const slotsWithDerivedNumbers = deriveSlotNumbers(slots);
-  if (slotsWithDerivedNumbers.length === 0) return empty;
-
-  const firstRoundSize = (slotsWithDerivedNumbers.length + 1) / 2;
-  const totalRounds = Math.log2(firstRoundSize);
-  const layoutSizing = calculateLayoutSizing(firstRoundSize);
-  const roundCenters = buildRoundCenters(firstRoundSize, totalRounds, layoutSizing);
-  const intrinsicDimensions = calculateIntrinsicDimensions(
-    firstRoundSize,
-    totalRounds,
-    layoutSizing,
-  );
-
-  const positionByDerivedSlotNumber = new Map<number, PositionedSlot>();
   const slotWithPositions: SlotWithPosition[] = [];
+  const centerBySlotId = new Map<number, CenterAndRound>();
 
-  for (const slotWithDerivedNumber of slotsWithDerivedNumbers) {
-    const roundIndex = calculateRoundIndex(
-      slotWithDerivedNumber.derivedSlotNumber,
-      totalRounds,
+  for (const slot of slots) {
+    const { roundIndex, indexWithinRound } = getBracketCellForSlotId(
+      slot.id,
+      firstRoundSize,
     );
-    const firstSlotNumberInRound = Math.pow(2, totalRounds - roundIndex);
-    const indexWithinRound =
-      slotWithDerivedNumber.derivedSlotNumber - firstSlotNumberInRound;
-
     const center = roundCenters[roundIndex]?.[indexWithinRound];
     if (!center) continue;
 
     const topLeftX = center.x - layoutSizing.slotWidth / 2;
     const topLeftY = center.y - layoutSizing.slotHeight / 2;
 
-    const slotWithPosition: SlotWithPosition = {
-      slot: slotWithDerivedNumber.slot,
-      x: (topLeftX / intrinsicDimensions.width) * 100,
-      y: (topLeftY / intrinsicDimensions.height) * 100,
-      width: (layoutSizing.slotWidth / intrinsicDimensions.width) * 100,
-      height: (layoutSizing.slotHeight / intrinsicDimensions.height) * 100,
-      fontSize:
-        (layoutSizing.slotHeight * 0.55 / intrinsicDimensions.height) * 100,
-    };
+    slotWithPositions.push({
+      slot,
+      x: widthAsPercent(topLeftX),
+      y: heightAsPercent(topLeftY),
+      width: widthAsPercent(layoutSizing.slotWidth),
+      height: heightAsPercent(layoutSizing.slotHeight),
+      fontSize: heightAsPercent(layoutSizing.slotHeight * 0.55),
+    });
 
-    slotWithPositions.push(slotWithPosition);
-    positionByDerivedSlotNumber.set(slotWithDerivedNumber.derivedSlotNumber, {
+    centerBySlotId.set(slot.id, {
       centerX: center.x,
       centerY: center.y,
-      slotWithPosition,
+      roundIndex,
     });
   }
 
+  const halfSlotWidth = layoutSizing.slotWidth / 2;
+  const halfHorizontalGap = layoutSizing.horizontalGap / 2;
   const connectors: Connector[] = [];
 
-  for (const slotWithDerivedNumber of slotsWithDerivedNumbers) {
-    const roundIndex = calculateRoundIndex(
-      slotWithDerivedNumber.derivedSlotNumber,
-      totalRounds,
-    );
-    if (roundIndex === 0) continue;
+  for (const slot of slots) {
+    const parent = centerBySlotId.get(slot.id);
+    if (!parent || parent.roundIndex === 0) continue;
 
-    const parentPosition = positionByDerivedSlotNumber.get(
-      slotWithDerivedNumber.derivedSlotNumber,
-    );
-    const leftChildPosition = positionByDerivedSlotNumber.get(
-      slotWithDerivedNumber.derivedSlotNumber * 2,
-    );
-    const rightChildPosition = positionByDerivedSlotNumber.get(
-      slotWithDerivedNumber.derivedSlotNumber * 2 + 1,
-    );
+    const leftChild = centerBySlotId.get(slot.id * 2 + 1);
+    const rightChild = centerBySlotId.get(slot.id * 2 + 2);
+    if (!leftChild || !rightChild) continue;
 
-    if (!parentPosition || !leftChildPosition || !rightChildPosition) continue;
-
-    for (const childPosition of [leftChildPosition, rightChildPosition]) {
-      const childRightX = childPosition.centerX + layoutSizing.slotWidth / 2;
-      const parentLeftX = parentPosition.centerX - layoutSizing.slotWidth / 2;
-      const middleConnectorX = childRightX + layoutSizing.horizontalGap / 2;
-
+    const parentLeftX = parent.centerX - halfSlotWidth;
+    for (const child of [leftChild, rightChild]) {
+      const childRightX = child.centerX + halfSlotWidth;
+      const middleConnectorX = childRightX + halfHorizontalGap;
       connectors.push({
-        path: `M ${childRightX} ${childPosition.centerY} H ${middleConnectorX} V ${parentPosition.centerY} H ${parentLeftX}`,
+        path: `M ${childRightX} ${child.centerY} H ${middleConnectorX} V ${parent.centerY} H ${parentLeftX}`,
       });
     }
   }
@@ -249,7 +191,7 @@ export function calculateSlotPositions(slots: Slot[]): TournamentLayout {
   return {
     slotWithPositions,
     connectors,
-    viewBox: `0 0 ${intrinsicDimensions.width} ${intrinsicDimensions.height}`,
-    aspectRatio: intrinsicDimensions.width / intrinsicDimensions.height,
+    viewBox: `0 0 ${layoutWidth} ${layoutHeight}`,
+    aspectRatio: layoutWidth / layoutHeight,
   };
 }

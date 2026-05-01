@@ -3,11 +3,11 @@ import http from "node:http";
 import type { AllData } from "../../shared/domain.js";
 import { createMongoDbService } from "./services/mongo-db.service.js";
 import { createWebSocketService } from "./services/websockets.service.js";
-import { poolCompConfig } from "../../shared/domain.js";
+import { poolCompConfig } from "../../shared/poolCompConfig.js";
 import { createBackendService } from "./services/backend.service.js";
 import { serverConfig } from "./config.js";
-import { MessageFromFrontendName, MessageHandlerData, MessageToBackend } from "../../shared/messageToBackend.js";
-import { MessagesFromFrontend, messagesFromFrontend } from "./messages-from-frontend/messages-from-frontend.js";
+import { MessageToBackend } from "../../shared/messageToBackend.js";
+import { messagesFromFrontend } from "./messages-from-frontend/messages-from-frontend.js";
 
 async function bootstrap(): Promise<void> {
   const app = express();

@@ -6,7 +6,7 @@ type Props = {
   onSelect: () => void;
 };
 
-export function Slot({ slotWithPosition, onSelect }: Props) {
+export function SlotElement({ slotWithPosition, onSelect }: Props) {
   const { players } = useAppContext();
   const { slot, x, y, width, height, fontSize } = slotWithPosition;
 

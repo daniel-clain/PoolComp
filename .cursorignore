@@ -3,3 +3,5 @@
 docs/archive/
 frontend/archive/
 !**/.env
+
+**/ignore-me/**

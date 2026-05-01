@@ -1,5 +1,6 @@
 @use "../../../../variables.scss" as *;
 @use "sass:color";
+@use "../../../../mixins.scss" as *;
 
 tournament-structure {
   display: flex;
@@ -16,10 +17,8 @@ tournament-structure {
     position: relative;
     container-type: size;
     width: min(100cqw, calc(var(--tournament-structure-aspect-ratio) * 100cqh));
-    height: min(
-      100cqh,
-      calc(100cqw / var(--tournament-structure-aspect-ratio))
-    );
+    height: min(100cqh,
+        calc(100cqw / var(--tournament-structure-aspect-ratio)));
 
     svg {
       position: absolute;
@@ -72,25 +71,18 @@ tournament-structure {
       backdrop-filter: blur(8px);
       border: 1px solid rgba(255, 255, 255, 0.15);
       border-radius: 0.3cqh;
-      overflow: hidden;
+      overflow: auto;
+      @include cq-responsive((max-height: 40));
 
       button {
-        display: block;
-        width: 100%;
-        text-align: left;
-        padding: 0.4cqh 0.6cqw;
-        font-size: inherit;
         border: none;
-        background: transparent;
-        color: #f0f0f0;
-        cursor: pointer;
+        text-align: left;
+        @include cq-responsive((padding: 1.6));
+        border-bottom: 1px solid $color-dark-border;
+        min-width: 12cqw;
 
-        &:hover {
-          background: rgba(255, 255, 255, 0.12);
-        }
-
-        & + button {
-          border-top: 1px solid rgba(255, 255, 255, 0.1);
+        &:last-child {
+          border-bottom: none;
         }
       }
     }

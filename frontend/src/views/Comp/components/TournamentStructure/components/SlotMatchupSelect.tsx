@@ -8,13 +8,13 @@ import type { Slot } from "../../../../../../../shared/domain";
 
 
 type Props = {
-  slotWithPosition: SlotWithPosition;
+  selectedSlot: SlotWithPosition;
   onClose: () => void;
   slots: Slot[];
 };
 
-export function SlotMatchupSelect({ slotWithPosition, onClose, slots }: Props) {
-  const { players, send } = useAppContext();
+export function SlotMatchupSelect({ selectedSlot, onClose, slots }: Props) {
+  const { activePoolComp, send } = useAppContext();
   const panelRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
@@ -28,15 +28,15 @@ export function SlotMatchupSelect({ slotWithPosition, onClose, slots }: Props) {
   }, [onClose]);
 
   const choices = getPlayerChoicesForSlot(
-    slotWithPosition.slot.id,
+    selectedSlot.slot,
     slots,
-    players,
+    activePoolComp?.registeredPlayers!,
   );
 
   if (choices.length === 0) return null;
 
   function handlePick(playerId: string) {
-    send(['manualAssignPlayerToSlot', { slotId: slotWithPosition.slot.id, playerId }]);
+    send(['manualAssignPlayerToSlot', { slotId: selectedSlot.slot.id, playerId }]);
     onClose();
   }
 
@@ -44,14 +44,13 @@ export function SlotMatchupSelect({ slotWithPosition, onClose, slots }: Props) {
     <slot-matchup-select
       ref={panelRef}
       style={{
-        left: `${slotWithPosition.x}cqw`,
-        top: `${slotWithPosition.y + slotWithPosition.height + 0.5}cqh`,
-        width: `${slotWithPosition.width}cqw`,
+        left: `${selectedSlot.x}cqw`,
+        top: `${selectedSlot.y + selectedSlot.height + 0.5}cqh`
       }}
     >
       {choices.map((choice) => (
-        <button key={choice.playerId} onClick={() => handlePick(choice.playerId)}>
-          {choice.playerName}
+        <button key={choice.id} onClick={() => handlePick(choice.id)}>
+          {choice.name}
         </button>
       ))}
     </slot-matchup-select>

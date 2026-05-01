@@ -4,6 +4,7 @@
 comp-players {
   display: flex;
   flex: 1;
+  overflow: auto;
 
   @include cq-responsive((gap: 2,
     ));

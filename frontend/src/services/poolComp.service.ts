@@ -1,57 +1,34 @@
 import type { RefObject } from "react";
 import {
-  poolCompConfig,
   type Player,
   type RegisteredPlayer,
   type Slot,
 } from "../../../shared/domain";
 
 import type { MessageToBackend } from "../../../shared/messageToBackend";
+import { poolCompConfig } from "../../../shared/poolCompConfig";
+import { getSlotSourceMatchup } from "../../../shared/tournament-slot.service";
 
+export function canSetSlot(slot: Slot, slots: Slot[]): boolean {
 
-export type SlotPlayerChoice = {
-  playerId: string;
-  playerName: string;
-};
+  const sourceMatchup = getSlotSourceMatchup(slot, slots)
 
-
-export function canSelectWinnerForSlot(slotId: string, slots: Slot[]): boolean {
-  const slot = slots.find((candidate) => candidate.id === slotId);
-  if (!slot || slot.playerId === undefined) return false;
-
-  const slotNumber = parseInt(slotId.slice(1));
-  const leftChild = slots.find(
-    (candidate) => candidate.id === `s${slotNumber * 2}`,
-  );
-  const rightChild = slots.find(
-    (candidate) => candidate.id === `s${slotNumber * 2 + 1}`,
-  );
-  if (!leftChild || !rightChild) return false;
-
-  return leftChild.playerId !== undefined && rightChild.playerId !== undefined;
+  return !sourceMatchup || (Boolean(sourceMatchup?.slot1.playerId) && Boolean(sourceMatchup?.slot2.playerId));
 }
 
 export function getPlayerChoicesForSlot(
-  parentSlotId: string,
+  selectedSlot: Slot,
   slots: Slot[],
-  players: Player[],
-): SlotPlayerChoice[] {
-  const parentSlotNumber = parseInt(parentSlotId.slice(1));
-  const leftChildId = `s${parentSlotNumber * 2}`;
-  const rightChildId = `s${parentSlotNumber * 2 + 1}`;
-  const leftChild = slots.find((slot) => slot.id === leftChildId);
-  const rightChild = slots.find((slot) => slot.id === rightChildId);
+  registeredPlayers: Player[],
+): Player[] {
 
-  const choices: SlotPlayerChoice[] = [];
-  for (const child of [leftChild, rightChild]) {
-    if (child?.playerId !== undefined) {
-      const player = players.find(
-        (candidate) => candidate.id === child.playerId,
-      );
-      if (player) {
-        choices.push({ playerId: player.id, playerName: player.name });
-      }
-    }
+  const sourceMatchup = getSlotSourceMatchup(selectedSlot, slots)
+
+  const choices: Player[] = [];
+  if (sourceMatchup) {
+    choices.push(...registeredPlayers.filter(p => p.id === sourceMatchup.slot1.playerId || p.id === sourceMatchup.slot2.playerId))
+  } else {
+    choices.push(...registeredPlayers)
   }
   return choices;
 }
@@ -69,33 +46,20 @@ export function countPlayersInComp(slots: Slot[]): number {
 }
 
 export function activePoolCompHasChampionPlayer(slots: Slot[]): boolean {
-  const rootSlot = slots.find((candidate) => candidate.id === "s1");
-  return rootSlot?.playerId !== undefined;
+  if (!slots.length) return false
+  const [firstPlaceSlot] = slots
+  return Boolean(firstPlaceSlot.playerId)
 }
 
 export function getFinalistPlayerIds(slots: Slot[]): {
-  firstPlaceId: string | null;
-  secondPlaceId: string | null;
+  firstPlaceId: string;
+  secondPlaceId: string;
 } {
-  const root = slots.find((slot) => slot.id === "s1");
-  if (!root || root.playerId === undefined)
-    return { firstPlaceId: null, secondPlaceId: null };
+  const [firstPlaceSlot, finalistSlot1, finalistSlot2] = slots
 
-  const firstPlaceId = root.playerId;
-  const leftChild = slots.find((slot) => slot.id === "s2");
-  const rightChild = slots.find((slot) => slot.id === "s3");
+  const secondPlaceSlot = firstPlaceSlot.playerId === finalistSlot1.playerId ? finalistSlot2 : finalistSlot1
 
-  let secondPlaceId: string | null = null;
-  if (leftChild?.playerId !== undefined && leftChild.playerId !== firstPlaceId) {
-    secondPlaceId = leftChild.playerId;
-  } else if (
-    rightChild?.playerId !== undefined &&
-    rightChild.playerId !== firstPlaceId
-  ) {
-    secondPlaceId = rightChild.playerId;
-  }
-
-  return { firstPlaceId, secondPlaceId };
+  return { firstPlaceId: firstPlaceSlot.playerId!, secondPlaceId: secondPlaceSlot.playerId! };
 }
 
 export function calculatePrizeMoneyFromPlayerCount(
@@ -131,4 +95,23 @@ export function createPoolCompService(
     send,
     calculateFirstPrizeMoney,
   };
+}
+export function tournamentHasStarted(tournamentSlots: Slot[]): boolean {
+  if (tournamentSlots.length === 0) {
+    return false;
+  }
+  const firstRoundWidth = (tournamentSlots.length + 1) / 2;
+  const firstRoundStart = tournamentSlots.length - firstRoundWidth;
+  for (let i = 0; i < firstRoundWidth; i = i + 2) {
+    const left = tournamentSlots[firstRoundStart + i]!;
+    const right = tournamentSlots[firstRoundStart + i + 1]!;
+    if (left.playerId && right.playerId) {
+      const leftIndex = firstRoundStart + i;
+      const parentIndex = Math.floor((leftIndex - 1) / 2);
+      if (tournamentSlots[parentIndex]!.playerId) {
+        return true;
+      }
+    }
+  }
+  return false;
 }

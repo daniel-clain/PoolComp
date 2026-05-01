@@ -5,7 +5,8 @@ import leavesImage from "../../assets/crossleaves.png";
 import crownImage from "../../assets/crown.png";
 import { ScalingImage } from "../../components/ScalingImage/ScalingImage";
 import { TabBar } from "../../components/TabBar/TabBar";
-import { activePoolCompHasChampionPlayer } from "../../services/poolComp.service";
+
+import { activePoolCompHasChampionPlayer, tournamentHasStarted } from "../../services/poolComp.service";
 import { CompPlayers } from "./components/CompPlayers/CompPlayers";
 import { TournamentStructure } from "./components/TournamentStructure/TournamentStructure";
 
@@ -33,7 +34,8 @@ export function Comp() {
 
   const completeCompDisabled = !activePoolCompHasChampionPlayer(comp.slots);
 
-  const createMatchupsDisabled = comp.registeredPlayers.length < 5
+  const randomiseMatchupsDisabled =
+    comp.registeredPlayers.length < 5 || tournamentHasStarted(comp.slots);
 
   return (
     <comp-view>
@@ -138,26 +140,26 @@ export function Comp() {
     return (
       <comp-actions>
         <TabBar
-          tabLabels={["Players", "Tournament"]}
-          selectedTabIndex={compPanel === "players" ? 0 : 1}
+          tabLabels={["Tournament", "Players"]}
+          selectedTabIndex={compPanel === "tournament" ? 0 : 1}
           onTabSelected={(selectedTabIndex) => {
             if (selectedTabIndex === 0) {
-              setCompPanel("players");
-            } else {
               setCompPanel("tournament");
+            } else {
+              setCompPanel("players");
             }
           }}
         />
         {userIsCompManager && (
           <button
             type="button"
-            disabled={createMatchupsDisabled}
+            disabled={randomiseMatchupsDisabled}
             onClick={() => {
-              send(['createMatchups']);
+              send(['randomiseMatchups']);
               setCompPanel("tournament");
             }}
           >
-            Create Matchups
+            Randomise Matchups
           </button>
         )}
       </comp-actions>
@@ -184,4 +186,5 @@ export function Comp() {
       </comp-actions-bottom>
     );
   }
+
 }

@@ -1,18 +1,15 @@
 import type { BackendService } from "../../services/backend.service.js";
-import { assignMatchups as generateMatchups } from "../../services/matchup-generation.service.js";
+import { randomiseAllMatchups } from "../../services/tournament-slot-assignment/tournament-slot-assignment.service.js";
 
-export async function createMatchups(
-  backendService: BackendService
+export async function randomiseMatchups(
+  backendService: BackendService,
 ): Promise<void> {
   const activeComp = backendService.getActiveComp();
-  const registeredPlayerIds = activeComp.registeredPlayers.map(
-    (registeredPlayer) => registeredPlayer.id,
-  );
-  const slots = generateMatchups(registeredPlayerIds, activeComp.slots);
 
+  const updatedSlots = randomiseAllMatchups(activeComp);
   await backendService.mongoDbService.activeCompCollection.updateOne(
     { id: activeComp.id },
-    { $set: { slots } },
+    { $set: { slots: updatedSlots } },
   );
   const updatedActiveComp = await backendService.mongoDbService.activeCompCollection.findOne({ id: activeComp.id })
   if (!updatedActiveComp) throw new Error("Active comp not found");

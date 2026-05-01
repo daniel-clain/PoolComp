@@ -2,21 +2,21 @@ import { useState } from "react";
 
 import type { PoolComp } from "../../../../../../shared/domain";
 import { useAppContext } from "../../../../AppContext";
-import { canSelectWinnerForSlot } from "../../../../services/poolComp.service";
+import { canSetSlot } from "../../../../services/poolComp.service";
 import {
   calculateSlotPositions,
-  type SlotWithPosition,
 } from "../../../../services/tournamentStructure.service";
 import { Connector } from "./components/Connector";
-import { Slot } from "./components/Slot";
+import { SlotElement } from "./components/Slot";
 import { SlotMatchupSelect } from "./components/SlotMatchupSelect";
+import type { Slot } from "../../../../../../shared/domain";
 
 type Props = {
   comp: PoolComp;
 };
 
 export function TournamentStructure({ comp }: Props) {
-  const [selectedSlot, setSelectedSlot] = useState<SlotWithPosition | null>(
+  const [selectedSlot, setSelectedSlot] = useState<Slot | null>(
     null,
   );
   const { userIsCompManager } = useAppContext();
@@ -28,9 +28,9 @@ export function TournamentStructure({ comp }: Props) {
   const isInteractive = !isHistoricalComp && userIsCompManager
 
 
-  function handleSlotSelect(slotWithPosition: SlotWithPosition) {
-    if (!canSelectWinnerForSlot(slotWithPosition.slot.id, comp.slots)) return;
-    setSelectedSlot(slotWithPosition);
+  function handleSlotSelect(slot: Slot) {
+    if (!canSetSlot(slot, comp.slots)) return;
+    setSelectedSlot(slot);
   }
 
   return (
@@ -48,16 +48,16 @@ export function TournamentStructure({ comp }: Props) {
           ))}
         </svg>
         {layout.slotWithPositions.map((slotWithPosition) => (
-          <Slot
+          <SlotElement
             key={slotWithPosition.slot.id}
             slotWithPosition={slotWithPosition}
-            onSelect={() => isInteractive && handleSlotSelect(slotWithPosition)}
+            onSelect={() => isInteractive && handleSlotSelect(slotWithPosition.slot)}
           />
         ))}
         {selectedSlot && (
           <SlotMatchupSelect
+            selectedSlot={layout.slotWithPositions.find(slotWithPosition => slotWithPosition.slot.id === selectedSlot.id)!}
             slots={comp.slots}
-            slotWithPosition={selectedSlot}
             onClose={() => setSelectedSlot(null)}
           />
         )}
