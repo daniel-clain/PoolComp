@@ -8,8 +8,6 @@ import type { MessageToFrontend } from "../../../shared/messageToFrontend";
 export type ConnectionStatus = "connecting" | "connected" | "disconnected";
 export type PendingAction = { requestId: string; action: MessageFromFrontendName } | null;
 
-const WS_URL = import.meta.env.VITE_WS_URL;
-
 
 export function createWebSocketService(
   onStateUpdate: (state: AllData) => void,
@@ -25,11 +23,7 @@ export function createWebSocketService(
 
   function connect() {
     onConnectionStatusChange("connecting");
-    if (!WS_URL) {
-      console.error("VITE_WS_URL is not configured in .env file.");
-      return;
-    }
-    socket = new WebSocket(WS_URL);
+    socket = new WebSocket(getWebSocketUrl());
 
     socket.addEventListener("open", () => {
       connected = true;
@@ -85,4 +79,16 @@ export function createWebSocketService(
 
 
   return { send, closeConnection, connected };
+
+  function getWebSocketUrl(): string {
+    const configuredWebSocketUrl = import.meta.env.VITE_WS_URL;
+    if (configuredWebSocketUrl) {
+      return configuredWebSocketUrl;
+    }
+
+    const webSocketProtocol =
+      window.location.protocol === "https:" ? "wss:" : "ws:";
+    return `${webSocketProtocol}//${window.location.host}/ws`;
+  }
+
 }

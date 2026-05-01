@@ -1,13 +1,16 @@
 import express from "express";
 import http from "node:http";
+import path from "node:path";
 import type { AllData } from "../../shared/domain.js";
+import { MessageToBackend } from "../../shared/messageToBackend.js";
+import { poolCompConfig } from "../../shared/poolCompConfig.js";
+import { messagesFromFrontend } from "./messages-from-frontend/messages-from-frontend.js";
+import { createBackendService } from "./services/backend.service.js";
 import { createMongoDbService } from "./services/mongo-db.service.js";
 import { createWebSocketService } from "./services/websockets.service.js";
-import { poolCompConfig } from "../../shared/poolCompConfig.js";
-import { createBackendService } from "./services/backend.service.js";
-import { serverConfig } from "./config.js";
-import { MessageToBackend } from "../../shared/messageToBackend.js";
-import { messagesFromFrontend } from "./messages-from-frontend/messages-from-frontend.js";
+
+const serverPort = 3000;
+const frontendDistributionPath = path.resolve(process.cwd(), "../frontend/dist");
 
 async function bootstrap(): Promise<void> {
   const app = express();
@@ -64,9 +67,15 @@ async function bootstrap(): Promise<void> {
 
     actionQueue = null;
   })
-  httpServer.listen(serverConfig.port, () => {
+
+  app.use(express.static(frontendDistributionPath));
+  app.get("/{*frontendPath}", (_request, response) => {
+    response.sendFile(path.join(frontendDistributionPath, "index.html"));
+  });
+
+  httpServer.listen(serverPort, () => {
     console.log(
-      `PoolComp backend listening on http://localhost:${serverConfig.port}`,
+      `PoolComp backend listening on http://localhost:${serverPort}`,
     );
   });
 }

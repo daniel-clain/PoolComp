@@ -7,8 +7,7 @@
     "debug": "tsx watch --inspect src/index.ts",
     "build": "tsc -p tsconfig.json",
     "start": "node dist/backend/src/index.js",
-    "test": "vitest run",
-    "test:legacy": "tsx src/main.test.ts"
+    "test": "vitest run"
   },
   "keywords": [],
   "author": "",
