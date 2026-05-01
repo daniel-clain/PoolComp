@@ -5,7 +5,7 @@ import type {
   Player,
   PoolComp,
 } from "../../../shared/domain.js";
-import { poolCompConfig } from "../../../shared/domain.js";
+import { poolCompConfig } from "../../../shared/poolCompConfig.js";
 import { serverConfig } from "../config.js";
 import { orderBy } from "lodash";
 

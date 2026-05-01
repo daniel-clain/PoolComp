@@ -1,5 +1,4 @@
-import type { Matchup, Slot } from "./domain";
-
+import type { Matchup, Slot } from "./domain.js";
 
 export function getSlotSourceMatchup(slot: Slot, tournamentSlots: Slot[]): Matchup | undefined {
     const [slot1, slot2] = tournamentSlots.filter(s => s.id === slot.id * 2 + 1 || s.id === slot.id * 2 + 2)
