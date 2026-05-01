@@ -1,5 +1,5 @@
 import type { ActivePoolComp, Slot } from "../../../../shared/domain.js";
-import { poolCompConfig } from "../../../../shared/poolCompConfig.js";
+
 import {
   getFirstRoundSize,
   getTournamentSlotsFromFirstRoundSize,

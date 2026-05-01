@@ -3,7 +3,7 @@ import type { ActivePoolComp, AllData, Player } from "../../../shared/domain.js"
 import type { MongoDbService } from "./mongo-db.service.js";
 import type { WebSocketService } from "./websockets.service.js";
 import type { RegisteredPlayer } from "../../../shared/domain.js";
-import { MessageToFrontend } from "../../../shared/messageToFrontend.js";
+import type { MessageToFrontend } from "../../../shared/messageToFrontend.js";
 import { WebSocket } from "ws";
 import _ from "lodash";
 

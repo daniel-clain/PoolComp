@@ -2,9 +2,6 @@ import { WebSocket, WebSocketServer } from "ws";
 
 import { Subject } from "rxjs";
 import http from "node:http";
-import { MessageToBackend } from "../../../shared/messageToBackend.js";
-
-
 
 
 export function createWebSocketService(httpServer: http.Server) {

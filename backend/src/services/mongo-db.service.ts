@@ -1,13 +1,13 @@
-import { Collection, MongoClient, type Db } from "mongodb";
+import { MongoClient, type Db } from "mongodb";
 import type {
   ActivePoolComp,
   AllData,
   Player,
   PoolComp,
 } from "../../../shared/domain.js";
-import { poolCompConfig } from "../../../shared/poolCompConfig.js";
+
 import { serverConfig } from "../config.js";
-import { orderBy } from "lodash";
+
 
 export type Repository = {
   load(): Promise<AllData>;
