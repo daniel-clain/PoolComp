@@ -8,8 +8,8 @@ export function ScalingImage({
   className?: string;
 }) {
   return (
-    <scaling-image id={id}>
-      <img src={src} className={className} />
+    <scaling-image id={id} className={className}>
+      <img src={src} />
     </scaling-image>
   );
 }

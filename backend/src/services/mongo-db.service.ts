@@ -6,15 +6,6 @@ import type {
   PoolComp,
 } from "../../../shared/domain.js";
 
-function getMongoConnectionString(): string {
-  const value = process.env.MONGODB_URI;
-  if (!value) {
-    throw new Error("Missing required environment variable: MONGODB_URI");
-  }
-  return value;
-}
-
-
 export type Repository = {
   load(): Promise<AllData>;
   ensureIndexes(): Promise<void>;
@@ -41,7 +32,11 @@ export async function createMongoDbService() {
   return { playersCollection, activeCompCollection, compHistoryCollection, getAllData }
 
   async function connectToDatabase(): Promise<Db> {
-    const client = new MongoClient(getMongoConnectionString());
+    const mongoConnectionString = process.env.MONGODB_URI;
+    if (mongoConnectionString === undefined) {
+      throw new Error("Missing required environment variable: MONGODB_URI");
+    }
+    const client = new MongoClient(mongoConnectionString);
 
     const MAX_RETRIES = 5;
     const BASE_DELAY_MS = 1000;

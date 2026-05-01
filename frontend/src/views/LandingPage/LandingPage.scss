@@ -6,33 +6,27 @@
   0% {
     background-position: -200% center;
   }
+
   100% {
     background-position: 200% center;
   }
 }
 
-home-view {
-  @include cq-responsive(
-    (
-      padding-top: 8,
-    )
-  );
+landing-view {
+  @include cq-responsive((padding-top: 8,
+    ));
 
   button {
-    position: relative;
-    z-index: 1;
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.04em;
     cursor: pointer;
-    background: linear-gradient(
-      110deg,
-      $color-button-active-bg 0%,
-      $color-button-active-bg 30%,
-      color.adjust($color-button-active-bg, $lightness: 18%) 50%,
-      $color-button-active-bg 70%,
-      $color-button-active-bg 100%
-    );
+    background: linear-gradient(110deg,
+        $color-button-active-bg 0%,
+        $color-button-active-bg 30%,
+        color.adjust($color-button-active-bg, $lightness: 18%) 50%,
+        $color-button-active-bg 70%,
+        $color-button-active-bg 100%);
     background-size: 200% 100%;
     animation: shimmer 3s ease-in-out infinite;
     box-shadow:
@@ -41,15 +35,12 @@ home-view {
     transition:
       box-shadow 0.3s,
       transform 0.15s;
+    align-self: center;
 
-    @include cq-responsive(
-      (
-        font-size: 8,
+    @include cq-responsive((font-size: 8,
         padding: 4 10,
         border-radius: 2,
-        border-width: 0.4,
-      )
-    );
+      ));
 
     &:hover {
       box-shadow:

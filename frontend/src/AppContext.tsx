@@ -10,6 +10,8 @@ import {
   type AllData,
   type PoolComp,
 } from "../../shared/domain";
+import type { MessageToBackend } from "../../shared/messageToBackend";
+import { poolCompConfig } from "../../shared/poolCompConfig";
 import { useOrientation } from "./hooks/useOrientation";
 import type { ModalState } from "./services/modal.service";
 import { createPoolCompService } from "./services/poolComp.service";
@@ -17,10 +19,9 @@ import type {
   ConnectionStatus,
 } from "./services/websockets.service";
 import { createWebSocketService } from "./services/websockets.service";
-import type { MessageToBackend } from "../../shared/messageToBackend";
-import { poolCompConfig } from "../../shared/poolCompConfig";
 
 export type View = "Pool Comp" | "Players" | "Comp History";
+export type CompPanel = "players" | "tournament";
 
 type AppContextValue = AllData &
   ReturnType<typeof createPoolCompService> & {
@@ -37,6 +38,8 @@ type AppContextValue = AllData &
     viewHistoricalComp: (comp: PoolComp) => void;
     clearHistoricalComp: () => void;
     actionInProgress: boolean;
+    compPanel: CompPanel;
+    setCompPanel: (compPanel: CompPanel) => void;
   };
 
 const AppContext = createContext<AppContextValue | undefined>(undefined);
@@ -56,6 +59,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [activeHistoricalComp, setActiveHistoricalComp] =
     useState<PoolComp | null>(null);
   const [actionInProgress, setActionInProgress] = useState(false);
+  const [compPanel, setCompPanel] = useState<CompPanel>("players");
 
   const isCompManager = localStorage.getItem('userIsCompManager') === 'true'
 
@@ -122,6 +126,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
         viewHistoricalComp,
         clearHistoricalComp,
         actionInProgress,
+        compPanel,
+        setCompPanel,
         userIsCompManager,
         setUserIsCompManager,
         ...poolCompService,

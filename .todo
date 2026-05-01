@@ -1,5 +1,6 @@
 personal remember list:
-    ☐ handle when multiple actions are sent faster than backend can process
+    ☐ Handle when someone tries to add a player to a comp that already has match up results, cover edge case scenarios
+    ☐ Add features for monthly second chance comp
     ☐ make sure ui components dont have more nesting elements than necessary
     ☐ 32 first round slots on landscape squashes the tournament too small, the layout for portrait should changs so that there are 16 first rounds on the left and 16 on the right. or should do a playin concept if theres only a few over 16
 

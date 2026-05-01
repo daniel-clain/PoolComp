@@ -11,26 +11,20 @@ view-container {
     container-type: size;
     flex-direction: column;
     box-sizing: border-box;
-    @include cq-responsive(
-      (
-        left: $frame-width,
+    @include cq-responsive((left: $frame-width,
         right: $frame-width,
         top: $frame-width,
         bottom: $frame-width,
         padding: 6 4,
-      )
-    );
+      ));
 
-    & > * {
+    &>* {
       width: 100cqw;
       height: 100cqh;
       display: flex;
       flex-direction: column;
-      @include cq-responsive(
-        (
-          gap: 4,
-        )
-      );
+      @include cq-responsive((gap: 6,
+        ));
     }
   }
 }

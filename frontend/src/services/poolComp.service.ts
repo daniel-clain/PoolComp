@@ -21,16 +21,14 @@ export function getPlayerChoicesForSlot(
   slots: Slot[],
   registeredPlayers: Player[],
 ): Player[] {
-
   const sourceMatchup = getSlotSourceMatchup(selectedSlot, slots)
+  if (!sourceMatchup) return registeredPlayers;
 
-  const choices: Player[] = [];
-  if (sourceMatchup) {
-    choices.push(...registeredPlayers.filter(p => p.id === sourceMatchup.slot1.playerId || p.id === sourceMatchup.slot2.playerId))
-  } else {
-    choices.push(...registeredPlayers)
-  }
-  return choices;
+  return [sourceMatchup.slot1.playerId, sourceMatchup.slot2.playerId]
+    .map((playerId) =>
+      registeredPlayers.find((registeredPlayer) => registeredPlayer.id === playerId),
+    )
+    .filter((player): player is Player => Boolean(player));
 }
 
 export function countPlayersInComp(slots: Slot[]): number {

@@ -1,16 +1,14 @@
-import { useState } from "react";
 import { useAppContext } from "../../AppContext";
 import ballImage from "../../assets/8ball.png";
 import leavesImage from "../../assets/crossleaves.png";
 import crownImage from "../../assets/crown.png";
+import diningVoucherImage from "../../assets/dining-voucher.jpg";
 import { ScalingImage } from "../../components/ScalingImage/ScalingImage";
 import { TabBar } from "../../components/TabBar/TabBar";
 
 import { activePoolCompHasChampionPlayer, tournamentHasStarted } from "../../services/poolComp.service";
 import { CompPlayers } from "./components/CompPlayers/CompPlayers";
 import { TournamentStructure } from "./components/TournamentStructure/TournamentStructure";
-
-type CompPanel = "players" | "tournament";
 
 export function Comp() {
   const {
@@ -21,21 +19,21 @@ export function Comp() {
     calculateFirstPrizeMoney,
     send,
     userIsCompManager,
+    compPanel,
+    setCompPanel,
   } = useAppContext();
 
   const comp = activePoolComp!;
-
-  const [compPanel, setCompPanel] = useState<CompPanel>("players");
 
   const firstPrizeMoney =
     !activeHistoricalComp && comp
       ? calculateFirstPrizeMoney(comp.registeredPlayers)
       : null;
 
-  const completeCompDisabled = !activePoolCompHasChampionPlayer(comp.slots);
+  const completeCompDisabled = Boolean(activeHistoricalComp) || !activePoolCompHasChampionPlayer(comp.slots);
 
-  const randomiseMatchupsDisabled =
-    comp.registeredPlayers.length < 5 || tournamentHasStarted(comp.slots);
+  const randomiseMatchupsDisabled = Boolean(activeHistoricalComp) ||
+    (comp.registeredPlayers.length < 5 || tournamentHasStarted(comp.slots));
 
   return (
     <comp-view>
@@ -107,11 +105,22 @@ export function Comp() {
           <text-box-label>
             <ScalingImage id="crown-image" src={crownImage} />
           </text-box-label>
-          <text-box-value>{firstPrizeMoney}</text-box-value>
+          <text-box-value>${firstPrizeMoney}</text-box-value>
         </text-box>
         <text-box>
           <text-box-label>SECOND PRIZE</text-box-label>
-          <text-box-value>$</text-box-value>
+          <text-box-images>
+            <ScalingImage
+              id="second-prize-voucher-back"
+              src={diningVoucherImage}
+              className="second-prize-voucher-image"
+            />
+            <ScalingImage
+              id="second-prize-voucher-front"
+              src={diningVoucherImage}
+              className="second-prize-voucher-image"
+            />
+          </text-box-images>
         </text-box>
         <text-box>
           <text-box-label>DATE</text-box-label>
@@ -131,7 +140,7 @@ export function Comp() {
     if (activeHistoricalComp) {
       return (
         <comp-actions>
-          <button onClick={clearHistoricalComp}>Back to Active Comp</button>
+          <button onClick={clearHistoricalComp}>Back{activePoolComp ? ` to Active Comp` : ''}</button>
         </comp-actions>
       );
     }
