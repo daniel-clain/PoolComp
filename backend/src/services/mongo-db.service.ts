@@ -1,13 +1,13 @@
 import { MongoClient, type Db } from "mongodb";
 import type {
   ActivePoolComp,
-  AllData,
+  BackendState,
   Player,
   PoolComp,
 } from "../../../shared/domain.js";
 
 export type Repository = {
-  load(): Promise<AllData>;
+  load(): Promise<BackendState>;
   ensureIndexes(): Promise<void>;
   insertPlayer(player: Player): Promise<void>;
   replacePlayerByPlayerId(playerId: string, player: Player): Promise<void>;

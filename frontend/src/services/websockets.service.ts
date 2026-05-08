@@ -1,4 +1,4 @@
-import type { AllData } from "../../../shared/domain";
+import type { BackendState } from "../../../shared/domain";
 import type {
   MessageFromFrontendName,
   MessageToBackend,
@@ -10,7 +10,7 @@ export type PendingAction = { requestId: string; action: MessageFromFrontendName
 
 
 export function createWebSocketService(
-  onStateUpdate: (state: AllData) => void,
+  onStateUpdate: (state: BackendState) => void,
   onActionInProgress: (actionInProgress: boolean) => void,
   onConnectionStatusChange: (status: ConnectionStatus) => void,
 ) {
@@ -35,6 +35,7 @@ export function createWebSocketService(
       const { message, data }: MessageToFrontend = JSON.parse(event.data);
       switch (message) {
         case "allData": {
+          console.log('data?.activePoolComp?.slots', data?.activePoolComp?.slots)
           console.log("slots:", data?.activePoolComp?.slots.map(s => ({ slotId: s.id, player: data?.activePoolComp?.registeredPlayers.find(p => p.id == s.playerId)?.name })));
           onStateUpdate(data);
           break;

@@ -1,9 +1,59 @@
-personal remember list:
+important:
+    ☐ rework how registered players are added
+        ~ only auto add after initial assignment
+        ~ tournament size grows based on number of registered players, but doenst add them
+        ~ comp has state checkmark that affect allowed actions
+    
     ☐ Handle when someone tries to add a player to a comp that already has match up results, cover edge case scenarios
-    ☐ Add features for monthly second chance comp
+        ~ adding players becomes disabled from shared function
+
+
+
+
+minor:
+    ☐ non manager users only see registered players, not all players
+    ☐ on new comp, active tab is players
+    ☐ historical comp title too lage on landscape
+    ☐ should show prize money on historical comp
     ☐ make sure ui components dont have more nesting elements than necessary
+    ☐ remove players needs a confirm
+
+
+precautionary:
+    ☐ establish/verify that db can be queried in an efficient way
+      ~ dont make a solution for somethinga thats not a problem
+          ~ if i want player with most all time wins, and data goes 3 years, does is pull every comp for 3 years, is that bad, does it take ages, does is cost usage
+
+    ☐ deleting historical data must not be possible, brainstom any obscure edge cases posibilites, make sure the list of scenarios is minimal controlled and secure
+      ~ mongo is only repo, if its lost its all gone, see if there is backup mechanism for mongo
+
+time consuming:
+    ☐ Add features for monthly second chance comp
     ☐ 32 first round slots on landscape squashes the tournament too small, the layout for portrait should changs so that there are 16 first rounds on the left and 16 on the right. or should do a playin concept if theres only a few over 16
+    ☐ view for reporting, shows interesting stats based on all collected data
+    ☐ on beaking changes the reporting doesnt just reset and forget prebreaking changes, it has more complex logic to deal with it
+      ~ base context is the date of each breaking change
+      ~ it knows what report data is/isnt affect by that change
+      ~ it show 2 different reports, one for the prebreaking change and one for the postbreaking change
+      ~ breaking change data object stored in the codebase, describing what changed, so the algorithm can refernce the data obj for its logic
+
+
+nice to have:
+    ☐ manager send alert that their game is coming up or on
+    ☐ app does coin toss for players    
+    ☐ post game 1st and 2nd photo is taken by the app and stored and shown in historical comps
 
 
 
+unsure:
+    ☐ rework concept of active comp, instead of separate until complete, auto add it to the list of historical comps
+      ~ its considered an active comp if date matches today
+      ~ its considered finalised when all the requirements are met
+        ~ what are the pros and cons
+          ~ pros:
+              ~ redundant extra data types, data collections
+              ~ if active comp is deleted, no record of it, needs to be marked as complete before stored in history
+          ~ cons:
+              ~ riskly to add delete mechanism to historical comps
+    ☐ feature for manager to enter actual money put away (vs how much should be put away), what the money that was supposed to be put asside actually put asside
 

@@ -2,7 +2,7 @@ import "dotenv/config";
 import express from "express";
 import http from "node:http";
 import path from "node:path";
-import type { AllData } from "../../shared/domain.js";
+import type { BackendState } from "../../shared/domain.js";
 import { MessageToBackend } from "../../shared/messageToBackend.js";
 import { poolCompConfig } from "../../shared/poolCompConfig.js";
 import { messagesFromFrontend } from "./messages-from-frontend/messages-from-frontend.js";
@@ -16,10 +16,11 @@ const frontendDistributionPath = path.resolve(process.cwd(), "../frontend/dist")
 async function bootstrap(): Promise<void> {
   const app = express();
   const httpServer = http.createServer(app);
-  const backendState: AllData = {
+  const backendState: BackendState = {
     players: [],
     activePoolComp: null,
     compHistory: [],
+    autoAssignPlayers: false,
     poolCompConfig: poolCompConfig,
   }
   const mongoDbService = await createMongoDbService();

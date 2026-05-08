@@ -7,7 +7,7 @@ import {
 
 import type { MessageToBackend } from "../../../shared/messageToBackend";
 import { poolCompConfig } from "../../../shared/poolCompConfig";
-import { getSlotSourceMatchup } from "../../../shared/tournament-slot.service";
+import { getFirstRoundSlotsFromAllTournamentSlots, getSlotSourceMatchup, tournamentHasHadAssignment } from "../../../shared/tournament-slot.service";
 
 export function canSetSlot(slot: Slot, slots: Slot[]): boolean {
 
@@ -65,7 +65,7 @@ export function calculatePrizeMoneyFromPlayerCount(
 ): number {
   return (
     (playerCount * poolCompConfig.buyIn) /
-    poolCompConfig.bigComp.weeklyContributionPercentage +
+    poolCompConfig.bigComp.contributionPercentage +
     poolCompConfig.barInput
   );
 }
@@ -75,41 +75,77 @@ export function createPoolCompService(
     ((message: MessageToBackend) => void) | null
   >,
 ) {
+
   function send(message: MessageToBackend) {
     sendMessageToBackendRef.current?.(message);
   }
 
-
-  function calculateFirstPrizeMoney(registeredPlayers: RegisteredPlayer[]) {
-    return (
-      (registeredPlayers.length * poolCompConfig.buyIn) /
-      poolCompConfig.bigComp.weeklyContributionPercentage +
-      poolCompConfig.barInput
-    );
-  }
-
-
   return {
     send,
-    calculateFirstPrizeMoney,
   };
+
+
+
 }
-export function tournamentHasStarted(tournamentSlots: Slot[]): boolean {
-  if (tournamentSlots.length === 0) {
-    return false;
+export function canAddMorePlayers(tournamentSlots: Slot[]): boolean {
+  if (!tournamentHasHadAssignment(tournamentSlots)) {
+    return true
   }
-  const firstRoundWidth = (tournamentSlots.length + 1) / 2;
-  const firstRoundStart = tournamentSlots.length - firstRoundWidth;
-  for (let i = 0; i < firstRoundWidth; i = i + 2) {
-    const left = tournamentSlots[firstRoundStart + i]!;
-    const right = tournamentSlots[firstRoundStart + i + 1]!;
-    if (left.playerId && right.playerId) {
-      const leftIndex = firstRoundStart + i;
-      const parentIndex = Math.floor((leftIndex - 1) / 2);
-      if (tournamentSlots[parentIndex]!.playerId) {
-        return true;
-      }
+  const firstRoundSlots = getFirstRoundSlotsFromAllTournamentSlots(tournamentSlots)
+  const currentPlayerIds = new Set(
+    firstRoundSlots
+      .map((slot) => slot.playerId)
+      .filter((playerId): playerId is string => Boolean(playerId)),
+  )
+
+  if (currentPlayerIds.size === 0) {
+    return true
+  }
+
+  const playersWithResolvedPlayerVersusPlayerMatchup = new Set<string>()
+
+  for (const slot of tournamentSlots) {
+    const sourceMatchup = getSlotSourceMatchup(slot, tournamentSlots)
+    if (!sourceMatchup) {
+      continue
     }
+
+    if (!slot.playerId) {
+      continue
+    }
+
+    const firstPlayerId = sourceMatchup.slot1.playerId
+    const secondPlayerId = sourceMatchup.slot2.playerId
+    if (!firstPlayerId || !secondPlayerId) {
+      continue
+    }
+
+    playersWithResolvedPlayerVersusPlayerMatchup.add(firstPlayerId)
+    playersWithResolvedPlayerVersusPlayerMatchup.add(secondPlayerId)
   }
-  return false;
+
+  const everyCurrentPlayerHasResolvedPlayerVersusPlayerMatchup = Array.from(
+    currentPlayerIds,
+  ).every((playerId) =>
+    playersWithResolvedPlayerVersusPlayerMatchup.has(playerId),
+  )
+
+  return !everyCurrentPlayerHasResolvedPlayerVersusPlayerMatchup
+}
+
+
+export function calculateFirstPrizeMoney(registeredPlayers: RegisteredPlayer[]) {
+  return (
+    (registeredPlayers.length * poolCompConfig.buyIn) *
+    (1 - poolCompConfig.bigComp.contributionPercentage) +
+    poolCompConfig.barInput
+  );
+}
+
+export function calculateBigCompMoney(registeredPlayers: RegisteredPlayer[]) {
+  return (
+    (registeredPlayers.length * poolCompConfig.buyIn) *
+    poolCompConfig.bigComp.contributionPercentage -
+    poolCompConfig.xmasCut
+  );
 }

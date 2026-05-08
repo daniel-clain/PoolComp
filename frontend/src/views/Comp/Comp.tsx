@@ -6,9 +6,12 @@ import diningVoucherImage from "../../assets/dining-voucher.jpg";
 import { ScalingImage } from "../../components/ScalingImage/ScalingImage";
 import { TabBar } from "../../components/TabBar/TabBar";
 
-import { activePoolCompHasChampionPlayer, tournamentHasStarted } from "../../services/poolComp.service";
+import { compStarted } from "../../../../shared/tournament-slot.service";
+import { activePoolCompHasChampionPlayer, calculateFirstPrizeMoney, canAddMorePlayers } from "../../services/poolComp.service";
 import { CompPlayers } from "./components/CompPlayers/CompPlayers";
+import { MoneyCalculations } from "./components/MoneyCalculations/MoneyCalculations";
 import { TournamentStructure } from "./components/TournamentStructure/TournamentStructure";
+
 
 export function Comp() {
   const {
@@ -16,11 +19,10 @@ export function Comp() {
     activeHistoricalComp,
     clearHistoricalComp,
     orientation,
-    calculateFirstPrizeMoney,
     send,
     userIsCompManager,
-    compPanel,
-    setCompPanel,
+    compActiveTab,
+    setCompActiveTab,
   } = useAppContext();
 
   const comp = activePoolComp!;
@@ -32,8 +34,10 @@ export function Comp() {
 
   const completeCompDisabled = Boolean(activeHistoricalComp) || !activePoolCompHasChampionPlayer(comp.slots);
 
+  const canAddMorePlayersDisabled = !canAddMorePlayers(comp.slots);
+
   const randomiseMatchupsDisabled = Boolean(activeHistoricalComp) ||
-    (comp.registeredPlayers.length < 5 || tournamentHasStarted(comp.slots));
+    (comp.registeredPlayers.length < 5 || compStarted(comp.slots));
 
   return (
     <comp-view>
@@ -72,16 +76,18 @@ export function Comp() {
 
   function compMainPanel() {
     if (activeHistoricalComp) {
-      return <TournamentStructure comp={activeHistoricalComp} />;
+      return <comp-main-panel><TournamentStructure comp={activeHistoricalComp} /></comp-main-panel>;
     }
-
+    console.log('tournament structure rerender', comp, activePoolComp)
     return (
       <comp-main-panel>
-        {compPanel === "players" ? (
-          <CompPlayers registeredPlayers={comp.registeredPlayers} />
-        ) : (
+        {compActiveTab === "Tournament" ? (
           <TournamentStructure comp={comp} />
-        )}
+        ) : compActiveTab === "Players" ? (
+          <CompPlayers registeredPlayers={comp.registeredPlayers} canAddMorePlayersDisabled={canAddMorePlayersDisabled} />
+        ) : compActiveTab === "Money" ? (
+          <MoneyCalculations />
+        ) : null}
       </comp-main-panel>
     );
   }
@@ -149,27 +155,35 @@ export function Comp() {
     return (
       <comp-actions>
         <TabBar
-          tabLabels={["Tournament", "Players"]}
-          selectedTabIndex={compPanel === "tournament" ? 0 : 1}
-          onTabSelected={(selectedTabIndex) => {
-            if (selectedTabIndex === 0) {
-              setCompPanel("tournament");
-            } else {
-              setCompPanel("players");
-            }
-          }}
+          tabs={["Tournament", "Players"]}
+          selectedTab={compActiveTab}
+          onTabSelected={setCompActiveTab}
         />
-        {userIsCompManager && (
+        {userIsCompManager && (<>
           <button
             type="button"
             disabled={randomiseMatchupsDisabled}
             onClick={() => {
               send(['randomiseMatchups']);
-              setCompPanel("tournament");
+              setCompActiveTab("Tournament");
             }}
           >
             Randomise Matchups
           </button>
+          <assign-players-container>
+            <button
+              type="button"
+              onClick={() => {
+                send(['assignPlayers']);
+              }}
+            >
+              Assign Players
+            </button>
+            <label>
+              <input type="checkbox" checked={autoAssignPlayers} onChange={() => {
+                send(['setAutoAssignPlayers', { autoAssignPlayers: !autoAssignPlayers }]);
+              }} />(Auto)</label></assign-players-container>
+        </>
         )}
       </comp-actions>
     )

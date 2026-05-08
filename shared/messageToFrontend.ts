@@ -1,10 +1,10 @@
-import type { AllData } from "./domain.js";
+import type { BackendState } from "./domain.js";
 
 
 export type MessageToFrontend = {
-    message: 'actionInProgress';
-    data: boolean;
+  message: 'actionInProgress';
+  data: boolean;
 } | {
-    message: 'allData';
-    data: AllData;
+  message: 'allData';
+  data: BackendState;
 } 

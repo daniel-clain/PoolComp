@@ -1,23 +1,21 @@
 import type { ActivePoolComp, Slot } from "../../../../shared/domain.js";
 
-import {
-  getFirstRoundSize,
-  getTournamentSlotsFromFirstRoundSize,
-  remapWhenFirstRoundSlotCountGrows,
-  registeredPlayersAreUnassigned,
-  eachFirstRoundMatchupDoesntHaveAPlayer,
-  getRandomMatchupWithoutPlayer,
-  getRandomSlotFromMatchup,
-  getRandomUnassignedPlayer,
-  getRandomMatchupWithout2Players,
-  eachFirstRoundMatchupDoesntHave2Players,
-  getFirstRoundSlotsFromAllTournamentSlots,
-  clearByeMatchupAutoAdvance,
-  applyByeToEmptyFirstRoundSlots,
-  autoAdvanceByeMatchups, slotIsFirstRoundSlot, clearPlayerFromBracket,
-} from "./tournament-slot-assignment.units.js";
 import _ from "lodash";
 
+import {
+  applyByeToEmptyFirstRoundSlots,
+  autoAdvanceByeMatchups,
+  clearPlayerFromBracket,
+  clearSlotsAutoAdvance,
+  getFirstRoundSize,
+  getMatchupsWithAnAvailableSlot,
+  getRandomMatchup,
+  getRandomSlotFromMatchup,
+  getTournamentSlotsFromFirstRoundSize,
+  getUnassignedPlayers,
+  matchupHasTwoEmptySlots,
+  slotIsFirstRoundSlot
+} from "./tournament-slot-assignment.units.js";
 
 
 
@@ -25,49 +23,23 @@ export function autoAssignUnassignedPlayers(comp: ActivePoolComp): Slot[] {
   const { registeredPlayers, slots: existingSlots } = comp
   let updatedSlots: Slot[] = _.cloneDeep(existingSlots);
 
-  clearByeMatchupAutoAdvance(updatedSlots)
 
-  const existingFirstRoundSize = getFirstRoundSlotsFromAllTournamentSlots(existingSlots).length;
 
-  const newFirstRoundSize = getFirstRoundSize(registeredPlayers.length);
+  getUnassignedPlayers(registeredPlayers, updatedSlots).forEach(player => {
 
-  // handle when first round size grows
-  if (newFirstRoundSize > existingFirstRoundSize) {
-    const newSlots = getTournamentSlotsFromFirstRoundSize(newFirstRoundSize);
-    remapWhenFirstRoundSlotCountGrows(existingSlots, newSlots);
-    updatedSlots = newSlots;
-  }
+    const matchupsWithAnAvailableSlot = getMatchupsWithAnAvailableSlot(updatedSlots)
+    let availableSlot: Slot
+    if (matchupsWithAnAvailableSlot.some(matchupHasTwoEmptySlots)) {
+      const matchup = getRandomMatchup(matchupsWithAnAvailableSlot.filter(matchupHasTwoEmptySlots));
+      availableSlot = getRandomSlotFromMatchup(matchup);
+    } else {
+      const matchup = getRandomMatchup(matchupsWithAnAvailableSlot);
+      availableSlot = matchup.slot1.playerId ? matchup.slot2 : matchup.slot1;
+    }
+    updatedSlots = clearSlotsAutoAdvance(availableSlot!, updatedSlots)
+    updatedSlots.find(slot => slot.id === availableSlot.id)!.playerId = player.id;
 
-  const firstRoundSlots = getFirstRoundSlotsFromAllTournamentSlots(updatedSlots);
-
-  while (
-    registeredPlayersAreUnassigned(registeredPlayers, updatedSlots) &&
-    eachFirstRoundMatchupDoesntHaveAPlayer(firstRoundSlots)
-  ) {
-    const matchup = getRandomMatchupWithoutPlayer(firstRoundSlots);
-    const randomSlot = getRandomSlotFromMatchup(matchup);
-    const playerId = getRandomUnassignedPlayer(
-      registeredPlayers,
-      firstRoundSlots,
-    );
-    randomSlot.playerId = playerId;
-  }
-  while (
-    registeredPlayersAreUnassigned(registeredPlayers, firstRoundSlots) &&
-    eachFirstRoundMatchupDoesntHave2Players(firstRoundSlots)
-  ) {
-    const matchup = getRandomMatchupWithout2Players(firstRoundSlots);
-    const remainingSlot = matchup.slot1.playerId
-      ? matchup.slot2
-      : matchup.slot1;
-
-    const playerId = getRandomUnassignedPlayer(
-      registeredPlayers,
-      firstRoundSlots,
-    );
-    remainingSlot.playerId = playerId;
-  }
-
+  })
   applyByeToEmptyFirstRoundSlots(updatedSlots)
   autoAdvanceByeMatchups(updatedSlots)
 
@@ -83,18 +55,16 @@ export function randomiseAllMatchups(comp: ActivePoolComp): Slot[] {
 }
 
 export function removePlayerFromSlots(comp: ActivePoolComp, playerId: string): Slot[] {
-  const { slots } = comp
-  slots.map((slot) => {
+  comp.slots = comp.slots.map((slot) => {
     if (slot.playerId === playerId) {
       return { id: slot.id };
     }
     return slot;
   })
-  const firstRoundSlots = getFirstRoundSlotsFromAllTournamentSlots(slots)
-  applyByeToEmptyFirstRoundSlots(firstRoundSlots)
-  autoAdvanceByeMatchups(slots)
+  applyByeToEmptyFirstRoundSlots(comp.slots)
+  autoAdvanceByeMatchups(comp.slots)
 
-  return slots
+  return comp.slots
 }
 
 

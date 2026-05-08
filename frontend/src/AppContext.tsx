@@ -7,7 +7,7 @@ import {
   type ReactNode,
 } from "react";
 import {
-  type AllData,
+  type BackendState,
   type PoolComp,
 } from "../../shared/domain";
 import type { MessageToBackend } from "../../shared/messageToBackend";
@@ -21,9 +21,11 @@ import type {
 import { createWebSocketService } from "./services/websockets.service";
 
 export type View = "Pool Comp" | "Players" | "Comp History";
-export type CompPanel = "players" | "tournament";
 
-type AppContextValue = AllData &
+export const compTabs = ["Tournament", "Players", "Money"] as const;
+export type CompTab = (typeof compTabs)[number];
+
+type AppContextValue = BackendState &
   ReturnType<typeof createPoolCompService> & {
     orientation: "portrait" | "landscape";
     userIsCompManager: boolean;
@@ -38,15 +40,16 @@ type AppContextValue = AllData &
     viewHistoricalComp: (comp: PoolComp) => void;
     clearHistoricalComp: () => void;
     actionInProgress: boolean;
-    compPanel: CompPanel;
-    setCompPanel: (compPanel: CompPanel) => void;
+    compActiveTab: CompTab;
+    setCompActiveTab: (compActiveTab: CompTab) => void;
   };
 
 const AppContext = createContext<AppContextValue | undefined>(undefined);
 
 export function AppProvider({ children }: { children: ReactNode }) {
-  const [allData, setAllData] = useState<AllData>({
+  const [allData, setAllData] = useState<BackendState>({
     activePoolComp: null,
+    autoAssignPlayers: false,
     compHistory: [],
     players: [],
     poolCompConfig,
@@ -59,7 +62,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [activeHistoricalComp, setActiveHistoricalComp] =
     useState<PoolComp | null>(null);
   const [actionInProgress, setActionInProgress] = useState(false);
-  const [compPanel, setCompPanel] = useState<CompPanel>("players");
+  const [compActiveTab, setCompActiveTab] = useState<CompTab>("Money");
 
   const isCompManager = localStorage.getItem('userIsCompManager') === 'true'
 
@@ -91,7 +94,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     const { send, closeConnection, connected } = createWebSocketService(
-      (stateUpdateFromBackend: AllData) => {
+      (stateUpdateFromBackend: BackendState) => {
         setAllData(stateUpdateFromBackend);
       },
       (actionInProgress: boolean) => {
@@ -126,8 +129,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
         viewHistoricalComp,
         clearHistoricalComp,
         actionInProgress,
-        compPanel,
-        setCompPanel,
+        compActiveTab,
+        setCompActiveTab,
         userIsCompManager,
         setUserIsCompManager,
         ...poolCompService,

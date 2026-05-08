@@ -1,7 +1,7 @@
 import type { RegisteredPlayer } from "../../../../../../shared/domain";
 import { useAppContext } from "../../../../AppContext";
 
-export function CompPlayers({ registeredPlayers }: { registeredPlayers: RegisteredPlayer[] }) {
+export function CompPlayers({ registeredPlayers, canAddMorePlayersDisabled }: { registeredPlayers: RegisteredPlayer[], canAddMorePlayersDisabled: boolean }) {
   const {
     players,
     send,
@@ -14,8 +14,8 @@ export function CompPlayers({ registeredPlayers }: { registeredPlayers: Register
 
   return (
     <comp-players>
-      <registered-players-panel className="players-panel">
-        <comp-players-heading>Registered for this comp ({registeredPlayers.length})</comp-players-heading>
+      <registered-players-panel className="panel-container">
+        <panel-heading>Registered for this comp ({registeredPlayers.length})</panel-heading>
         {registeredPlayers.length === 0 ? (
           <no-data-message>No players registered yet.</no-data-message>
         ) : (
@@ -43,8 +43,8 @@ export function CompPlayers({ registeredPlayers }: { registeredPlayers: Register
           </player-grid>
         )}
       </registered-players-panel>
-      <all-players-panel className="players-panel">
-        <comp-players-heading>All players</comp-players-heading>
+      <all-players-panel className="panel-container">
+        <panel-heading>All players</panel-heading>
         <player-grid>
           {databasePlayersForGrid.map((player) => {
             const isRegistered = registeredPlayers.some(
@@ -56,6 +56,7 @@ export function CompPlayers({ registeredPlayers }: { registeredPlayers: Register
                 type="button"
                 onClick={() => send([isRegistered ? 'removePlayerFromComp' : 'addPlayerToComp', { playerId: player.id }])}
                 className={isRegistered ? "active" : ""}
+                disabled={canAddMorePlayersDisabled}
               >
                 {player.name}
               </button>

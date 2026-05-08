@@ -3,7 +3,7 @@ export const poolCompConfig = {
     barInput: 50,
     xmasCut: 20,
     bigComp: {
-        weeklyContributionPercentage: 0.5,
+        contributionPercentage: 0.5,
         mainCompPercentage: 0.7,
         mainCompFirstPlacePercentage: 0.7,
     },

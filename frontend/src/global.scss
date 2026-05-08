@@ -78,3 +78,25 @@ no-data-message {
   @include cq-responsive((font-size: 4,
     ));
 }
+
+.panel-container {
+
+  display: flex;
+  flex-direction: column;
+  overflow: auto;
+  background: $color-panel-bg;
+  flex: 1;
+  color: $color-white-text;
+
+  @include cq-responsive((padding: 6 4,
+      border-radius: 1,
+      gap: 4,
+    ));
+
+  panel-heading {
+    font-weight: 700;
+    text-transform: uppercase;
+    @include cq-responsive((font-size: 4,
+      ));
+  }
+}

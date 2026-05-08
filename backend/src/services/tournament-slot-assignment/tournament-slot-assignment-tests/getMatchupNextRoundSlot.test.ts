@@ -1,7 +1,7 @@
 import { describe, expect, test } from "vitest";
 import type { Matchup } from "../../../../../shared/domain.js";
+import { getMatchupNextRoundSlot } from "../../../../../shared/tournament-slot.service.js";
 import {
-  getMatchupNextRoundSlot,
   getTournamentSlotsFromFirstRoundSize,
 } from "../tournament-slot-assignment.units.js";
 
@@ -15,7 +15,7 @@ describe("getMatchupNextRoundSlot", function () {
       slot1: tournamentSlots.find((slot) => slot.id === 7)!,
       slot2: tournamentSlots.find((slot) => slot.id === 8)!,
     };
-    expect(getMatchupNextRoundSlot(matchup, tournamentSlots).id).toBe(3);
+    expect(getMatchupNextRoundSlot(matchup, tournamentSlots)?.id).toBe(3);
 
   });
 

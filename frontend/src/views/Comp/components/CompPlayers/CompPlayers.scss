@@ -17,27 +17,6 @@ comp-players {
     flex-direction: row;
   }
 
-  comp-players-heading {
-    font-weight: 700;
-    text-transform: uppercase;
-    color: $color-white-text;
-    @include cq-responsive((font-size: 4,
-      ));
-  }
-
-  .players-panel {
-    display: flex;
-    flex-direction: column;
-    overflow: auto;
-    background: $color-panel-bg;
-    flex: 1;
-    color: $color-white-text;
-
-    @include cq-responsive((padding: 6 4,
-        border-radius: 1,
-        gap: 4,
-      ));
-  }
 
   player-grid {
     flex: 1;

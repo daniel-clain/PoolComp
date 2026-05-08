@@ -22,10 +22,11 @@ export type RegisteredPlayer = Player & {
 export type Slot = { id: number; isBye?: boolean; playerId?: string };
 export type Matchup = { slot1: Slot; slot2: Slot };
 
-export type AllData = {
+export type BackendState = {
   activePoolComp: ActivePoolComp | null;
   compHistory: PoolComp[];
   players: Player[];
+  autoAssignPlayers: boolean;
   poolCompConfig: PoolCompConfig;
 };
 

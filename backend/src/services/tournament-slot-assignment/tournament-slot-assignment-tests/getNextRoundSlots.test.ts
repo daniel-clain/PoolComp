@@ -1,12 +1,8 @@
 import { describe, expect, test } from "vitest";
 
+import { getFirstRoundSlotsFromAllTournamentSlots, getNextRoundSlots } from "../../../../../shared/tournament-slot.service.js";
 import {
-    autoAdvanceByeMatchups,
-    getFirstRoundSlotsFromAllTournamentSlots,
     getTournamentSlotsFromFirstRoundSize,
-    applyByeToEmptyFirstRoundSlots,
-    getMatchupNextRoundSlot,
-    getNextRoundSlots,
 } from "../tournament-slot-assignment.units.js";
 
 

@@ -1,24 +1,24 @@
 import "./TabBar.scss";
 
-export function TabBar({
-  tabLabels,
-  selectedTabIndex,
+export function TabBar<T extends string>({
+  tabs,
+  selectedTab,
   onTabSelected,
 }: {
-  tabLabels: string[];
-  selectedTabIndex: number;
-  onTabSelected: (selectedTabIndex: number) => void;
+  tabs: T[];
+  selectedTab: T;
+  onTabSelected: (selectedTab: T) => void;
 }) {
   return (
     <tab-bar>
-      {tabLabels.map((tabLabel, tabIndex) => (
+      {tabs.map((tab, tabIndex) => (
         <button
           key={tabIndex}
           type="button"
-          className={selectedTabIndex === tabIndex ? "active" : ""}
-          onClick={() => onTabSelected(tabIndex)}
+          className={selectedTab === tab ? "active" : ""}
+          onClick={() => onTabSelected(tab)}
         >
-          {tabLabel}
+          {tab}
         </button>
       ))}
     </tab-bar>
