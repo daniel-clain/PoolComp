@@ -1,18 +1,21 @@
-import { type MouseEvent, type ReactNode } from "react";
+import { type MouseEvent } from "react";
+import { useAppContext } from "../../AppContext";
 
-type ModalProps = {
-  onClose: () => void;
-  children: ReactNode;
-};
-
-export function Modal({ onClose, children }: ModalProps) {
+export function Modal() {
+  const { modalContent, setModalContent } = useAppContext();
+  if (!modalContent) return null;
   return (
-    <app-modal-overlay onClick={onClose}>
-      <app-modal
-        onClick={(event: MouseEvent<HTMLElement>) => event.stopPropagation()}
+    <modal-overlay onClick={() => setModalContent()}>
+      <modal-container
+        onClick={stopClicksInsideFromClosingTheModal}
       >
-        {children}
-      </app-modal>
-    </app-modal-overlay>
+
+        <modal-content>{modalContent}</modal-content>
+      </modal-container>
+    </modal-overlay>
   );
+
+  function stopClicksInsideFromClosingTheModal(event: MouseEvent<HTMLElement>) {
+    event.stopPropagation();
+  }
 }

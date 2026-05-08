@@ -1,8 +1,9 @@
 import { useState, type ChangeEvent, type KeyboardEvent } from "react";
 import { useAppContext } from "../../AppContext";
+import { UpdatePlayerModal } from "./components/UpdatePlayerContent";
 
 export function Players() {
-  const { players, send, openModal } = useAppContext();
+  const { players, send, setModalContent } = useAppContext();
   const [playerName, setPlayerName] = useState("");
   const [showDeactivated, setShowDeactivated] = useState(false);
 
@@ -10,10 +11,13 @@ export function Players() {
     ? players
     : players.filter((player) => !player.deactivated);
 
-  function commitNewPlayer() {
-    const trimmed = playerName.trim();
-    if (!trimmed) return;
-    send(['addPlayer', { name: trimmed }]);
+  const deactivatedPlayersCount = players.length - visiblePlayers.length;
+
+
+  function addPlayer() {
+    const name = playerName.trim();
+    if (!name) return;
+    send(['addPlayer', { name }]);
     setPlayerName("");
   }
 
@@ -24,8 +28,16 @@ export function Players() {
   function handleKeyDown(event: KeyboardEvent<HTMLInputElement>): void {
     if (event.key === "Enter") {
       event.preventDefault();
-      commitNewPlayer();
+      addPlayer();
     }
+  }
+
+
+  function handlePlayerSelected(playerId: string) {
+    const player = players.find((player) => player.id === playerId)!;
+
+
+    setModalContent(<UpdatePlayerModal player={player} />)
   }
 
   return (
@@ -39,7 +51,7 @@ export function Players() {
           onKeyDown={handleKeyDown}
           placeholder="New player name"
         />
-        <button type="button" onClick={commitNewPlayer}>
+        <button type="button" onClick={addPlayer}>
           Add Player
         </button>
       </player-input-row>
@@ -51,7 +63,7 @@ export function Players() {
               checked={showDeactivated}
               onChange={(event) => setShowDeactivated(event.target.checked)}
             />
-            Show deactivated
+            Show deactivated ({deactivatedPlayersCount})
           </label>
         </player-filter>
         <player-grid>
@@ -63,7 +75,7 @@ export function Players() {
                 key={player.id}
                 className={player.deactivated ? "is-deactivated" : ""}
                 onClick={() =>
-                  openModal({ kind: "updatePlayer", playerId: player.id })
+                  handlePlayerSelected(player.id)
                 }
               >
                 {player.name}

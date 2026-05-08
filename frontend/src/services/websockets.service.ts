@@ -35,8 +35,10 @@ export function createWebSocketService(
       const { message, data }: MessageToFrontend = JSON.parse(event.data);
       switch (message) {
         case "allData": {
-          console.log('data?.activePoolComp?.slots', data?.activePoolComp?.slots)
-          console.log("slots:", data?.activePoolComp?.slots.map(s => ({ slotId: s.id, player: data?.activePoolComp?.registeredPlayers.find(p => p.id == s.playerId)?.name })));
+          console.log("slots:", data?.activePoolComp?.slots.map((slot) => ({
+            slotId: slot.id,
+            player: data?.players.find((player) => player.id === slot.playerId)?.name
+          })));
           onStateUpdate(data);
           break;
         }

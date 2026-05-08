@@ -1,69 +1,65 @@
+import type { ChangeEvent, KeyboardEvent } from "react";
 import { useState } from "react";
+import type { Player } from "../../../../../shared/domain";
 import { useAppContext } from "../../../AppContext";
 
-type Props = {
-  playerId: string;
-};
 
-export function UpdatePlayerModal({ playerId }: Props) {
-  const {
-    players,
-    send,
-    closeModal,
-  } = useAppContext();
-  const player = players.find((candidate) => candidate.id === playerId);
-  const [name, setName] = useState(player?.name ?? "");
+export function UpdatePlayerModal({ player }: {
+  player: Player;
+}) {
+  const { send, setModalContent } = useAppContext();
 
-  if (!player) return null;
+  const [updatedPlayer, setUpdatedPlayer] = useState<Player>(player);
 
-  const trimmedName = name.trim();
-  const isDirty = trimmedName !== "" && trimmedName !== player.name;
+  function handleChange(event: ChangeEvent<HTMLInputElement>): void {
+    setUpdatedPlayer({ ...updatedPlayer, name: event.target.value });
+  }
 
+  function handleKeyDown(event: KeyboardEvent<HTMLInputElement>): void {
+    if (event.key === "Enter") {
+      event.preventDefault();
+      handleSave();
+    }
+  }
   function handleSave() {
-    if (!isDirty) return;
-    send(['updatePlayer', { playerId, name: trimmedName }]);
-    closeModal();
+    send(['updatePlayer', { player: updatedPlayer }]);
+    setModalContent(null);
   }
 
   function handleToggleActive() {
-    if (player!.deactivated) {
-      send(['activatePlayer', { playerId }]);
-    } else {
-      send(['deactivatePlayer', { playerId }]);
-    }
-    closeModal();
+    setUpdatedPlayer({ ...updatedPlayer, deactivated: !updatedPlayer.deactivated });
   }
-
   return (
-    <>
-      <app-modal-title>Update Player</app-modal-title>
-      <app-modal-body>
-        <modal-field>
-          <modal-field-label>Player ID</modal-field-label>
-          <input type="text" value={player.id} readOnly />
-        </modal-field>
-        <modal-field>
-          <modal-field-label>Name</modal-field-label>
-          <input
-            type="text"
-            value={name}
-            onChange={(event) => setName(event.target.value)}
-          />
-        </modal-field>
-      </app-modal-body>
-      <app-modal-actions>
-        <button className="danger" onClick={handleToggleActive}>
-          {player.deactivated ? "Activate Player" : "Deactivate Player"}
-        </button>
-        <button onClick={closeModal}>Close</button>
-        <button
-          className={isDirty ? "is-primary" : ""}
-          disabled={!isDirty}
-          onClick={handleSave}
-        >
+    <update-player>
+      <update-player-heading>Update Player</update-player-heading>
+      <update-player-content >
+        <fields-container>
+          <field-group>
+            <field-label>Player ID</field-label>
+            <field-value>
+              {updatedPlayer.id} </field-value>
+          </field-group>
+          <field-group>
+            <field-label>Name</field-label>
+            <field-value>
+              <input type="text" value={updatedPlayer.name}
+                onChange={handleChange} />
+            </field-value>
+          </field-group>
+          <field-group>
+            <field-label>Deactivated</field-label>
+            <field-value>
+              <input type="checkbox" checked={updatedPlayer.deactivated}
+                onKeyDown={handleKeyDown} onChange={handleToggleActive} />
+            </field-value>
+          </field-group>
+        </fields-container>
+      </update-player-content>
+      <update-player-actions><button className={updatedPlayer.deactivated ? "active" : "danger"} onClick={handleToggleActive}>
+        {updatedPlayer.deactivated ? "Activate Player" : "Deactivate Player"}
+      </button><button className="active" onClick={handleSave}>
           Save
-        </button>
-      </app-modal-actions>
-    </>
+        </button></update-player-actions>
+    </update-player>
   );
 }

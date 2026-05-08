@@ -1,6 +1,6 @@
 @use "../../variables.scss" as *;
 
-app-modal-overlay {
+modal-overlay {
   position: fixed;
   inset: 0;
   background: $color-modal-overlay;
@@ -10,7 +10,7 @@ app-modal-overlay {
   padding: 1rem;
 }
 
-app-modal {
+modal-container {
   display: block;
   width: min(100%, 32rem);
   max-height: 80vh;
@@ -23,40 +23,11 @@ app-modal {
   box-sizing: border-box;
   color: $color-white-text;
 
-  app-modal-title {
-    display: block;
-    font-size: 1.125rem;
-    font-weight: 600;
-    margin: 0 0 0.75rem;
-  }
 
-  app-modal-body {
+  modal-content {
     display: block;
   }
 
-  app-modal-actions {
-    display: flex;
-    gap: 0.5rem;
-    justify-content: flex-end;
-    margin-top: 1rem;
-  }
 
-  modal-field {
-    display: block;
-    margin-bottom: 0.75rem;
 
-    modal-field-label {
-      display: block;
-      font-size: 0.75rem;
-      color: $color-white-text;
-      margin-bottom: 0.25rem;
-    }
-
-    input[type="text"] {
-      width: 100%;
-      padding: 0.5rem 0.625rem;
-      font-size: 0.875rem;
-      border-radius: 0.375rem;
-    }
-  }
 }

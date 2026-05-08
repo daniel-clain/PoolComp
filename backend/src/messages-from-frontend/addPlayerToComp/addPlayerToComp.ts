@@ -1,6 +1,7 @@
-import { Slot } from "../../../../shared/domain.js";
+import type { Slot } from "../../../../shared/domain.js";
 import { tournamentHasHadAssignment } from "../../../../shared/tournament-slot.service.js";
 import type { BackendService } from "../../services/backend.service.js";
+import { updateOptions } from "../../services/mongo-db.service.js";
 import { assignPlayer } from "../../services/tournament-slot-assignment/tournament-slot-assignment.service.js";
 import { mapTournamentSlotsToNextRoundSize, tournamentNeedsSizeIncrease } from "../../services/tournament-slot-assignment/tournament-slot-assignment.units.js";
 
@@ -9,9 +10,8 @@ export async function addPlayerToComp(
   data: { playerId: string }
 ) {
   const comp = backendService.getActiveComp();
-  const player = backendService.getPlayerById(data.playerId);
 
-  const updatedRegisteredPlayers = [...comp.registeredPlayers, { ...player, paid: false }];
+  const updatedRegisteredPlayers = [...comp.registeredPlayers, { playerId: data.playerId, paid: false }];
 
   let updatedSlots: Slot[] = comp.slots;
 
@@ -24,11 +24,11 @@ export async function addPlayerToComp(
       data.playerId
     );
   }
-  await backendService.mongoDbService.activeCompCollection.updateOne(
+  const updatedCompResult = await backendService.mongoDbService.activeCompCollection.findOneAndUpdate(
     { id: comp.id },
     { $set: { slots: updatedSlots, registeredPlayers: updatedRegisteredPlayers } },
+    updateOptions,
   );
-  const updatedComp = await backendService.mongoDbService.activeCompCollection.findOne({ id: comp.id });
-  if (!updatedComp) throw new Error("Active comp not found");
-  backendService.backendState.activePoolComp = updatedComp;
+  if (!updatedCompResult) throw new Error("Active comp not found");
+  backendService.backendState.activePoolComp = updatedCompResult;
 }

@@ -12,8 +12,9 @@ import {
 } from "../../shared/domain";
 import type { MessageToBackend } from "../../shared/messageToBackend";
 import { poolCompConfig } from "../../shared/poolCompConfig";
+import { tournamentHasHadAssignment } from "../../shared/tournament-slot.service";
 import { useOrientation } from "./hooks/useOrientation";
-import type { ModalState } from "./services/modal.service";
+
 import { createPoolCompService } from "./services/poolComp.service";
 import type {
   ConnectionStatus,
@@ -25,6 +26,9 @@ export type View = "Pool Comp" | "Players" | "Comp History";
 export const compTabs = ["Tournament", "Players", "Money"] as const;
 export type CompTab = (typeof compTabs)[number];
 
+
+type ModalContent = undefined | ReactNode
+
 type AppContextValue = BackendState &
   ReturnType<typeof createPoolCompService> & {
     orientation: "portrait" | "landscape";
@@ -33,9 +37,8 @@ type AppContextValue = BackendState &
     activeView: View;
     setActiveView: (view: View) => void;
     connectionStatus: ConnectionStatus;
-    modal: ModalState;
-    openModal: (modal: NonNullable<ModalState>) => void;
-    closeModal: () => void;
+    modalContent: ModalContent;
+    setModalContent: (modal?: ModalContent) => void;
     activeHistoricalComp: PoolComp | null;
     viewHistoricalComp: (comp: PoolComp) => void;
     clearHistoricalComp: () => void;
@@ -58,24 +61,19 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [activeView, setActiveView] = useState<View>("Pool Comp");
   const [connectionStatus, setConnectionStatus] =
     useState<ConnectionStatus>("connecting");
-  const [modal, setModal] = useState<ModalState>(null);
+  const [modalContent, setModalContent] = useState<ModalContent>();
   const [activeHistoricalComp, setActiveHistoricalComp] =
     useState<PoolComp | null>(null);
   const [actionInProgress, setActionInProgress] = useState(false);
-  const [compActiveTab, setCompActiveTab] = useState<CompTab>("Players");
+  const hasStarted = allData.activePoolComp && tournamentHasHadAssignment(allData.activePoolComp.slots);
+  console.log('hasStarted', hasStarted)
+  const [compActiveTab, setCompActiveTab] = useState<CompTab>(hasStarted ? "Tournament" : "Players");
+  console.log('compActiveTab', compActiveTab)
 
   const isCompManager = localStorage.getItem('userIsCompManager') === 'true'
 
   const [userIsCompManager, setUserIsCompManager] = useState(isCompManager);
 
-
-  function openModal(state: NonNullable<ModalState>) {
-    setModal(state);
-  }
-
-  function closeModal() {
-    setModal(null);
-  }
 
   function viewHistoricalComp(comp: PoolComp) {
     setActiveHistoricalComp(comp);
@@ -122,9 +120,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
         activeView,
         setActiveView,
         connectionStatus,
-        modal,
-        openModal,
-        closeModal,
+        modalContent,
+        setModalContent,
         activeHistoricalComp,
         viewHistoricalComp,
         clearHistoricalComp,

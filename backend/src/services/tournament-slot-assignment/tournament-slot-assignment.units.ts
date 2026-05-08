@@ -18,7 +18,9 @@ export function mapTournamentSlotsToNextRoundSize(registeredPlayers: RegisteredP
   const newSlots = getTournamentSlotsFromFirstRoundSize(newFirstRoundSize);
   const newFirstRoundSlots = getFirstRoundSlotsFromAllTournamentSlots(newSlots);
   existingFirstRoundSlots.forEach((slot, index) => {
-    newFirstRoundSlots[index * 2]!.playerId = slot.playerId;
+    if (slot.playerId) {
+      newFirstRoundSlots[index * 2]!.playerId = slot.playerId;
+    }
   });
   return newSlots;
 }
@@ -140,8 +142,8 @@ export function getRandomUnassignedPlayer(
   firstRoundSlots: Slot[],
 ): string {
   return registeredPlayers.find(
-    (player) => !firstRoundSlots.some((slot) => slot.playerId === player.id),
-  )!.id;
+    (player) => !firstRoundSlots.some((slot) => slot.playerId === player.playerId),
+  )!.playerId;
 }
 
 

@@ -1,14 +1,16 @@
+import type { Player } from "../../../../shared/domain.js";
 import type { BackendService } from "../../services/backend.service.js";
+import { updateOptions } from "../../services/mongo-db.service.js";
 
 export async function updatePlayer(
   backendService: BackendService,
-  data: { playerId: string; name: string },
+  data: { player: Player },
 ): Promise<void> {
-  await backendService.mongoDbService.playersCollection.updateOne(
-    { id: data.playerId },
-    { $set: { name: data.name.trim() } },
+  const updatedPlayerResult = await backendService.mongoDbService.playersCollection.findOneAndUpdate(
+    { id: data.player.id },
+    { $set: data.player },
+    updateOptions,
   );
-  const updatedPlayer = await backendService.mongoDbService.playersCollection.findOne({ id: data.playerId })
-  if (!updatedPlayer) throw new Error("Player not found");
-  backendService.backendState.players = backendService.backendState.players.map(player => player.id === data.playerId ? updatedPlayer : player);
+  if (!updatedPlayerResult) throw new Error("Player not found");
+  backendService.backendState.players = backendService.backendState.players.map(player => player.id === updatedPlayerResult.id ? updatedPlayerResult : player);
 }

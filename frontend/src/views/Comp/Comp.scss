@@ -98,6 +98,19 @@ comp-view {
     display: flex;
     @include cq-responsive((gap: 2,
       ));
+
+    assign-players-container {
+      display: flex;
+      align-items: center;
+
+      label {
+        display: flex;
+        align-items: center;
+        font-style: italic;
+        color: $color-comp-data-value;
+        @include cq-responsive((font-size: 3));
+      }
+    }
   }
 
   comp-actions-bottom {

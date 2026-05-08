@@ -10,20 +10,19 @@ export type PoolComp = {
   id: string;
   date: Date;
   slots: Slot[];
-};
-
-export type ActivePoolComp = PoolComp & {
   registeredPlayers: RegisteredPlayer[];
 };
 
-export type RegisteredPlayer = Player & {
+
+export type RegisteredPlayer = {
+  playerId: string;
   paid: boolean;
 };
 export type Slot = { id: number; isBye?: boolean; playerId?: string };
 export type Matchup = { slot1: Slot; slot2: Slot };
 
 export type BackendState = {
-  activePoolComp: ActivePoolComp | null;
+  activePoolComp: PoolComp | null;
   compHistory: PoolComp[];
   players: Player[];
   autoAssignPlayers: boolean;

@@ -56,7 +56,9 @@ tournament-structure {
         background: white;
       }
 
-      &.is-bye {
+      &.danger {
+        background: $color-button-danger-bg;
+        border-color: $color-button-danger-border;
         color: $color-danger-text;
         font-weight: 700;
       }
@@ -77,13 +79,14 @@ tournament-structure {
       button {
         border: none;
         text-align: left;
-        @include cq-responsive((padding: 1.6));
+        @include cq-responsive((padding: 1.6, border-radius: 0));
         border-bottom: 1px solid $color-dark-border;
         min-width: 12cqw;
 
         &:last-child {
           border-bottom: none;
         }
+
       }
     }
   }

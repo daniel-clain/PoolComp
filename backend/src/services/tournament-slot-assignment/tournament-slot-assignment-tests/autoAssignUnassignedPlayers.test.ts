@@ -1,16 +1,9 @@
 import { describe, expect, test } from "vitest";
-import type { ActivePoolComp, RegisteredPlayer, Slot } from "../../../../../shared/domain.js";
+import type { PoolComp, RegisteredPlayer, Slot } from "../../../../../shared/domain.js";
 import { autoAssignUnassignedPlayers } from "../tournament-slot-assignment.service.js";
 import { getTournamentSlotsFromFirstRoundSize } from "../tournament-slot-assignment.units.js";
 
-function createRegisteredPlayer(id: string): RegisteredPlayer {
-  return {
-    id,
-    name: id,
-    deactivated: false,
-    paid: true,
-  }
-}
+
 
 describe("autoAssignUnassignedPlayers", function () {
   test("does not place a late player into a bye path that already has a resolved player versus player result", function () {
@@ -66,9 +59,9 @@ describe("autoAssignUnassignedPlayers", function () {
       "Mitch",
       "Greg",
       "LatePlayer",
-    ].map(createRegisteredPlayer)
+    ].map(playerId => ({ playerId, paid: true }))
 
-    const activePoolComp: ActivePoolComp = {
+    const activePoolComp: PoolComp = {
       id: "active",
       date: new Date("2026-05-06T10:00:00.000Z"),
       slots,

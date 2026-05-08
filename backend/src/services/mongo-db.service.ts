@@ -1,20 +1,12 @@
-import { MongoClient, type Db } from "mongodb";
+import { type FindOneAndUpdateOptions, MongoClient, type Db } from "mongodb";
 import type {
-  ActivePoolComp,
-  BackendState,
   Player,
-  PoolComp,
+  PoolComp
 } from "../../../shared/domain.js";
 
-export type Repository = {
-  load(): Promise<BackendState>;
-  ensureIndexes(): Promise<void>;
-  insertPlayer(player: Player): Promise<void>;
-  replacePlayerByPlayerId(playerId: string, player: Player): Promise<void>;
-  insertActivePoolComp(activePoolComp: ActivePoolComp): Promise<void>;
-  replaceActivePoolComp(activePoolComp: ActivePoolComp): Promise<void>;
-  deleteActivePoolCompById(activePoolCompId: string): Promise<void>;
-  insertCompHistoryEntry(poolComp: PoolComp): Promise<void>;
+export const updateOptions: FindOneAndUpdateOptions = {
+  returnDocument: "after",
+  projection: { _id: 0 },
 };
 
 export async function createMongoDbService() {
@@ -23,7 +15,7 @@ export async function createMongoDbService() {
 
   const playersCollection = database.collection<Player>("Players");
   const activeCompCollection =
-    database.collection<ActivePoolComp>("ActiveComp");
+    database.collection<PoolComp>("ActiveComp");
   const compHistoryCollection = database.collection<PoolComp>("CompHistory");
 
 
@@ -63,12 +55,12 @@ export async function createMongoDbService() {
     throw new Error("MongoDB connection failed after all retries.");
   }
 
-  async function getAllData(): Promise<[Player[], ActivePoolComp | null, PoolComp[]]> {
+  async function getAllData(): Promise<[Player[], PoolComp | null, PoolComp[]]> {
     const [playerDocuments, activeCompDocument, historyDocuments] =
       await Promise.all([
-        playersCollection.find().toArray(),
-        activeCompCollection.findOne(),
-        compHistoryCollection.find().sort({ date: -1 }).toArray(),
+        playersCollection.find({}, { projection: { _id: 0 } }).toArray(),
+        activeCompCollection.findOne({}, { projection: { _id: 0 } }),
+        compHistoryCollection.find({}, { projection: { _id: 0 } }).sort({ date: -1 }).toArray(),
       ]);
     return [playerDocuments, activeCompDocument, historyDocuments];
   }

@@ -21,21 +21,21 @@ export function CompPlayers({ registeredPlayers, canAddMorePlayersDisabled }: { 
         ) : (
           <player-grid>
             {registeredPlayers.map((registeredPlayer) => (
-              <registered-player-cell key={registeredPlayer.id}>
+              <registered-player-cell key={registeredPlayer.playerId}>
                 <button
                   type="button"
                   className="active"
                   onClick={() =>
-                    send(['removePlayerFromComp', { playerId: registeredPlayer.id }])
+                    send(['removePlayerFromComp', { playerId: registeredPlayer.playerId }])
                   }
                 >
-                  {registeredPlayer.name}
+                  {players.find((player) => player.id === registeredPlayer.playerId)!.name}
                 </button>
                 <input
                   type="checkbox"
                   checked={registeredPlayer.paid}
                   onChange={() =>
-                    send([registeredPlayer.paid ? 'unsetRegisteredPlayerPaid' : 'setRegisteredPlayerPaid', { playerId: registeredPlayer.id }])
+                    send(['togglePlayerPaid', { playerId: registeredPlayer.playerId, paid: !registeredPlayer.paid }])
                   }
                 />
               </registered-player-cell>
@@ -48,7 +48,7 @@ export function CompPlayers({ registeredPlayers, canAddMorePlayersDisabled }: { 
         <player-grid>
           {databasePlayersForGrid.map((player) => {
             const isRegistered = registeredPlayers.some(
-              (registeredPlayer) => registeredPlayer.id === player.id,
+              (registeredPlayer) => registeredPlayer.playerId === player.id,
             );
             return (
               <button

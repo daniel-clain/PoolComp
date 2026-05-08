@@ -1,4 +1,4 @@
-import type { Matchup, RegisteredPlayer, Slot } from "./domain.js";
+import type { Matchup, PoolComp, RegisteredPlayer, Slot } from "./domain.js";
 
 export function getSlotSourceMatchup(slot: Slot, tournamentSlots: Slot[]): Matchup | undefined {
   const [slot1, slot2] = tournamentSlots.filter(s => s.id === slot.id * 2 + 1 || s.id === slot.id * 2 + 2)
@@ -92,8 +92,7 @@ export function getSlotTier(slot: Slot, tournamentSlots: Slot[]): number {
 }
 
 export function getUnassignedPlayers(
-  registeredPlayers: RegisteredPlayer[],
-  tournamentSlots: Slot[],
+  comp: PoolComp
 ): RegisteredPlayer[] {
-  return registeredPlayers.filter(player => !tournamentSlots.some(slot => slot.playerId === player.id));
+  return comp.registeredPlayers.filter(player => !comp.slots.some(slot => slot.playerId === player.playerId));
 } 

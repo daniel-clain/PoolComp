@@ -4,12 +4,9 @@ export async function cancelActivePoolComp(
   backendService: BackendService,
 ): Promise<void> {
   const activeComp = backendService.getActiveComp();
-  await backendService.mongoDbService.activeCompCollection.deleteOne({
-    id: activeComp.id,
-  });
-
-  const updatedActiveComp = await backendService.mongoDbService.activeCompCollection.findOne()
-
-  if (updatedActiveComp) throw new Error("Should not have found active comp");
-  backendService.backendState.activePoolComp = updatedActiveComp;
+  const deleteResult = await backendService.mongoDbService.activeCompCollection.deleteOne({ id: activeComp.id });
+  if (deleteResult.deletedCount !== 1) {
+    throw new Error("Failed to cancel active comp");
+  }
+  backendService.backendState.activePoolComp = null;
 }

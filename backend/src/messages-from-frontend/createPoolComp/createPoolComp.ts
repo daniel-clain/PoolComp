@@ -6,12 +6,17 @@ import { getTournamentSlotsFromFirstRoundSize } from "../../services/tournament-
 export async function createPoolComp(
   backendService: BackendService
 ): Promise<void> {
+  const activeCompId = randomUUID();
   await backendService.mongoDbService.activeCompCollection.insertOne({
-    id: randomUUID(),
+    id: activeCompId,
     date: new Date(),
     slots: getTournamentSlotsFromFirstRoundSize(poolCompConfig.minCompSize),
     registeredPlayers: [],
   });
-  const updatedActiveComp = await backendService.mongoDbService.activeCompCollection.findOne()
+  const updatedActiveComp = await backendService.mongoDbService.activeCompCollection.findOne(
+    { id: activeCompId },
+    { projection: { _id: 0 } },
+  );
+  if (!updatedActiveComp) throw new Error("Active comp not found after create");
   backendService.backendState.activePoolComp = updatedActiveComp;
 }

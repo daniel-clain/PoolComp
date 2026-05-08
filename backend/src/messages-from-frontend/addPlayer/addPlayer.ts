@@ -12,7 +12,10 @@ export async function addPlayer(
     deactivated: false,
   };
   await backendService.mongoDbService.playersCollection.insertOne(newPlayer);
-  const updatedPlayer = await backendService.mongoDbService.playersCollection.findOne({ id: newPlayer.id })
-  if (!updatedPlayer) throw new Error("Player not found");
-  backendService.backendState.players.push(updatedPlayer);
+  const updatedPlayerResult = await backendService.mongoDbService.playersCollection.findOne(
+    { id: newPlayer.id },
+    { projection: { _id: 0 } },
+  );
+  if (!updatedPlayerResult) throw new Error("Player not found");
+  backendService.backendState.players.push(updatedPlayerResult);
 }

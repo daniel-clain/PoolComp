@@ -31,14 +31,29 @@ input[type="text"] {
   line-height: 1;
   box-sizing: border-box;
   @include cq-responsive((border-width: 0.4,
-      padding: 1 3,
-      font-size: 4,
+      padding: 0 1,
+      font-size: 3,
       border-radius: 1,
     ));
 
   &[readonly] {
     opacity: 0.5;
     cursor: default;
+  }
+}
+
+input[type="checkbox"] {
+  align-self: center;
+  margin: unset;
+
+  .is-portrait & {
+    width: 4cqw;
+    height: 2cqh;
+  }
+
+  .is-landscape & {
+    width: 2cqw;
+    height: 4cqh;
   }
 }
 
@@ -51,7 +66,7 @@ button {
   font-weight: 400;
   line-height: 1;
   @include cq-responsive((font-size: 2.8,
-      padding: 1.4 3.6,
+      padding: 1.4 2.6,
       border-radius: 1,
       border-width: 0.4,
     ));
@@ -64,8 +79,14 @@ button {
 
   &.danger {
     background: $color-button-danger-bg;
-    color: $color-dark-text;
+    color: $color-danger-text;
     border-color: $color-button-danger-border;
+  }
+
+  &.primary {
+    background: $color-button-primary-bg;
+    color: $color-dark-text;
+    border-color: $color-button-primary-border;
   }
 
   &:disabled {
@@ -98,5 +119,39 @@ no-data-message {
     text-transform: uppercase;
     @include cq-responsive((font-size: 4,
       ));
+  }
+}
+
+fields-container {
+  display: flex;
+  flex-direction: column;
+  @include cq-responsive((gap: 2,
+    ));
+
+  field-group {
+    display: flex;
+    align-items: center;
+    @include cq-responsive((font-size: 3, gap: 1,
+      ));
+
+    field-label {
+      @include cq-responsive((width: 20,
+        ));
+    }
+
+    field-value {
+      flex: 1;
+      color: $color-comp-data-value;
+    }
+
+    field-description {
+      display: flex;
+      flex-direction: column;
+      @include cq-responsive((font-size: 2,
+        ));
+      font-style: italic;
+      @include cq-responsive((gap: 1,
+        ));
+    }
   }
 }

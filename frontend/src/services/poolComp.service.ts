@@ -1,6 +1,8 @@
+import orderBy from "lodash/orderBy";
 import type { RefObject } from "react";
 import {
   type Player,
+  type PoolComp,
   type RegisteredPlayer,
   type Slot,
 } from "../../../shared/domain";
@@ -16,32 +18,42 @@ export function canSetSlot(slot: Slot, slots: Slot[]): boolean {
   return !sourceMatchup || (Boolean(sourceMatchup?.slot1.playerId) && Boolean(sourceMatchup?.slot2.playerId));
 }
 
+export type PlayerChoice = {
+  player: Player;
+  isUnassigned?: boolean;
+}
+
 export function getPlayerChoicesForSlot(
   selectedSlot: Slot,
   slots: Slot[],
-  registeredPlayers: Player[],
-): Player[] {
+  registeredPlayers: RegisteredPlayer[],
+  players: Player[],
+): PlayerChoice[] {
   const sourceMatchup = getSlotSourceMatchup(selectedSlot, slots)
-  if (!sourceMatchup) return registeredPlayers;
+  if (sourceMatchup) {
+    const { slot1, slot2 } = sourceMatchup
+    return registeredPlayers.reduce((acc, { playerId }) => {
+      if (playerId === slot1.playerId || playerId === slot2.playerId) {
+        acc.push({ player: players.find((player) => player.id === playerId)! })
+      }
+      return acc
+    }, [] as PlayerChoice[])
+  }
+  const { unassignedPlayers, assignedPlayers } = registeredPlayers.reduce((acc, { playerId }) => {
+    const player = players.find((player) => player.id === playerId)!
+    if (slots.some(slot => slot.playerId === playerId)) {
+      acc.assignedPlayers.push({ player })
+    } else {
+      acc.unassignedPlayers.push({ player, isUnassigned: true })
+    }
+    return acc
+  }, { unassignedPlayers: [] as PlayerChoice[], assignedPlayers: [] as PlayerChoice[] })
 
-  return [sourceMatchup.slot1.playerId, sourceMatchup.slot2.playerId]
-    .map((playerId) =>
-      registeredPlayers.find((registeredPlayer) => registeredPlayer.id === playerId),
-    )
-    .filter((player): player is Player => Boolean(player));
+  return [
+    ...orderBy(unassignedPlayers, 'player.name'),
+    ...orderBy(assignedPlayers, 'player.name')]
 }
 
-export function countPlayersInComp(slots: Slot[]): number {
-  const uniquePlayerIds = new Set(
-    slots
-      .filter(
-        (slot): slot is Extract<typeof slot, { playerId: string }> =>
-          slot.playerId !== undefined,
-      )
-      .map((slot: Slot) => slot.playerId),
-  );
-  return uniquePlayerIds.size;
-}
 
 export function activePoolCompHasChampionPlayer(slots: Slot[]): boolean {
   if (!slots.length) return false
@@ -49,26 +61,20 @@ export function activePoolCompHasChampionPlayer(slots: Slot[]): boolean {
   return Boolean(firstPlaceSlot.playerId)
 }
 
-export function getFinalistPlayerIds(slots: Slot[]): {
-  firstPlaceId: string;
-  secondPlaceId: string;
+export function getFinalists(comp: PoolComp, players: Player[]): {
+  firstPlace: Player;
+  secondPlace: Player;
 } {
-  const [firstPlaceSlot, finalistSlot1, finalistSlot2] = slots
+  const [firstPlaceSlot, finalistSlot1, finalistSlot2] = comp.slots
 
   const secondPlaceSlot = firstPlaceSlot.playerId === finalistSlot1.playerId ? finalistSlot2 : finalistSlot1
 
-  return { firstPlaceId: firstPlaceSlot.playerId!, secondPlaceId: secondPlaceSlot.playerId! };
+  const firstPlace = players.find((player) => player.id === firstPlaceSlot.playerId)!
+  const secondPlace = players.find((player) => player.id === secondPlaceSlot.playerId)!
+
+  return { firstPlace, secondPlace };
 }
 
-export function calculatePrizeMoneyFromPlayerCount(
-  playerCount: number,
-): number {
-  return (
-    (playerCount * poolCompConfig.buyIn) /
-    poolCompConfig.bigComp.contributionPercentage +
-    poolCompConfig.barInput
-  );
-}
 
 export function createPoolCompService(
   sendMessageToBackendRef: RefObject<

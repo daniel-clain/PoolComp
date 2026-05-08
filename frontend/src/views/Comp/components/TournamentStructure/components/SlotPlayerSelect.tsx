@@ -1,20 +1,20 @@
 import { useEffect, useRef } from "react";
+import type { Slot } from "../../../../../../../shared/domain";
 import { useAppContext } from "../../../../../AppContext";
 import {
   getPlayerChoicesForSlot,
 } from "../../../../../services/poolComp.service";
-import type { SlotWithPosition } from "../../../../../services/tournamentStructure.service";
-import type { Slot } from "../../../../../../../shared/domain";
 
 
 type Props = {
-  selectedSlot: SlotWithPosition;
+  selectedSlot: Slot;
+  selectPosition: { x: number, y: number };
   onClose: () => void;
   slots: Slot[];
 };
 
-export function SlotMatchupSelect({ selectedSlot, onClose, slots }: Props) {
-  const { activePoolComp, send } = useAppContext();
+export function SlotPlayerSelect({ selectedSlot, selectPosition, onClose, slots }: Props) {
+  const { activePoolComp, players, send } = useAppContext();
   const panelRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
@@ -28,15 +28,16 @@ export function SlotMatchupSelect({ selectedSlot, onClose, slots }: Props) {
   }, [onClose]);
 
   const choices = getPlayerChoicesForSlot(
-    selectedSlot.slot,
+    selectedSlot,
     slots,
     activePoolComp?.registeredPlayers!,
+    players,
   );
 
   if (choices.length === 0) return null;
 
-  function handlePick(playerId: string) {
-    send(['manualAssignPlayerToSlot', { slotId: selectedSlot.slot.id, playerId }]);
+  function handlePick(playerId: string | undefined) {
+    send(['manualAssignPlayerToSlot', { slotId: selectedSlot.id, playerId }]);
     onClose();
   }
 
@@ -44,13 +45,18 @@ export function SlotMatchupSelect({ selectedSlot, onClose, slots }: Props) {
     <slot-matchup-select
       ref={panelRef}
       style={{
-        left: `${selectedSlot.x}cqw`,
-        top: `${selectedSlot.y + selectedSlot.height + 0.5}cqh`
+        left: `${selectPosition.x}cqw`,
+        top: `${selectPosition.y}cqh`
       }}
     >
-      {choices.map((choice) => (
-        <button key={choice.id} onClick={() => handlePick(choice.id)}>
-          {choice.name}
+      {selectedSlot.playerId && (
+        <button className="danger" onClick={() => handlePick(undefined)}>
+          Clear
+        </button>
+      )}
+      {choices.map(({ player, isUnassigned }) => (
+        <button key={player.id} className={isUnassigned ? "primary" : ""} onClick={() => handlePick(player.id)}>
+          {player.name}
         </button>
       ))}
     </slot-matchup-select>

@@ -28,7 +28,7 @@ export function SlotElement({ slotWithPosition, onSelect }: Props) {
         height: `${height}cqh`,
         fontSize: `${fontSize}cqh`,
       }}
-      className={`is-${slot.playerId ? "player" : slot.isBye ? "bye" : "empty"}`}
+      className={slot.isBye && "danger"}
       onClick={onSelect}
     >
       {label}

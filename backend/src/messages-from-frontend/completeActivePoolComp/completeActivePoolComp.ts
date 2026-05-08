@@ -5,18 +5,20 @@ export async function completeActivePoolComp(
 ): Promise<void> {
   const activeComp = backendService.getActiveComp();
 
-  await backendService.mongoDbService.compHistoryCollection.insertOne({
-    id: activeComp.id,
-    date: activeComp.date,
-    slots: activeComp.slots,
-  });
+  await backendService.mongoDbService.compHistoryCollection.insertOne(activeComp);
   await backendService.mongoDbService.activeCompCollection.deleteOne({
     id: activeComp.id,
   });
 
-  const updatedActiveComp = await backendService.mongoDbService.activeCompCollection.findOne()
+  const updatedActiveComp = await backendService.mongoDbService.activeCompCollection.findOne(
+    { id: activeComp.id },
+    { projection: { _id: 0 } },
+  );
   backendService.backendState.activePoolComp = updatedActiveComp;
 
-  const updatedCompHistory = await backendService.mongoDbService.compHistoryCollection.find().sort({ date: -1 }).toArray()
+  const updatedCompHistory = await backendService.mongoDbService.compHistoryCollection
+    .find({}, { projection: { _id: 0 } })
+    .sort({ date: -1 })
+    .toArray();
   backendService.backendState.compHistory = updatedCompHistory
 }

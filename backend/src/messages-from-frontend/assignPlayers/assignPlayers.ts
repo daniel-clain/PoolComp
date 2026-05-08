@@ -1,17 +1,18 @@
 import type { BackendService } from "../../services/backend.service.js";
+import { updateOptions } from "../../services/mongo-db.service.js";
 import { autoAssignUnassignedPlayers } from "../../services/tournament-slot-assignment/tournament-slot-assignment.service.js";
 
 export async function assignPlayers(
   backendService: BackendService,
 ): Promise<void> {
   const activeComp = backendService.getActiveComp();
-  const slots = autoAssignUnassignedPlayers(activeComp);
+  const updatedSlots = autoAssignUnassignedPlayers(activeComp);
 
-  await backendService.mongoDbService.activeCompCollection.updateOne(
+  const updatedActiveCompResult = await backendService.mongoDbService.activeCompCollection.findOneAndUpdate(
     { id: activeComp.id },
-    { $set: { slots } },
+    { $set: { slots: updatedSlots } },
+    updateOptions,
   );
-  const updatedActiveComp = await backendService.mongoDbService.activeCompCollection.findOne({ id: activeComp.id });
-  if (!updatedActiveComp) throw new Error("Active comp not found");
-  backendService.backendState.activePoolComp = updatedActiveComp;
+  if (!updatedActiveCompResult) throw new Error("Active comp not found");
+  backendService.backendState.activePoolComp = updatedActiveCompResult;
 }

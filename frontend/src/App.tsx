@@ -1,6 +1,6 @@
 import { useAppContext } from "./AppContext";
 import { Header } from "./components/Header/Header";
-import { ModalHost } from "./components/Modal/ModalHost";
+import { Modal } from "./components/Modal/Modal";
 import { ViewContainer } from "./components/ViewContainer/ViewContainer";
 import { Comp } from "./views/Comp/Comp";
 import { CompHistory } from "./views/CompHistory/CompHistory";
@@ -26,7 +26,7 @@ export function App() {
             }
           })()}
         </ViewContainer>
-        <ModalHost />
+        <Modal />
       </app-content>
     </app-container>
   );

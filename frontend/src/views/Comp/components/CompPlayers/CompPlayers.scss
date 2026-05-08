@@ -36,7 +36,7 @@ comp-players {
       ));
 
     button {
-      width: 100%;
+      flex: 1;
       text-align: left;
     }
   }
@@ -45,19 +45,6 @@ comp-players {
     display: flex;
     align-items: stretch;
 
-    input[type="checkbox"] {
-      align-self: center;
-      margin: unset;
 
-      .is-portrait & {
-        width: 6cqw;
-        height: 2cqh;
-      }
-
-      .is-landscape & {
-        width: 3cqw;
-        height: 5cqh;
-      }
-    }
   }
 }

@@ -1,4 +1,4 @@
-import type { ActivePoolComp, Slot } from "../../../../shared/domain.js";
+import type { PoolComp, Slot } from "../../../../shared/domain.js";
 
 import _ from "lodash";
 
@@ -19,17 +19,15 @@ import {
 
 
 
-export function autoAssignUnassignedPlayers(comp: ActivePoolComp): Slot[] {
-
-  const { registeredPlayers, slots } = comp
-  let updatedSlots: Slot[] = _.cloneDeep(slots);
-  getUnassignedPlayers(registeredPlayers, slots).forEach(player => {
-    updatedSlots = assignPlayer({ ...comp, slots: updatedSlots }, player.id);
+export function autoAssignUnassignedPlayers(comp: PoolComp): Slot[] {
+  let updatedSlots: Slot[] = _.cloneDeep(comp.slots);
+  getUnassignedPlayers(comp).forEach(player => {
+    updatedSlots = assignPlayer({ ...comp, slots: updatedSlots }, player.playerId);
   })
   return updatedSlots;
 }
 
-export function assignPlayer(comp: ActivePoolComp, playerId: string): Slot[] {
+export function assignPlayer(comp: PoolComp, playerId: string): Slot[] {
   let updatedSlots: Slot[] = _.cloneDeep(comp.slots);
   const matchupsWithAnAvailableSlot = getMatchupsWithAnAvailableSlot(updatedSlots)
   let availableSlot: Slot
@@ -52,13 +50,13 @@ export function assignPlayer(comp: ActivePoolComp, playerId: string): Slot[] {
   return updatedSlots;
 }
 
-export function randomiseAllMatchups(comp: ActivePoolComp): Slot[] {
+export function randomiseAllMatchups(comp: PoolComp): Slot[] {
   const newFirstRoundSize = getFirstRoundSize(comp.registeredPlayers.length);
   const slots = getTournamentSlotsFromFirstRoundSize(newFirstRoundSize); return autoAssignUnassignedPlayers({ ...comp, slots })
 
 }
 
-export function removePlayerFromSlots(comp: ActivePoolComp, playerId: string): Slot[] {
+export function removePlayerFromSlots(comp: PoolComp, playerId: string): Slot[] {
   let updatedSlots: Slot[] = _.cloneDeep(comp.slots);
   clearPlayerFromTournament(playerId, updatedSlots)
   applyByeToEmptyFirstRoundSlots(updatedSlots)
@@ -68,7 +66,7 @@ export function removePlayerFromSlots(comp: ActivePoolComp, playerId: string): S
 }
 
 
-export function handleManualAssignPlayerToSlot(comp: ActivePoolComp, slotId: number, playerId: string, autoAssignPlayers: boolean): Slot[] {
+export function handleManualAssignPlayerToSlot(comp: PoolComp, slotId: number, playerId: string | undefined, autoAssignPlayers: boolean): Slot[] {
   let updatedSlots: Slot[] = _.cloneDeep(comp.slots);
   const targetSlot = updatedSlots.find(slot => slot.id === slotId)
   if (slotIsFirstRoundSlot(slotId, updatedSlots)) {
@@ -77,7 +75,7 @@ export function handleManualAssignPlayerToSlot(comp: ActivePoolComp, slotId: num
       clearPlayerFromTournament(playerAlreadyInSlot, updatedSlots)
 
 
-    clearPlayerFromTournament(playerId, updatedSlots)
+    playerId && clearPlayerFromTournament(playerId, updatedSlots)
 
     clearSlotsAutoAdvance(targetSlot!, updatedSlots)
     updatedSlots.find(slot => {
@@ -87,13 +85,18 @@ export function handleManualAssignPlayerToSlot(comp: ActivePoolComp, slotId: num
     })
     if (playerAlreadyInSlot && autoAssignPlayers)
       updatedSlots = assignPlayer({ ...comp, slots: updatedSlots }, playerAlreadyInSlot)
+    else {
+      applyByeToEmptyFirstRoundSlots(updatedSlots)
+      autoAdvanceByeMatchups(updatedSlots)
+
+    }
 
 
   } else {
 
     updatedSlots.find(slot => {
       if (slot.id === slotId)
-        return slot.playerId = playerId
+        return playerId ? slot.playerId = playerId : delete slot.playerId
     })
   }
   return updatedSlots

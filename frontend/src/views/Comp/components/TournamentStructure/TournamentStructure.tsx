@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-import type { PoolComp } from "../../../../../../shared/domain";
+import type { PoolComp, Slot } from "../../../../../../shared/domain";
 import { useAppContext } from "../../../../AppContext";
 import { canSetSlot } from "../../../../services/poolComp.service";
 import {
@@ -8,8 +8,7 @@ import {
 } from "../../../../services/tournamentStructure.service";
 import { Connector } from "./components/Connector";
 import { SlotElement } from "./components/Slot";
-import { SlotMatchupSelect } from "./components/SlotMatchupSelect";
-import type { Slot } from "../../../../../../shared/domain";
+import { SlotPlayerSelect } from "./components/SlotPlayerSelect";
 
 type Props = {
   comp: PoolComp;
@@ -55,13 +54,19 @@ export function TournamentStructure({ comp }: Props) {
           />
         ))}
         {selectedSlot && (
-          <SlotMatchupSelect
-            selectedSlot={layout.slotWithPositions.find(slotWithPosition => slotWithPosition.slot.id === selectedSlot.id)!}
+          <SlotPlayerSelect
+            selectedSlot={selectedSlot}
             slots={comp.slots}
+            selectPosition={getSelectPosition(selectedSlot)}
             onClose={() => setSelectedSlot(null)}
           />
         )}
       </tournament-structure-inner>
     </tournament-structure>
   );
+
+  function getSelectPosition(slot: Slot): { x: number, y: number } {
+    const { x, y, height } = layout.slotWithPositions.find(slotWithPosition => slotWithPosition.slot.id === slot.id)!;
+    return { x, y: y + height };
+  }
 }

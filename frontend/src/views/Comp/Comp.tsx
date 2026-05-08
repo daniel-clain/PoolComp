@@ -25,19 +25,8 @@ export function Comp() {
     setCompActiveTab, autoAssignPlayers
   } = useAppContext();
 
-  const comp = activePoolComp!;
+  const comp = activeHistoricalComp ?? activePoolComp!;
 
-  const firstPrizeMoney =
-    !activeHistoricalComp && comp
-      ? calculateFirstPrizeMoney(comp.registeredPlayers)
-      : null;
-
-  const completeCompDisabled = Boolean(activeHistoricalComp) || !activePoolCompHasChampionPlayer(comp.slots);
-
-  const canAddMorePlayersDisabled = !canAddMorePlayers(comp.slots);
-
-  const randomiseMatchupsDisabled = Boolean(activeHistoricalComp) ||
-    (comp.registeredPlayers.length < 5 || compStarted(comp.slots));
 
   return (
     <comp-view>
@@ -78,7 +67,9 @@ export function Comp() {
     if (activeHistoricalComp) {
       return <comp-main-panel><TournamentStructure comp={activeHistoricalComp} /></comp-main-panel>;
     }
-    console.log('tournament structure rerender', comp, activePoolComp)
+    console.log('tournament structure rerender', comp)
+
+    const canAddMorePlayersDisabled = !canAddMorePlayers(comp.slots);
     return (
       <comp-main-panel>
         {compActiveTab === "Tournament" ? (
@@ -101,10 +92,12 @@ export function Comp() {
   }
 
   function textBoxes() {
-    const compDate = (activeHistoricalComp ?? comp).date;
+    const compDate = comp.date;
     const compDateString = compDate
       ? new Date(compDate).toLocaleDateString()
       : "";
+    const firstPrizeMoney =
+      calculateFirstPrizeMoney(comp.registeredPlayers)
     return (
       <text-box-container>
         <text-box>
@@ -151,7 +144,10 @@ export function Comp() {
       );
     }
 
-    const unassignedPlayers = getUnassignedPlayers(comp.registeredPlayers, comp.slots).length;
+    const unassignedPlayers = getUnassignedPlayers(comp).length;
+
+    const randomiseMatchupsDisabled =
+      (comp.registeredPlayers.length < 5 || compStarted(comp.slots));
 
 
     return (
@@ -197,6 +193,7 @@ export function Comp() {
       return null;
     }
 
+    const completeCompDisabled = !activePoolCompHasChampionPlayer(comp.slots);
     return (
       <comp-actions-bottom>
         <button

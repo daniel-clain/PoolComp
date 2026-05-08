@@ -11,34 +11,5 @@ money-calculations {
       ));
   }
 
-  data-group {
-    display: flex;
-    gap: 1rem;
-    @include cq-responsive((font-size: 3,
-      ));
 
-    data-label {
-      @include cq-responsive((width: 20,
-        ));
-    }
-
-    data-value {
-      flex: 1;
-      color: $color-comp-data-value;
-    }
-
-    data-description {
-      display: flex;
-      flex-direction: column;
-      @include cq-responsive((font-size: 2,
-        ));
-      font-style: italic;
-      @include cq-responsive((gap: 1,
-        ));
-
-      description-line {
-        display: block;
-      }
-    }
-  }
 }

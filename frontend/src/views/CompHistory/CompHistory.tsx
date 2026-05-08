@@ -1,16 +1,14 @@
-import { useCallback } from "react";
+
 import { useAppContext } from "../../AppContext";
 import {
-  calculatePrizeMoneyFromPlayerCount,
-  countPlayersInComp,
-  getFinalistPlayerIds,
+  calculateFirstPrizeMoney,
+  getFinalists,
 } from "../../services/poolComp.service";
 
 export function CompHistory() {
   const { compHistory, players, viewHistoricalComp } = useAppContext();
-  const playerName = useCallback((playerId: string): string => {
-    return players.find((player) => player.id === playerId)?.name!
-  }, [players])
+
+
 
   return (
     <history-view>
@@ -28,12 +26,13 @@ export function CompHistory() {
           </history-table-header>
           <history-table-body>
             {compHistory.map((comp) => {
-              const playerCount = countPlayersInComp(comp.slots);
-              const { firstPlaceId, secondPlaceId } = getFinalistPlayerIds(
-                comp.slots,
+              const { firstPlace, secondPlace } = getFinalists(
+                comp,
+                players,
               );
+              const playersCount = comp.registeredPlayers.length;
               const prizeMoney =
-                calculatePrizeMoneyFromPlayerCount(playerCount);
+                calculateFirstPrizeMoney(comp.registeredPlayers);
               return (
                 <history-row
                   key={comp.id}
@@ -42,9 +41,9 @@ export function CompHistory() {
                   <history-cell>
                     {new Date(comp.date).toLocaleDateString()}
                   </history-cell>
-                  <history-cell>{playerCount}</history-cell>
-                  <history-cell>{playerName(firstPlaceId)}</history-cell>
-                  <history-cell>{playerName(secondPlaceId)}</history-cell>
+                  <history-cell>{playersCount}</history-cell>
+                  <history-cell>{firstPlace.name}</history-cell>
+                  <history-cell>{secondPlace.name}</history-cell>
                   <history-cell>${prizeMoney}</history-cell>
                 </history-row>
               );
