@@ -62,7 +62,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [activeHistoricalComp, setActiveHistoricalComp] =
     useState<PoolComp | null>(null);
   const [actionInProgress, setActionInProgress] = useState(false);
-  const [compActiveTab, setCompActiveTab] = useState<CompTab>("Money");
+  const [compActiveTab, setCompActiveTab] = useState<CompTab>("Players");
 
   const isCompManager = localStorage.getItem('userIsCompManager') === 'true'
 

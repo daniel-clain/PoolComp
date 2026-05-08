@@ -6,7 +6,7 @@ export async function manualAssignPlayerToSlot(
   data: { slotId: number; playerId: string },
 ): Promise<void> {
   const activeComp = backendService.getActiveComp();
-  const slots = handleManualAssignPlayerToSlot(activeComp, data.slotId, data.playerId);
+  const slots = handleManualAssignPlayerToSlot(activeComp, data.slotId, data.playerId, backendService.backendState.autoAssignPlayers);
 
   await backendService.mongoDbService.activeCompCollection.updateOne(
     { id: activeComp.id },

@@ -4,13 +4,13 @@ import { poolCompConfig } from "../../../../shared/poolCompConfig.js";
 import { getFirstRoundMatchupsFromAllTournamentSlots, getFirstRoundSlotsFromAllTournamentSlots, getMatchupNextRoundSlot, getNextRoundSlots, getSlotsMatchup, getSlotsNextRoundSlot } from "../../../../shared/tournament-slot.service.js";
 
 
-
-
 export function tournamentNeedsSizeIncrease(registeredPlayers: RegisteredPlayer[], existingSlots: Slot[]): boolean {
   const existingFirstRoundSize = getFirstRoundSlotsFromAllTournamentSlots(existingSlots).length;
   const newFirstRoundSize = getFirstRoundSize(registeredPlayers.length);
   return newFirstRoundSize > existingFirstRoundSize;
 }
+
+
 export function mapTournamentSlotsToNextRoundSize(registeredPlayers: RegisteredPlayer[], existingSlots: Slot[]): Slot[] {
 
   const existingFirstRoundSlots = getFirstRoundSlotsFromAllTournamentSlots(existingSlots);
@@ -23,18 +23,23 @@ export function mapTournamentSlotsToNextRoundSize(registeredPlayers: RegisteredP
   return newSlots;
 }
 
+
 export function getMatchupsWithAnAvailableSlot(tournamentSlots: Slot[]): Matchup[] {
   const matchups: Matchup[] = getFirstRoundMatchupsFromAllTournamentSlots(tournamentSlots)
   const matchupsWithAnAvailableSlot = matchups.filter(({ slot1, slot2 }) => [slot1, slot2].some(slot => isSlotAvailable(slot, tournamentSlots)));
   return matchupsWithAnAvailableSlot;
 }
 
+
 export function matchupHasTwoEmptySlots(matchup: Matchup): boolean {
   return !matchup.slot1.playerId && !matchup.slot2.playerId;
 }
+
+
 export function matchupHasAnEmptySlot(matchup: Matchup): boolean {
   return !matchup.slot1.playerId || !matchup.slot2.playerId;
 }
+
 
 export function isSlotAvailable(slot: Slot, tournamentSlots: Slot[]): boolean {
   if (slot.playerId) {
@@ -52,11 +57,6 @@ export function isSlotAvailable(slot: Slot, tournamentSlots: Slot[]): boolean {
 
   return !slot.playerId;
 }
-
-
-
-
-/* ------------------------------------- */
 
 
 export function getFirstRoundSize(registeredPlayerCount: number): PoolCompConfig["minCompSize"] | 16 | PoolCompConfig["maxCompSize"] {
@@ -81,8 +81,6 @@ export function getTournamentSlotsFromFirstRoundSize(firstRoundSize: number): Sl
 }
 
 
-
-
 export function remapWhenFirstRoundSlotCountGrows(
   existingSlots: Slot[],
   newSlots: Slot[],
@@ -92,14 +90,6 @@ export function remapWhenFirstRoundSlotCountGrows(
   existingFirstRoundSlots.forEach((slot, index) => {
     newFirstRoundSlots[index * 2]!.playerId = slot.playerId;
   });
-}
-
-
-export function getUnassignedPlayers(
-  registeredPlayers: RegisteredPlayer[],
-  tournamentSlots: Slot[],
-): RegisteredPlayer[] {
-  return registeredPlayers.filter(player => !tournamentSlots.some(slot => slot.playerId === player.id));
 }
 
 
@@ -123,57 +113,26 @@ export function getRandomMatchup(matchups: Matchup[]): Matchup {
 }
 
 
-
-
 export function getRandomSlotFromMatchup(matchup: Matchup): Slot {
   const randomIndex = Math.floor(Math.random() * 2);
   return randomIndex === 0 ? matchup.slot1 : matchup.slot2;
 }
 
-export function clearSlotsAutoAdvance(slot: Slot, tournamentSlots: Slot[]): Slot[] {
 
+export function clearSlotsAutoAdvance(slot: Slot, tournamentSlots: Slot[]) {
+
+  recursiveClear(slot);
 
   function recursiveClear(slot: Slot) {
 
     delete slot.isBye;
+    delete slot.playerId;
 
     const nextRoundSlot = getSlotsNextRoundSlot(slot, tournamentSlots);
-
-    const nextRoundMatchup = nextRoundSlot && getSlotsMatchup(nextRoundSlot, tournamentSlots);
-
-
-    if (!nextRoundSlot) {
-      throw "nextRoundSlot should not be undefined"
-    }
-
-    if (!nextRoundMatchup) {
-      return
-    }
-
-    const isDoubleByeMatchup = nextRoundMatchup.slot1.isBye && nextRoundMatchup.slot2.isBye;
-
-    if (isDoubleByeMatchup) {
-      recursiveClear(nextRoundSlot);
-    } else {
-      const slotWithPlayer = nextRoundMatchup.slot1.playerId ? nextRoundMatchup.slot1 : nextRoundMatchup.slot2;
-      recursiveClearPlayerAutoAdvance(slotWithPlayer);
-      recursiveClear(nextRoundSlot);
-
-    }
+    nextRoundSlot && recursiveClear(nextRoundSlot)
 
   }
-  function recursiveClearPlayerAutoAdvance(slot: Slot) {
-    delete tournamentSlots.find(s => s.id === slot.id)!.playerId
-    const nextRoundSlot = getSlotsNextRoundSlot(slot, tournamentSlots);
-    if (nextRoundSlot) {
-      recursiveClearPlayerAutoAdvance(nextRoundSlot);
-    }
-  }
-  recursiveClear(slot);
-  return tournamentSlots;
 }
-
-
 
 
 export function getRandomUnassignedPlayer(
@@ -184,8 +143,6 @@ export function getRandomUnassignedPlayer(
     (player) => !firstRoundSlots.some((slot) => slot.playerId === player.id),
   )!.id;
 }
-
-
 
 
 export function applyByeToEmptyFirstRoundSlots(tournamentSlots: Slot[]) {
@@ -219,15 +176,13 @@ export function autoAdvanceByeMatchups(tournamentSlots: Slot[]) {
       }
 
     }
-    if (thisRoundSlots.length == 2) {
+    const nextRoundSlots = getNextRoundSlots(thisRoundSlots, tournamentSlots)
+    if (nextRoundSlots.length == 1) {
       return
     }
-    const nextRoundSlots = getNextRoundSlots(thisRoundSlots, tournamentSlots)
     advanceRoundSlots(nextRoundSlots)
   }
 }
-
-
 
 
 export function slotIsFirstRoundSlot(slotId: number, tournamentSlots: Slot[]): boolean {
@@ -235,7 +190,8 @@ export function slotIsFirstRoundSlot(slotId: number, tournamentSlots: Slot[]): b
   return firstRoundSlots.some(slot => slot.id === slotId)
 }
 
-export function clearPlayerFromBracket(playerId: string, tournamentSlots: Slot[]) {
+
+export function clearPlayerFromTournament(playerId: string, tournamentSlots: Slot[]) {
   tournamentSlots.forEach(slot => {
     if (slot.playerId === playerId) {
       delete slot.playerId

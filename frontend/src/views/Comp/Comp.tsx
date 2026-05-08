@@ -6,7 +6,7 @@ import diningVoucherImage from "../../assets/dining-voucher.jpg";
 import { ScalingImage } from "../../components/ScalingImage/ScalingImage";
 import { TabBar } from "../../components/TabBar/TabBar";
 
-import { compStarted } from "../../../../shared/tournament-slot.service";
+import { compStarted, getUnassignedPlayers } from "../../../../shared/tournament-slot.service";
 import { activePoolCompHasChampionPlayer, calculateFirstPrizeMoney, canAddMorePlayers } from "../../services/poolComp.service";
 import { CompPlayers } from "./components/CompPlayers/CompPlayers";
 import { MoneyCalculations } from "./components/MoneyCalculations/MoneyCalculations";
@@ -22,7 +22,7 @@ export function Comp() {
     send,
     userIsCompManager,
     compActiveTab,
-    setCompActiveTab,
+    setCompActiveTab, autoAssignPlayers
   } = useAppContext();
 
   const comp = activePoolComp!;
@@ -151,6 +151,8 @@ export function Comp() {
       );
     }
 
+    const unassignedPlayers = getUnassignedPlayers(comp.registeredPlayers, comp.slots).length;
+
 
     return (
       <comp-actions>
@@ -173,11 +175,12 @@ export function Comp() {
           <assign-players-container>
             <button
               type="button"
+              disabled={autoAssignPlayers}
               onClick={() => {
                 send(['assignPlayers']);
               }}
             >
-              Assign Players
+              Assign Players ({unassignedPlayers})
             </button>
             <label>
               <input type="checkbox" checked={autoAssignPlayers} onChange={() => {

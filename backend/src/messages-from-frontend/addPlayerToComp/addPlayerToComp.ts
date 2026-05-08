@@ -1,7 +1,7 @@
 import { Slot } from "../../../../shared/domain.js";
 import { tournamentHasHadAssignment } from "../../../../shared/tournament-slot.service.js";
 import type { BackendService } from "../../services/backend.service.js";
-import { autoAssignUnassignedPlayers } from "../../services/tournament-slot-assignment/tournament-slot-assignment.service.js";
+import { assignPlayer } from "../../services/tournament-slot-assignment/tournament-slot-assignment.service.js";
 import { mapTournamentSlotsToNextRoundSize, tournamentNeedsSizeIncrease } from "../../services/tournament-slot-assignment/tournament-slot-assignment.units.js";
 
 export async function addPlayerToComp(
@@ -18,9 +18,10 @@ export async function addPlayerToComp(
   if (tournamentNeedsSizeIncrease(updatedRegisteredPlayers, updatedSlots)) {
     updatedSlots = mapTournamentSlotsToNextRoundSize(updatedRegisteredPlayers, updatedSlots)
   }
-  if (tournamentHasHadAssignment(updatedSlots)) {
-    updatedSlots = autoAssignUnassignedPlayers(
-      { ...comp, registeredPlayers: updatedRegisteredPlayers, slots: updatedSlots }
+  if (tournamentHasHadAssignment(updatedSlots) && backendService.backendState.autoAssignPlayers) {
+    updatedSlots = assignPlayer(
+      { ...comp, registeredPlayers: updatedRegisteredPlayers, slots: updatedSlots },
+      data.playerId
     );
   }
   await backendService.mongoDbService.activeCompCollection.updateOne(
