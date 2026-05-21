@@ -12,9 +12,9 @@ import {
 } from "../../shared/domain";
 import type { MessageToBackend } from "../../shared/messageToBackend";
 import { poolCompConfig } from "../../shared/poolCompConfig";
-import { tournamentHasHadAssignment } from "../../shared/tournament-slot.service";
 import { useOrientation } from "./hooks/useOrientation";
 
+import { tournamentHasHadAssignment } from "../../shared/tournament-slot.service";
 import { createPoolCompService } from "./services/poolComp.service";
 import type {
   ConnectionStatus,
@@ -65,14 +65,24 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [activeHistoricalComp, setActiveHistoricalComp] =
     useState<PoolComp | null>(null);
   const [actionInProgress, setActionInProgress] = useState(false);
-  const hasStarted = allData.activePoolComp && tournamentHasHadAssignment(allData.activePoolComp.slots);
-  console.log('hasStarted', hasStarted)
-  const [compActiveTab, setCompActiveTab] = useState<CompTab>(hasStarted ? "Tournament" : "Players");
-  console.log('compActiveTab', compActiveTab)
+
+  const [compActiveTab, setCompActiveTab] = useState<CompTab>("Players");
 
   const isCompManager = localStorage.getItem('userIsCompManager') === 'true'
 
   const [userIsCompManager, setUserIsCompManager] = useState(isCompManager);
+
+  const initialCompTabHasBeenSet = useRef(false);
+
+  useEffect(() => {
+    if (initialCompTabHasBeenSet.current) return;
+    const slots = allData.activePoolComp?.slots;
+    if (!slots) return; // wait until allData has active comp + slots
+    setCompActiveTab(
+      tournamentHasHadAssignment(slots) ? "Tournament" : "Players"
+    );
+    initialCompTabHasBeenSet.current = true;
+  }, [allData.activePoolComp?.slots]);
 
 
   function viewHistoricalComp(comp: PoolComp) {

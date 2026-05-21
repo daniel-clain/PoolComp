@@ -135,7 +135,7 @@ fields-container {
       ));
 
     field-label {
-      @include cq-responsive((width: 20,
+      @include cq-responsive((width: 30,
         ));
     }
 
@@ -152,6 +152,10 @@ fields-container {
       font-style: italic;
       @include cq-responsive((gap: 1,
         ));
+    }
+
+    description-line {
+      display: block
     }
   }
 }

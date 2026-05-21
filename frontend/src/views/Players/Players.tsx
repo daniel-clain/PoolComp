@@ -3,7 +3,7 @@ import { useAppContext } from "../../AppContext";
 import { UpdatePlayerModal } from "./components/UpdatePlayerContent";
 
 export function Players() {
-  const { players, send, setModalContent } = useAppContext();
+  const { players, send, setModalContent, userIsCompManager } = useAppContext();
   const [playerName, setPlayerName] = useState("");
   const [showDeactivated, setShowDeactivated] = useState(false);
 
@@ -50,8 +50,9 @@ export function Players() {
           onChange={handleChange}
           onKeyDown={handleKeyDown}
           placeholder="New player name"
+          disabled={!userIsCompManager}
         />
-        <button type="button" onClick={addPlayer}>
+        <button type="button" onClick={addPlayer} disabled={!userIsCompManager}>
           Add Player
         </button>
       </player-input-row>
@@ -77,6 +78,7 @@ export function Players() {
                 onClick={() =>
                   handlePlayerSelected(player.id)
                 }
+                disabled={!userIsCompManager}
               >
                 {player.name}
               </button>

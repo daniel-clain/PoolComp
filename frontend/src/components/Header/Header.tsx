@@ -1,7 +1,7 @@
 import { useAppContext } from "../../AppContext";
 
 export function Header() {
-  const { connectionStatus, activeView, setActiveView, actionInProgress } = useAppContext();
+  const { connectionStatus, activeView, setActiveView, actionInProgress, clearHistoricalComp } = useAppContext();
   return (
     <header>
       <nav-tabs>
@@ -9,7 +9,7 @@ export function Header() {
           <button
             key={viewName}
             className={activeView === viewName ? "active" : ""}
-            onClick={() => setActiveView(viewName)}
+            onClick={() => (setActiveView(viewName), viewName === "Pool Comp" && clearHistoricalComp())}
           >
             {viewName}
           </button>

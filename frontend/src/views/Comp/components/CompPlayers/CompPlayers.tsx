@@ -1,16 +1,26 @@
+import { useMemo } from "react";
 import type { RegisteredPlayer } from "../../../../../../shared/domain";
+import { compStarted } from "../../../../../../shared/tournament-slot.service";
 import { useAppContext } from "../../../../AppContext";
 
 export function CompPlayers({ registeredPlayers, canAddMorePlayersDisabled }: { registeredPlayers: RegisteredPlayer[], canAddMorePlayersDisabled: boolean }) {
   const {
     players,
     send,
+    userIsCompManager,
+    activePoolComp,
   } = useAppContext();
+
+  const compHasStarted = useMemo(() => {
+    return activePoolComp?.slots && compStarted(activePoolComp.slots)
+  }, [activePoolComp?.slots])
 
 
   const databasePlayersForGrid = players.filter(
     (player) => !player.deactivated,
   );
+
+  console.log('isCompManager', userIsCompManager)
 
   return (
     <comp-players>
@@ -28,6 +38,7 @@ export function CompPlayers({ registeredPlayers, canAddMorePlayersDisabled }: { 
                   onClick={() =>
                     send(['removePlayerFromComp', { playerId: registeredPlayer.playerId }])
                   }
+                  disabled={compHasStarted || !userIsCompManager}
                 >
                   {players.find((player) => player.id === registeredPlayer.playerId)!.name}
                 </button>
@@ -37,13 +48,14 @@ export function CompPlayers({ registeredPlayers, canAddMorePlayersDisabled }: { 
                   onChange={() =>
                     send(['togglePlayerPaid', { playerId: registeredPlayer.playerId, paid: !registeredPlayer.paid }])
                   }
+                  disabled={!userIsCompManager}
                 />
               </registered-player-cell>
             ))}
           </player-grid>
         )}
       </registered-players-panel>
-      <all-players-panel className="panel-container">
+      {userIsCompManager && <all-players-panel className="panel-container">
         <panel-heading>All players</panel-heading>
         <player-grid>
           {databasePlayersForGrid.map((player) => {
@@ -56,14 +68,14 @@ export function CompPlayers({ registeredPlayers, canAddMorePlayersDisabled }: { 
                 type="button"
                 onClick={() => send([isRegistered ? 'removePlayerFromComp' : 'addPlayerToComp', { playerId: player.id }])}
                 className={isRegistered ? "active" : ""}
-                disabled={canAddMorePlayersDisabled}
+                disabled={canAddMorePlayersDisabled || !userIsCompManager}
               >
                 {player.name}
               </button>
             );
           })}
         </player-grid>
-      </all-players-panel>
+      </all-players-panel>}
     </comp-players>
   );
 }

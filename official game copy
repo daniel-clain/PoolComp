@@ -1,0 +1,197 @@
+{
+  "_id": {
+    "$oid": "6a05a71c411556b93debc368"
+  },
+  "id": "9b59ed16-ef89-4d16-9f69-5c5d49f86081",
+  "date": {
+    "$date": "2026-05-14T09:09:03.075Z"
+  },
+  "slots": [
+    {
+      "id": 0,
+      "playerId": "4832ff29-d1a4-495f-b939-078309160477"
+    },
+    {
+      "id": 1,
+      "playerId": "1e3d8fcb-141f-4061-bb9a-6f0f80d7a45e"
+    },
+    {
+      "id": 2,
+      "playerId": "4832ff29-d1a4-495f-b939-078309160477"
+    },
+    {
+      "id": 3,
+      "playerId": "f41cd4e1-ac72-4dd0-bd8b-44813636f1d5"
+    },
+    {
+      "id": 4,
+      "playerId": "1e3d8fcb-141f-4061-bb9a-6f0f80d7a45e"
+    },
+    {
+      "id": 5,
+      "playerId": "62904385-2358-4b6e-9edd-3a6589cca5f1"
+    },
+    {
+      "id": 6,
+      "playerId": "4832ff29-d1a4-495f-b939-078309160477"
+    },
+    {
+      "id": 7,
+      "playerId": "f41cd4e1-ac72-4dd0-bd8b-44813636f1d5"
+    },
+    {
+      "id": 8,
+      "playerId": "fda65fbb-c3e9-4a40-b125-11f76acde069"
+    },
+    {
+      "id": 9,
+      "playerId": "1e3d8fcb-141f-4061-bb9a-6f0f80d7a45e"
+    },
+    {
+      "id": 10,
+      "playerId": "e17fd8c8-1e1e-4ecf-b473-37a6a6c20343"
+    },
+    {
+      "id": 11,
+      "playerId": "62904385-2358-4b6e-9edd-3a6589cca5f1"
+    },
+    {
+      "id": 12,
+      "playerId": "bbce9914-fcf7-4e5a-94ed-c83ae97b08ab"
+    },
+    {
+      "id": 13,
+      "playerId": "4832ff29-d1a4-495f-b939-078309160477"
+    },
+    {
+      "id": 14,
+      "playerId": "d5aaea87-0d55-4c0a-8af7-e6a8e1f97ef5"
+    },
+    {
+      "id": 15,
+      "playerId": "f41cd4e1-ac72-4dd0-bd8b-44813636f1d5"
+    },
+    {
+      "id": 16,
+      "playerId": "ca414cbc-14c0-4f4a-93de-a0f15e9a2b2b"
+    },
+    {
+      "id": 17,
+      "playerId": "fda65fbb-c3e9-4a40-b125-11f76acde069"
+    },
+    {
+      "id": 18,
+      "playerId": "79b08841-3c5b-4280-b254-4bb2d43d6c86"
+    },
+    {
+      "id": 19,
+      "playerId": "1e3d8fcb-141f-4061-bb9a-6f0f80d7a45e"
+    },
+    {
+      "id": 20,
+      "playerId": "b81509d3-6c34-4cc9-9b70-26dc7f691d18"
+    },
+    {
+      "id": 21,
+      "playerId": "fcb3046a-bbd6-4c0a-a709-428893b6fd81"
+    },
+    {
+      "id": 22,
+      "playerId": "e17fd8c8-1e1e-4ecf-b473-37a6a6c20343"
+    },
+    {
+      "id": 23,
+      "isBye": true
+    },
+    {
+      "id": 24,
+      "playerId": "62904385-2358-4b6e-9edd-3a6589cca5f1"
+    },
+    {
+      "id": 25,
+      "playerId": "bbce9914-fcf7-4e5a-94ed-c83ae97b08ab"
+    },
+    {
+      "id": 26,
+      "playerId": "546e3e37-ffac-40fc-a255-4fac9cef3a9b"
+    },
+    {
+      "id": 27,
+      "playerId": "7e1dd82e-31c7-4f63-ad1a-20d074e1ed1f"
+    },
+    {
+      "id": 28,
+      "playerId": "4832ff29-d1a4-495f-b939-078309160477"
+    },
+    {
+      "id": 29,
+      "playerId": "e870f0b1-7cea-46be-a3c9-9372ddb0ddbe"
+    },
+    {
+      "id": 30,
+      "playerId": "d5aaea87-0d55-4c0a-8af7-e6a8e1f97ef5"
+    }
+  ],
+  "registeredPlayers": [
+    {
+      "playerId": "f41cd4e1-ac72-4dd0-bd8b-44813636f1d5",
+      "paid": false
+    },
+    {
+      "playerId": "fda65fbb-c3e9-4a40-b125-11f76acde069",
+      "paid": false
+    },
+    {
+      "playerId": "1e3d8fcb-141f-4061-bb9a-6f0f80d7a45e",
+      "paid": false
+    },
+    {
+      "playerId": "b81509d3-6c34-4cc9-9b70-26dc7f691d18",
+      "paid": false
+    },
+    {
+      "playerId": "fcb3046a-bbd6-4c0a-a709-428893b6fd81",
+      "paid": false
+    },
+    {
+      "playerId": "e17fd8c8-1e1e-4ecf-b473-37a6a6c20343",
+      "paid": false
+    },
+    {
+      "playerId": "62904385-2358-4b6e-9edd-3a6589cca5f1",
+      "paid": false
+    },
+    {
+      "playerId": "7e1dd82e-31c7-4f63-ad1a-20d074e1ed1f",
+      "paid": false
+    },
+    {
+      "playerId": "4832ff29-d1a4-495f-b939-078309160477",
+      "paid": false
+    },
+    {
+      "playerId": "d5aaea87-0d55-4c0a-8af7-e6a8e1f97ef5",
+      "paid": false
+    },
+    {
+      "playerId": "79b08841-3c5b-4280-b254-4bb2d43d6c86",
+      "paid": false
+    },
+    {
+      "playerId": "bbce9914-fcf7-4e5a-94ed-c83ae97b08ab",
+      "paid": false
+    },
+    {
+      "playerId": "546e3e37-ffac-40fc-a255-4fac9cef3a9b",
+      "paid": false
+    },
+    {
+      "playerId": "ca414cbc-14c0-4f4a-93de-a0f15e9a2b2b",
+      "paid": false
+    },
+    {
+      "playerId": "e870f0b1-7cea-46be-a3c9-9372ddb0ddbe",
+      "paid": false
+    }
+  ]
+}

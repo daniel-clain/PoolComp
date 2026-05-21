@@ -1,6 +1,7 @@
+import _ from "lodash";
 import { randomUUID } from "node:crypto";
-import type { BackendService } from "../../services/backend.service.js";
 import type { Player } from "../../../../shared/domain.js";
+import type { BackendService } from "../../services/backend.service.js";
 
 export async function addPlayer(
   backendService: BackendService,
@@ -17,5 +18,5 @@ export async function addPlayer(
     { projection: { _id: 0 } },
   );
   if (!updatedPlayerResult) throw new Error("Player not found");
-  backendService.backendState.players.push(updatedPlayerResult);
+  backendService.backendState.players = _.orderBy([...backendService.backendState.players, updatedPlayerResult], ['name'], ['asc']);
 }

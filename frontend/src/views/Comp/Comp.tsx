@@ -26,6 +26,7 @@ export function Comp() {
   } = useAppContext();
 
   const comp = activeHistoricalComp ?? activePoolComp!;
+  const isBigComp = comp.secondChanceSlots
 
 
   return (
@@ -67,7 +68,6 @@ export function Comp() {
     if (activeHistoricalComp) {
       return <comp-main-panel><TournamentStructure comp={activeHistoricalComp} /></comp-main-panel>;
     }
-    console.log('tournament structure rerender', comp)
 
     const canAddMorePlayersDisabled = !canAddMorePlayers(comp.slots);
     return (
@@ -85,8 +85,7 @@ export function Comp() {
 
   function compTitle() {
     if (activeHistoricalComp) {
-      const compDate = new Date(activeHistoricalComp.date).toLocaleDateString();
-      return <view-title>Historical Comp ({compDate})</view-title>;
+      return <view-title>Previous Comp</view-title>;
     }
     return <view-title>Comp Brackets</view-title>;
   }
@@ -153,7 +152,7 @@ export function Comp() {
     return (
       <comp-actions>
         <TabBar
-          tabs={["Tournament", "Players"]}
+          tabs={["Tournament", "Players", "Money"]}
           selectedTab={compActiveTab}
           onTabSelected={setCompActiveTab}
         />
@@ -174,6 +173,7 @@ export function Comp() {
               disabled={autoAssignPlayers}
               onClick={() => {
                 send(['assignPlayers']);
+                setCompActiveTab("Tournament");
               }}
             >
               Assign Players ({unassignedPlayers})
@@ -181,7 +181,14 @@ export function Comp() {
             <label>
               <input type="checkbox" checked={autoAssignPlayers} onChange={() => {
                 send(['setAutoAssignPlayers', { autoAssignPlayers: !autoAssignPlayers }]);
+                setCompActiveTab("Tournament");
               }} />(Auto)</label></assign-players-container>
+
+          {/* <label>
+              <input type="checkbox" checked={isBigComp} onChange={() => {
+                send(['setAutoAssignPlayers', { autoAssignPlayers: !autoAssignPlayers }]);
+                setCompActiveTab("Tournament");
+              }} />Is Big Comp?</label> */}
         </>
         )}
       </comp-actions>

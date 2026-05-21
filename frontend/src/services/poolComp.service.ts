@@ -89,10 +89,8 @@ export function createPoolCompService(
   return {
     send,
   };
-
-
-
 }
+
 export function canAddMorePlayers(tournamentSlots: Slot[]): boolean {
   if (!tournamentHasHadAssignment(tournamentSlots)) {
     return true

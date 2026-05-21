@@ -11,6 +11,7 @@ export type PoolComp = {
   date: Date;
   slots: Slot[];
   registeredPlayers: RegisteredPlayer[];
+  secondChanceSlots?: Slot[];
 };
 
 

@@ -1,20 +1,13 @@
 important:
-    ☐ rework how registered players are added
-        ~ only auto add after initial assignment
-        ~ tournament size grows based on number of registered players, but doenst add them
-        ~ comp has state checkmark that affect allowed actions
-    
-    ☐ Handle when someone tries to add a player to a comp that already has match up results, cover edge case scenarios
-        ~ adding players becomes disabled from shared function
+    ☐ shouldnt be able to clear/change a slot if its next slot is already assigned
+    ☐ everything updates on every change, need to rerender only when necessary
 
 
 
 
 minor:
     ☐ non manager users only see registered players, not all players
-    ☐ on new comp, active tab is players
-    ☐ historical comp title too lage on landscape
-    ☐ should show prize money on historical comp
+    ☐ historical comp title too lage on landscapep
     ☐ make sure ui components dont have more nesting elements than necessary
     ☐ remove players needs a confirm
 
@@ -46,14 +39,5 @@ nice to have:
 
 
 unsure:
-    ☐ rework concept of active comp, instead of separate until complete, auto add it to the list of historical comps
-      ~ its considered an active comp if date matches today
-      ~ its considered finalised when all the requirements are met
-        ~ what are the pros and cons
-          ~ pros:
-              ~ redundant extra data types, data collections
-              ~ if active comp is deleted, no record of it, needs to be marked as complete before stored in history
-          ~ cons:
-              ~ riskly to add delete mechanism to historical comps
     ☐ feature for manager to enter actual money put away (vs how much should be put away), what the money that was supposed to be put asside actually put asside
 
