@@ -27,7 +27,7 @@ export function Comp() {
 
   const comp = activeHistoricalComp ?? activePoolComp!;
   const isBigComp = comp.secondChanceSlots
-
+  console.log('isBigComp', isBigComp)
 
   return (
     <comp-view>
