@@ -1,34 +1,35 @@
 import { useState } from "react";
 
-import type { PoolComp, Slot } from "../../../../../../shared/domain";
-import { useAppContext } from "../../../../AppContext";
-import { canSetSlot } from "../../../../services/poolComp.service";
+import type { Slot } from "../../../../../../../../shared/domain";
+import { useAppContext } from "../../../../../../AppContext";
+
+import { canSetSlot } from "../../../../../../services/poolComp.service";
 import {
   calculateSlotPositions,
-} from "../../../../services/tournamentStructure.service";
+} from "../../../../../../services/tournamentStructure.service";
 import { Connector } from "./components/Connector";
 import { SlotElement } from "./components/Slot";
 import { SlotPlayerSelect } from "./components/SlotPlayerSelect";
 
 type Props = {
-  comp: PoolComp;
+  slots: Slot[];
+  isHistoricalComp: boolean;
 };
 
-export function TournamentStructure({ comp }: Props) {
+export function TournamentStructure({ slots, isHistoricalComp }: Props) {
   const [selectedSlot, setSelectedSlot] = useState<Slot | null>(
     null,
   );
   const { userIsCompManager } = useAppContext();
 
-  if (comp.slots.length === 0) return null;
+  if (slots.length === 0) return null;
 
-  const layout = calculateSlotPositions(comp.slots);
-  const isHistoricalComp = !('registeredPlayers' in comp)
+  const layout = calculateSlotPositions(slots);
   const isInteractive = !isHistoricalComp && userIsCompManager
 
 
   function handleSlotSelect(slot: Slot) {
-    if (!canSetSlot(slot, comp.slots)) return;
+    if (!canSetSlot(slot, slots)) return;
     setSelectedSlot(slot);
   }
 
@@ -56,7 +57,7 @@ export function TournamentStructure({ comp }: Props) {
         {selectedSlot && (
           <SlotPlayerSelect
             selectedSlot={selectedSlot}
-            slots={comp.slots}
+            slots={slots}
             selectPosition={getSelectPosition(selectedSlot)}
             onClose={() => setSelectedSlot(null)}
           />

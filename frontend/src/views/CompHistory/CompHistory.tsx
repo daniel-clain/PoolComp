@@ -32,7 +32,7 @@ export function CompHistory() {
               );
               const playersCount = comp.registeredPlayers.length;
               const prizeMoney =
-                calculateFirstPrizeMoney(comp.registeredPlayers);
+                calculateFirstPrizeMoney(comp);
               return (
                 <history-row
                   key={comp.id}

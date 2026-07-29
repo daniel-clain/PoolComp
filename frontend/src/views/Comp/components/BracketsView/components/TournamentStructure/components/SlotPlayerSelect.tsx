@@ -1,9 +1,9 @@
 import { useEffect, useRef } from "react";
-import type { Slot } from "../../../../../../../shared/domain";
-import { useAppContext } from "../../../../../AppContext";
+import type { Slot } from "../../../../../../../../../shared/domain";
+import { useAppContext } from "../../../../../../../AppContext";
 import {
   getPlayerChoicesForSlot,
-} from "../../../../../services/poolComp.service";
+} from "../../../../../../../services/poolComp.service";
 
 
 type Props = {

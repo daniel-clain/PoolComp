@@ -1,5 +1,5 @@
-import { useAppContext } from "../../../../../AppContext";
-import type { SlotWithPosition } from "../../../../../services/tournamentStructure.service";
+import { useAppContext } from "../../../../../../../AppContext";
+import type { SlotWithPosition } from "../../../../../../../services/tournamentStructure.service";
 
 type Props = {
   slotWithPosition: SlotWithPosition;

@@ -1,6 +1,6 @@
 import { poolCompConfig } from "../../../../../../shared/poolCompConfig";
 import { useAppContext } from "../../../../AppContext";
-import { calculateBigCompMoney, calculateFirstPrizeMoney } from "../../../../services/poolComp.service";
+import { calculateCompBigCompContribution, calculateFirstPrizeMoney } from "../../../../services/poolComp.service";
 
 export function MoneyCalculations() {
 
@@ -11,8 +11,8 @@ export function MoneyCalculations() {
   const firstPlacePrizeMoneyPercentage = 1 - contributionPercentage
   const numberOfPlayers = activePoolComp!.registeredPlayers.length
 
-  const firstPlacePrizeMoney = calculateFirstPrizeMoney(activePoolComp!.registeredPlayers)
-  const bigCompMoney = calculateBigCompMoney(activePoolComp!.registeredPlayers)
+  const firstPlacePrizeMoney = calculateFirstPrizeMoney(activePoolComp!)
+  const bigCompMoney = calculateCompBigCompContribution(activePoolComp!)
   return (
     <money-calculations className="panel-container">
       <panel-heading>Money Calculations</panel-heading>

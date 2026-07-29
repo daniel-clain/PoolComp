@@ -3,6 +3,10 @@
 
 money-calculations {
 
+  .is-landscape & {
+    align-self: start;
+  }
+
   comp-data-container,
   base-values-container {
     display: flex;

@@ -23,7 +23,7 @@ import { createWebSocketService } from "./services/websockets.service";
 
 export type View = "Pool Comp" | "Players" | "Comp History";
 
-export const compTabs = ["Tournament", "Players", "Money"] as const;
+export const compTabs = ["Brackets", "2nd Chance Brackets", "Players", "Money"] as const;
 export type CompTab = (typeof compTabs)[number];
 
 
@@ -79,7 +79,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     const slots = allData.activePoolComp?.slots;
     if (!slots) return; // wait until allData has active comp + slots
     setCompActiveTab(
-      tournamentHasHadAssignment(slots) ? "Tournament" : "Players"
+      tournamentHasHadAssignment(slots) ? "Brackets" : "Players"
     );
     initialCompTabHasBeenSet.current = true;
   }, [allData.activePoolComp?.slots]);

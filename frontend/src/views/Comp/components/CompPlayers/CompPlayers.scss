@@ -15,22 +15,16 @@ comp-players {
 
   .is-landscape & {
     flex-direction: row;
+    align-self: start;
   }
 
 
   player-grid {
-    flex: 1;
     overflow: auto;
     display: grid;
     align-content: start;
 
-    .is-portrait & {
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-    }
-
-    .is-landscape & {
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
+    grid-template-columns: repeat(3, minmax(0, 1fr));
 
     @include cq-responsive((gap: 2,
       ));
@@ -38,6 +32,8 @@ comp-players {
     button {
       flex: 1;
       text-align: left;
+      @include cq-responsive((max-width: 20,
+        ));
     }
   }
 

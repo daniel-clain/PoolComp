@@ -1,0 +1,142 @@
+@use "../../../../mixins.scss" as *;
+@use "../../../../variables.scss" as *;
+
+brackets-view {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+
+  .is-portrait & {
+    flex-direction: column;
+    gap: 2cqh;
+
+    text-box-container {
+      align-items: end;
+      justify-content: space-between;
+
+      text-box {
+        width: 32cqw;
+
+        text-box-label {
+          #crown-image {
+            width: 22cqw;
+          }
+        }
+      }
+    }
+  }
+
+  .is-landscape & {
+
+    left-container {
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+      min-width: 0;
+      min-height: 0;
+      gap: 2cqh;
+    }
+
+    right-container {
+      width: 20cqw;
+
+
+      text-box-container {
+        display: flex;
+        flex-direction: column;
+        flex: 3;
+        gap: 3cqh;
+
+        text-box {
+          text-box-value {
+            width: 80%;
+          }
+
+          text-box-label {
+            #crown-image {
+              width: 24cqh;
+              margin: 0 auto;
+            }
+          }
+        }
+      }
+
+    }
+  }
+
+  text-box-container {
+    display: flex;
+
+    text-box {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+
+      @include cq-responsive((gap: 1,
+        ));
+
+      text-box-label {
+        font-weight: 700;
+        text-transform: uppercase;
+        text-align: center;
+        @include cq-responsive((font-size: 3,
+          ));
+      }
+
+      text-box-value {
+        @include cq-responsive((font-size: 4,
+          ));
+        aspect-ratio: 4 / 1;
+        width: 100%;
+        font-weight: 600;
+        border-style: solid;
+        border-color: $color-comp-field-border;
+        box-sizing: border-box;
+        display: flex;
+        align-items: center;
+        background: white;
+        justify-content: center;
+      }
+
+      text-box-images {
+        aspect-ratio: 4 / 1;
+        width: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+
+        .second-prize-voucher-image {
+          position: absolute;
+          left: 50%;
+          top: 50%;
+          border: 1px solid $color-dark-border;
+          box-sizing: border-box;
+          box-shadow:
+            0 0.25cqh 0.5cqh rgba(0, 0, 0, 0.22),
+            0 0.5cqh 1.2cqh rgba(0, 0, 0, 0.18);
+
+          .is-portrait & {
+            width: 12cqw;
+          }
+
+          .is-landscape & {
+            width: 17cqh;
+          }
+        }
+
+        #second-prize-voucher-back {
+          transform: translate(-70%, -50%) rotate(-9deg);
+        }
+
+        #second-prize-voucher-front {
+          transform: translate(-30%, -50%) rotate(6deg);
+          box-shadow:
+            0 0.35cqh 0.75cqh rgba(0, 0, 0, 0.25),
+            0 0.7cqh 1.6cqh rgba(0, 0, 0, 0.2);
+        }
+      }
+    }
+  }
+
+}
