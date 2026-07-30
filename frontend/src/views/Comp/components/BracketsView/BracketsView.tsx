@@ -30,7 +30,7 @@ export function BracketsView() {
     {
       const compDate = comp.date;
       const compDateString = compDate
-        ? new Date(compDate).toLocaleDateString()
+        ? new Date(compDate).toLocaleDateString("en-AU", { day: "numeric", month: "long", year: "numeric" })
         : "";
 
 

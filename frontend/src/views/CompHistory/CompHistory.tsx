@@ -30,6 +30,9 @@ export function CompHistory() {
                 comp,
                 players,
               );
+              const compDateString = comp.date
+                ? new Date(comp.date).toLocaleDateString("en-AU", { day: "numeric", month: "long", year: "numeric" })
+                : "";
               const playersCount = comp.registeredPlayers.length;
               const prizeMoney =
                 calculateFirstPrizeMoney(comp);
@@ -39,7 +42,7 @@ export function CompHistory() {
                   onClick={() => viewHistoricalComp(comp)}
                 >
                   <history-cell>
-                    {new Date(comp.date).toLocaleDateString()}
+                    {compDateString}
                   </history-cell>
                   <history-cell>{playersCount}</history-cell>
                   <history-cell>{firstPlace.name}</history-cell>
