@@ -1,10 +1,6 @@
 import { describe, expect, test } from "vitest";
-import type { Player, PoolComp, Slot } from "../../../../shared/domain";
+import type { PoolComp, Slot } from "../../../../shared/domain";
 import { getSecondChancePlayersPool } from "../../../../shared/tournament-slot.service";
-
-function createPlayer(id: string, name: string): Player {
-  return { id, name, deactivated: false };
-}
 
 function createComp(slots: Slot[]): PoolComp {
   return {
@@ -17,9 +13,6 @@ function createComp(slots: Slot[]): PoolComp {
 
 describe("getSecondChancePlayersPool", function () {
   test("includes a player who lost their first player versus player matchup in the first round", function () {
-    const darren = createPlayer("Darren", "Darren");
-    const kat = createPlayer("Kat", "Kat");
-    const players = [darren, kat];
 
     const comp = createComp([
       { id: 0 },
@@ -41,13 +34,10 @@ describe("getSecondChancePlayersPool", function () {
 
     const secondChancePlayers = getSecondChancePlayersPool(comp, []);
 
-    expect(secondChancePlayers).toEqual([kat]);
+    expect(secondChancePlayers).toEqual([{ id: "Kat", name: "Kat", deactivated: false }]);
   });
 
   test("does not include a player who lost their second player versus player matchup after a first round bye", function () {
-    const daniel = createPlayer("Daniel", "Daniel");
-    const darren = createPlayer("Darren", "Darren");
-    const players = [daniel, darren];
 
     const comp = createComp([
       { id: 0 },
@@ -73,9 +63,6 @@ describe("getSecondChancePlayersPool", function () {
   });
 
   test("excludes a player who won first place in one of the last six comps", function () {
-    const darren = createPlayer("Darren", "Darren");
-    const kat = createPlayer("Kat", "Kat");
-    const players = [darren, kat];
 
     const comp = createComp([
       { id: 0 },
