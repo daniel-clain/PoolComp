@@ -22,7 +22,6 @@ export function Comp() {
     compActiveTab,
     setCompActiveTab,
     autoAssignPlayers,
-    players,
     compHistory,
   } = useAppContext();
 

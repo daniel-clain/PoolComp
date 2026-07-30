@@ -14,7 +14,7 @@ type Props = {
 };
 
 export function SlotPlayerSelect({ selectedSlot, selectPosition, onClose, }: Props) {
-  const { activePoolComp, players, send, compActiveTab, activeHistoricalComp, compHistory } = useAppContext();
+  const { activePoolComp, send, compActiveTab, activeHistoricalComp, compHistory } = useAppContext();
   const panelRef = useRef<HTMLElement>(null);
 
   const comp = activeHistoricalComp || activePoolComp!;

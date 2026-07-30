@@ -101,7 +101,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const { orientation } = useOrientation();
 
   useEffect(() => {
-    const { send, closeConnection, connected, connect } = createWebSocketService(
+    const { send, closeConnection, connect } = createWebSocketService(
       (stateUpdateFromBackend: BackendState) => {
         setAllData(stateUpdateFromBackend);
       },

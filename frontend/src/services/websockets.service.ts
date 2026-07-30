@@ -19,15 +19,12 @@ export function createWebSocketService(
   let closedManually = false;
 
 
-  let connected: boolean = false;
-
   function connect() {
     if (closedManually) return;
     onConnectionStatusChange("connecting");
     socket = new WebSocket(getWebSocketUrl());
 
     socket.addEventListener("open", () => {
-      connected = true;
       onConnectionStatusChange("connected");
     });
 
@@ -53,7 +50,6 @@ export function createWebSocketService(
     });
 
     socket.addEventListener("close", () => {
-      connected = false;
       if (closedManually) {
         onConnectionStatusChange("disconnected");
         return;
@@ -82,7 +78,7 @@ export function createWebSocketService(
   connect();
 
 
-  return { send, closeConnection, connected, connect };
+  return { send, closeConnection, connect };
 
   function getWebSocketUrl(): string {
     const configuredWebSocketUrl = import.meta.env.VITE_WS_URL;

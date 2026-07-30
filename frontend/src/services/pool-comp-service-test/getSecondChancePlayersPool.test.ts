@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vitest";
 import type { Player, PoolComp, Slot } from "../../../../shared/domain";
-import { getSecondChancePlayersPool } from "../poolComp.service";
+import { getSecondChancePlayersPool } from "../../../../shared/tournament-slot.service";
 
 function createPlayer(id: string, name: string): Player {
   return { id, name, deactivated: false };
@@ -39,7 +39,7 @@ describe("getSecondChancePlayersPool", function () {
       { id: 14 },
     ]);
 
-    const secondChancePlayers = getSecondChancePlayersPool(comp, players, []);
+    const secondChancePlayers = getSecondChancePlayersPool(comp, []);
 
     expect(secondChancePlayers).toEqual([kat]);
   });
@@ -67,7 +67,7 @@ describe("getSecondChancePlayersPool", function () {
       { id: 14 },
     ]);
 
-    const secondChancePlayers = getSecondChancePlayersPool(comp, players, []);
+    const secondChancePlayers = getSecondChancePlayersPool(comp, []);
 
     expect(secondChancePlayers).toEqual([]);
   });
@@ -97,7 +97,7 @@ describe("getSecondChancePlayersPool", function () {
 
     const compHistory = [createComp([{ id: 0, playerId: "Kat" }, { id: 1 }, { id: 2 }])];
 
-    const secondChancePlayers = getSecondChancePlayersPool(comp, players, compHistory);
+    const secondChancePlayers = getSecondChancePlayersPool(comp, compHistory);
 
     expect(secondChancePlayers).toEqual([]);
   });
