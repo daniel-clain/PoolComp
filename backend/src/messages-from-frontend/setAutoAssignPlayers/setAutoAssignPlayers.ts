@@ -3,10 +3,10 @@ import { assignPlayers } from "../assignPlayers/assignPlayers.js";
 
 export async function setAutoAssignPlayers(
   backendService: BackendService,
-  data: { autoAssignPlayers: boolean },
+  data: { autoAssignPlayers: boolean; isSecondChanceComp: boolean },
 ): Promise<void> {
   backendService.backendState.autoAssignPlayers = data.autoAssignPlayers;
   if (data.autoAssignPlayers) {
-    await assignPlayers(backendService);
+    await assignPlayers(backendService, { isSecondChanceComp: data.isSecondChanceComp });
   }
 }

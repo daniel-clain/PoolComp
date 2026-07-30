@@ -3,8 +3,7 @@ import type { RefObject } from "react";
 import {
   type Player,
   type PoolComp,
-  type RegisteredPlayer,
-  type Slot,
+  type Slot
 } from "../../../shared/domain";
 
 import type { MessageToBackend } from "../../../shared/messageToBackend";
@@ -24,24 +23,25 @@ export type PlayerChoice = {
 }
 
 export function getPlayerChoicesForSlot(
-  selectedSlot: Slot,
-  slots: Slot[],
-  registeredPlayers: RegisteredPlayer[],
-  players: Player[],
+  { selectedSlot, slots, bracketPlayers }: {
+    selectedSlot: Slot,
+    slots: Slot[],
+    bracketPlayers: Player[]
+  },
 ): PlayerChoice[] {
   const sourceMatchup = getSlotSourceMatchup(selectedSlot, slots)
   if (sourceMatchup) {
     const { slot1, slot2 } = sourceMatchup
-    return registeredPlayers.reduce((acc, { playerId }) => {
-      if (playerId === slot1.playerId || playerId === slot2.playerId) {
-        acc.push({ player: players.find((player) => player.id === playerId)! })
+    return bracketPlayers.reduce((acc, { id }) => {
+      if (id === slot1.playerId || id === slot2.playerId) {
+        acc.push({ player: bracketPlayers.find((player) => player.id === id)! })
       }
       return acc
     }, [] as PlayerChoice[])
   }
-  const { unassignedPlayers, assignedPlayers } = registeredPlayers.reduce((acc, { playerId }) => {
-    const player = players.find((player) => player.id === playerId)!
-    if (slots.some(slot => slot.playerId === playerId)) {
+  const { unassignedPlayers, assignedPlayers } = bracketPlayers.reduce((acc, { id }) => {
+    const player = bracketPlayers.find((player) => player.id === id)!
+    if (slots.some(slot => slot.playerId === id)) {
       acc.assignedPlayers.push({ player })
     } else {
       acc.unassignedPlayers.push({ player, isUnassigned: true })
@@ -197,7 +197,6 @@ function getAllCompsSinceLastBigComp(compHistory: PoolComp[]): PoolComp[] {
 }
 
 function getBigCompTotalPrizePool(comp: PoolComp, compHistory: PoolComp[]): number {
-  console.log('doink')
   const normalFirstPlacePrizeMoney = calculateFirstPrizeMoney(comp)
   const compsSinceLastBigComp = getAllCompsSinceLastBigComp(compHistory)
   const bigCompFund = compsSinceLastBigComp.reduce((acc, comp) => acc + comp.registeredPlayers.length * poolCompConfig.buyIn * poolCompConfig.bigComp.contributionPercentage, 0)

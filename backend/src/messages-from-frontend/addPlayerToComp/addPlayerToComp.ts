@@ -1,4 +1,4 @@
-import type { Slot } from "../../../../shared/domain.js";
+import type { RegisteredPlayer, Slot } from "../../../../shared/domain.js";
 import { tournamentHasHadAssignment } from "../../../../shared/tournament-slot.service.js";
 import type { BackendService } from "../../services/backend.service.js";
 import { updateOptions } from "../../services/mongo-db.service.js";
@@ -11,7 +11,9 @@ export async function addPlayerToComp(
 ) {
   const comp = backendService.getActiveComp();
 
-  const updatedRegisteredPlayers = [...comp.registeredPlayers, { playerId: data.playerId, paid: false }];
+  const player = backendService.backendState.players.find(player => player.id === data.playerId)!;
+
+  const updatedRegisteredPlayers: RegisteredPlayer[] = [...comp.registeredPlayers, { ...player, paid: false }];
 
   let updatedSlots: Slot[] = comp.slots;
 
@@ -21,7 +23,8 @@ export async function addPlayerToComp(
   if (tournamentHasHadAssignment(updatedSlots) && backendService.backendState.autoAssignPlayers) {
     updatedSlots = assignPlayer(
       { ...comp, registeredPlayers: updatedRegisteredPlayers, slots: updatedSlots },
-      data.playerId
+      data.playerId,
+      false
     );
   }
   const updatedCompResult = await backendService.mongoDbService.activeCompCollection.findOneAndUpdate(

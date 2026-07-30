@@ -4,14 +4,14 @@ import { handleManualAssignPlayerToSlot } from "../../services/tournament-slot-a
 
 export async function manualAssignPlayerToSlot(
   backendService: BackendService,
-  data: { slotId: number; playerId: string | undefined },
+  data: { slotId: number; playerId: string | undefined; isSecondChanceComp: boolean },
 ): Promise<void> {
   const activeComp = backendService.getActiveComp();
-  const slots = handleManualAssignPlayerToSlot(activeComp, data.slotId, data.playerId, backendService.backendState.autoAssignPlayers);
+  const slots = handleManualAssignPlayerToSlot(activeComp, data.slotId, data.playerId, backendService.backendState.autoAssignPlayers, data.isSecondChanceComp);
 
   const updatedActiveCompResult = await backendService.mongoDbService.activeCompCollection.findOneAndUpdate(
     { id: activeComp.id },
-    { $set: { slots } },
+    { $set: { ...(data.isSecondChanceComp ? { secondChanceSlots: slots } : { slots: slots }) } },
     updateOptions,
   );
   if (!updatedActiveCompResult) throw new Error("Active comp not found");

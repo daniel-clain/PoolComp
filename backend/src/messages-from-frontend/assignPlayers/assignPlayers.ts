@@ -4,9 +4,10 @@ import { autoAssignUnassignedPlayers } from "../../services/tournament-slot-assi
 
 export async function assignPlayers(
   backendService: BackendService,
+  data: { isSecondChanceComp: boolean },
 ): Promise<void> {
   const activeComp = backendService.getActiveComp();
-  const updatedSlots = autoAssignUnassignedPlayers(activeComp);
+  const updatedSlots = autoAssignUnassignedPlayers(activeComp, data.isSecondChanceComp);
 
   const updatedActiveCompResult = await backendService.mongoDbService.activeCompCollection.findOneAndUpdate(
     { id: activeComp.id },

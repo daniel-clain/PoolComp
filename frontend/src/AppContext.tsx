@@ -23,7 +23,7 @@ import { createWebSocketService } from "./services/websockets.service";
 
 export type View = "Pool Comp" | "Players" | "Comp History";
 
-export const compTabs = ["Brackets", "2nd Chance Brackets", "Players", "Money"] as const;
+export const compTabs = ["Main Comp", "2nd Chance Comp", "Players", "Money"] as const;
 export type CompTab = (typeof compTabs)[number];
 
 
@@ -79,7 +79,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     const slots = allData.activePoolComp?.slots;
     if (!slots) return; // wait until allData has active comp + slots
     setCompActiveTab(
-      tournamentHasHadAssignment(slots) ? "Brackets" : "Players"
+      tournamentHasHadAssignment(slots) ? "Main Comp" : "Players"
     );
     initialCompTabHasBeenSet.current = true;
   }, [allData.activePoolComp?.slots]);
@@ -101,7 +101,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const { orientation } = useOrientation();
 
   useEffect(() => {
-    const { send, closeConnection, connected } = createWebSocketService(
+    const { send, closeConnection, connected, connect } = createWebSocketService(
       (stateUpdateFromBackend: BackendState) => {
         setAllData(stateUpdateFromBackend);
       },
@@ -114,12 +114,13 @@ export function AppProvider({ children }: { children: ReactNode }) {
     );
 
     sendMessageToBackendRef.current = send;
+    // to prevent dev mode running twice causing error
+    const connectTimer = window.setTimeout(connect, 0);
 
     return () => {
+      window.clearTimeout(connectTimer);
       sendMessageToBackendRef.current = null;
-      if (connected) {
-        closeConnection();
-      }
+      closeConnection();
     };
   }, []);
 

@@ -12,7 +12,7 @@ export async function removePlayerFromComp(
   const updatedActiveCompResult = await backendService.mongoDbService.activeCompCollection.findOneAndUpdate(
     { id: comp.id },
     {
-      $pull: { registeredPlayers: { playerId: data.playerId } },
+      $pull: { registeredPlayers: { id: data.playerId } },
       $set: { slots: updatedSlots },
     },
     updateOptions,

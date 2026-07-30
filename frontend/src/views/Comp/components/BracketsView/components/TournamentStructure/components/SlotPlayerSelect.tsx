@@ -1,21 +1,27 @@
 import { useEffect, useRef } from "react";
 import type { Slot } from "../../../../../../../../../shared/domain";
+import { getSecondChancePlayersPool } from "../../../../../../../../../shared/tournament-slot.service";
 import { useAppContext } from "../../../../../../../AppContext";
-import {
-  getPlayerChoicesForSlot,
-} from "../../../../../../../services/poolComp.service";
+import { getPlayerChoicesForSlot } from "../../../../../../../services/poolComp.service";
+
+
 
 
 type Props = {
   selectedSlot: Slot;
   selectPosition: { x: number, y: number };
   onClose: () => void;
-  slots: Slot[];
 };
 
-export function SlotPlayerSelect({ selectedSlot, selectPosition, onClose, slots }: Props) {
-  const { activePoolComp, players, send } = useAppContext();
+export function SlotPlayerSelect({ selectedSlot, selectPosition, onClose, }: Props) {
+  const { activePoolComp, players, send, compActiveTab, activeHistoricalComp, compHistory } = useAppContext();
   const panelRef = useRef<HTMLElement>(null);
+
+  const comp = activeHistoricalComp || activePoolComp!;
+
+  const slots = compActiveTab === 'Main Comp' ? comp?.slots! : comp?.secondChanceSlots!;
+
+  const bracketPlayers = compActiveTab === 'Main Comp' ? comp.registeredPlayers : getSecondChancePlayersPool(comp, compHistory);
 
   useEffect(() => {
     function handlePointerDown(event: PointerEvent) {
@@ -27,17 +33,12 @@ export function SlotPlayerSelect({ selectedSlot, selectPosition, onClose, slots 
     return () => document.removeEventListener("pointerdown", handlePointerDown);
   }, [onClose]);
 
-  const choices = getPlayerChoicesForSlot(
-    selectedSlot,
-    slots,
-    activePoolComp?.registeredPlayers!,
-    players,
-  );
+  const choices = getPlayerChoicesForSlot({ selectedSlot, slots, bracketPlayers });
 
   if (choices.length === 0) return null;
 
   function handlePick(playerId: string | undefined) {
-    send(['manualAssignPlayerToSlot', { slotId: selectedSlot.id, playerId }]);
+    send(['manualAssignPlayerToSlot', { slotId: selectedSlot.id, playerId, isSecondChanceComp: compActiveTab === '2nd Chance Comp' }]);
     onClose();
   }
 

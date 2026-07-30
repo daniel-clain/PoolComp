@@ -137,15 +137,6 @@ export function clearSlotsAutoAdvance(slot: Slot, tournamentSlots: Slot[]) {
 }
 
 
-export function getRandomUnassignedPlayer(
-  registeredPlayers: RegisteredPlayer[],
-  firstRoundSlots: Slot[],
-): string {
-  return registeredPlayers.find(
-    (player) => !firstRoundSlots.some((slot) => slot.playerId === player.playerId),
-  )!.playerId;
-}
-
 
 export function applyByeToEmptyFirstRoundSlots(tournamentSlots: Slot[]) {
   const firstRoundSlots = getFirstRoundSlotsFromAllTournamentSlots(tournamentSlots)

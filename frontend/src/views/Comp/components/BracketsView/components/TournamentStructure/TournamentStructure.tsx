@@ -1,8 +1,8 @@
 import { useState } from "react";
 
 import type { Slot } from "../../../../../../../../shared/domain";
-import { useAppContext } from "../../../../../../AppContext";
 
+import { useAppContext } from "../../../../../../AppContext";
 import { canSetSlot } from "../../../../../../services/poolComp.service";
 import {
   calculateSlotPositions,
@@ -11,21 +11,26 @@ import { Connector } from "./components/Connector";
 import { SlotElement } from "./components/Slot";
 import { SlotPlayerSelect } from "./components/SlotPlayerSelect";
 
-type Props = {
-  slots: Slot[];
-  isHistoricalComp: boolean;
-};
 
-export function TournamentStructure({ slots, isHistoricalComp }: Props) {
+
+export function TournamentStructure() {
   const [selectedSlot, setSelectedSlot] = useState<Slot | null>(
     null,
   );
-  const { userIsCompManager } = useAppContext();
+
+  const { userIsCompManager, activeHistoricalComp, activePoolComp, compActiveTab } = useAppContext();
+
+
+  const comp = activeHistoricalComp || activePoolComp!;
+
+  const slots = compActiveTab === 'Main Comp' ? comp?.slots! : comp?.secondChanceSlots!;
+
 
   if (slots.length === 0) return null;
 
+
   const layout = calculateSlotPositions(slots);
-  const isInteractive = !isHistoricalComp && userIsCompManager
+  const isInteractive = !activeHistoricalComp && userIsCompManager
 
 
   function handleSlotSelect(slot: Slot) {
@@ -57,7 +62,6 @@ export function TournamentStructure({ slots, isHistoricalComp }: Props) {
         {selectedSlot && (
           <SlotPlayerSelect
             selectedSlot={selectedSlot}
-            slots={slots}
             selectPosition={getSelectPosition(selectedSlot)}
             onClose={() => setSelectedSlot(null)}
           />

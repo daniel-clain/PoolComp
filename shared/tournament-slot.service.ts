@@ -92,7 +92,45 @@ export function getSlotTier(slot: Slot, tournamentSlots: Slot[]): number {
 }
 
 export function getUnassignedPlayers(
-  comp: PoolComp
+  comp: PoolComp,
+  isSecondChanceComp: boolean,
+  compHistory: PoolComp[]
 ): RegisteredPlayer[] {
-  return comp.registeredPlayers.filter(player => !comp.slots.some(slot => slot.playerId === player.playerId));
-} 
+  const slots = isSecondChanceComp ? comp.secondChanceSlots! : comp.slots!;
+  const bracketPlayers = isSecondChanceComp ? getSecondChancePlayersPool(comp, compHistory) : comp.registeredPlayers;
+  console.log(`bracketPlayers: `, bracketPlayers);
+  return bracketPlayers.filter(player => !slots.some(slot => slot.playerId === player.id));
+}
+
+export function getSecondChancePlayersPool(comp: PoolComp, compHistory: PoolComp[]): RegisteredPlayer[] {
+  return comp.registeredPlayers.filter(player => {
+
+    const lostTheirFirstGame = comp.slots.some(slot => {
+      if (slot.playerId != player.id) {
+        return false;
+      }
+
+      const playersSlot = slot
+      const playersFirstMatchup = getSlotsMatchup(playersSlot, comp.slots)
+      if (!playersFirstMatchup) return false;
+      const otherSlot = playersFirstMatchup.slot1.playerId === player.id ? playersFirstMatchup.slot2 : playersFirstMatchup.slot1
+      if (!otherSlot.playerId) {
+        return false;
+      }
+
+      const winnerSlot = getSlotsNextRoundSlot(playersSlot, comp.slots)
+      const lostTheirFirstGame = winnerSlot?.playerId == otherSlot.playerId
+      return lostTheirFirstGame
+
+    })
+
+    const hasntWonRecently = !compHistory.some(comp => {
+      const [winner] = comp.slots
+      return winner?.playerId === player.id
+    })
+
+    const isInSecondChancePool = lostTheirFirstGame && hasntWonRecently
+    isInSecondChancePool && console.log(`${player.name} is in second chance pool`)
+    return isInSecondChancePool
+  })
+}

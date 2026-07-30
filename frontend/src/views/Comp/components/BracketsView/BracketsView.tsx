@@ -20,14 +20,11 @@ export function BracketsView() {
   const comp = activeHistoricalComp ?? activePoolComp!;
   const isBigComp = comp.secondChanceSlots
 
-  const slots = compActiveTab === "Brackets" ? comp.slots : comp.secondChanceSlots!;
+  const slots = compActiveTab === "Main Comp" ? comp.slots : comp.secondChanceSlots!;
 
   const tournamentStructure = useMemo(() => {
-    return <TournamentStructure
-      slots={compActiveTab === "Brackets" ? comp.slots : comp.secondChanceSlots!}
-      isHistoricalComp={!!activeHistoricalComp}
-    />
-  }, [slots]);
+    return <TournamentStructure />
+  }, [slots, compActiveTab]);
 
   const textBoxes = useMemo(() => {
     {
@@ -74,7 +71,7 @@ export function BracketsView() {
           />
         </text-box-images>
 
-        if (compActiveTab === "Brackets") {
+        if (compActiveTab === "Main Comp") {
           if (!isBigComp) {
             return {
               firstPrizeElem: (
@@ -102,7 +99,7 @@ export function BracketsView() {
           }
 
         }
-        if (compActiveTab === "2nd Chance Brackets") {
+        if (compActiveTab === "2nd Chance Comp") {
           return {
             firstPrizeElem: (
               <text-box-value>

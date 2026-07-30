@@ -6,6 +6,9 @@ export type Player = {
   deactivated: boolean;
 };
 
+export type RegisteredPlayer = Player & {
+  paid: boolean;
+};
 export type PoolComp = {
   id: string;
   date: Date;
@@ -15,10 +18,6 @@ export type PoolComp = {
 };
 
 
-export type RegisteredPlayer = {
-  playerId: string;
-  paid: boolean;
-};
 export type Slot = { id: number; isBye?: boolean; playerId?: string };
 export type Matchup = { slot1: Slot; slot2: Slot };
 

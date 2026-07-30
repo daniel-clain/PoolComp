@@ -22,6 +22,7 @@ export function createWebSocketService(
   let connected: boolean = false;
 
   function connect() {
+    if (closedManually) return;
     onConnectionStatusChange("connecting");
     socket = new WebSocket(getWebSocketUrl());
 
@@ -81,12 +82,19 @@ export function createWebSocketService(
   connect();
 
 
-  return { send, closeConnection, connected };
+  return { send, closeConnection, connected, connect };
 
   function getWebSocketUrl(): string {
     const configuredWebSocketUrl = import.meta.env.VITE_WS_URL;
     if (configuredWebSocketUrl) {
       return configuredWebSocketUrl;
+    }
+
+    const isLocalDevelopmentHost =
+      window.location.hostname === "localhost" ||
+      window.location.hostname === "127.0.0.1";
+    if (import.meta.env.DEV && isLocalDevelopmentHost) {
+      return "ws://127.0.0.1:3000/ws";
     }
 
     const webSocketProtocol =

@@ -4,7 +4,8 @@ import leavesImage from "../../assets/crossleaves.png";
 import { ScalingImage } from "../../components/ScalingImage/ScalingImage";
 import { TabBar } from "../../components/TabBar/TabBar";
 
-import { compStarted, getUnassignedPlayers } from "../../../../shared/tournament-slot.service";
+import { useMemo } from "react";
+import { compStarted, getSecondChancePlayersPool, getUnassignedPlayers } from "../../../../shared/tournament-slot.service";
 import { activePoolCompHasChampionPlayer, canAddMorePlayers } from "../../services/poolComp.service";
 import { BracketsView } from "./components/BracketsView/BracketsView";
 import { CompPlayers } from "./components/CompPlayers/CompPlayers";
@@ -21,19 +22,29 @@ export function Comp() {
     compActiveTab,
     setCompActiveTab,
     autoAssignPlayers,
+    players,
+    compHistory,
   } = useAppContext();
 
   const comp = activeHistoricalComp ?? activePoolComp!;
   const isBigComp = comp.secondChanceSlots
 
-  const tournamentTabActive = compActiveTab === "Brackets" || compActiveTab === "2nd Chance Brackets"
+  const activeTabIsSecondChance = compActiveTab === "2nd Chance Comp"
+
+  const tournamentTabActive = compActiveTab === "Main Comp" || activeTabIsSecondChance
+
+  const secondChancePlayerPool = useMemo(() => {
+    console.log('getting second chance player pool');
+    return getSecondChancePlayersPool(comp, compHistory);
+  }, [comp.slots]);
+  console.log('secondChancePlayerPool', secondChancePlayerPool);
 
   return (
     <comp-view>
       <top-row>
         <comp-tabs>
           <TabBar
-            tabs={["Brackets", ...(isBigComp ? ["2nd Chance Brackets"] as CompTab[] : []), "Players", "Money"]}
+            tabs={["Main Comp", ...(isBigComp ? ["2nd Chance Comp"] as CompTab[] : []), "Players", "Money"]}
             selectedTab={compActiveTab}
             onTabSelected={setCompActiveTab}
           />
@@ -74,7 +85,7 @@ export function Comp() {
       );
     }
 
-    const unassignedPlayers = getUnassignedPlayers(comp).length;
+    const unassignedPlayers = getUnassignedPlayers(comp, activeTabIsSecondChance, compHistory).length;
 
     const randomiseMatchupsDisabled =
       (comp.registeredPlayers.length < 5 || compStarted(comp.slots));
@@ -88,8 +99,8 @@ export function Comp() {
             type="button"
             disabled={randomiseMatchupsDisabled}
             onClick={() => {
-              send(['randomiseMatchups']);
-              setCompActiveTab("Brackets");
+              send(['randomiseMatchups', { isSecondChanceComp: activeTabIsSecondChance }]);
+              if (compActiveTab == 'Players') setCompActiveTab("Main Comp");
             }}
           >
             Randomise Matchups
@@ -99,16 +110,17 @@ export function Comp() {
               type="button"
               disabled={autoAssignPlayers}
               onClick={() => {
-                send(['assignPlayers']);
-                setCompActiveTab("Brackets");
+                send(['assignPlayers', { isSecondChanceComp: activeTabIsSecondChance }]);
+                if (compActiveTab == 'Players') setCompActiveTab("Main Comp");
               }}
             >
               Assign Players ({unassignedPlayers})
             </button>
             <label>
               <input type="checkbox" checked={autoAssignPlayers} onChange={() => {
-                send(['setAutoAssignPlayers', { autoAssignPlayers: !autoAssignPlayers }]);
-                setCompActiveTab("Brackets");
+                send(['setAutoAssignPlayers', { autoAssignPlayers: !autoAssignPlayers, isSecondChanceComp: activeTabIsSecondChance }]);
+
+                if (compActiveTab == 'Players') setCompActiveTab("Main Comp");
               }} />(Auto)</label></assign-players-container>
 
         </>
