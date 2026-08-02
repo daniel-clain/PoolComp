@@ -7,16 +7,17 @@ export async function togglePlayerPaid(
 ): Promise<void> {
   const activeComp = backendService.getActiveComp();
 
-
   const result = await backendService.mongoDbService.activeCompCollection.findOneAndUpdate(
     {
       id: activeComp.id,
-      "registeredPlayers.playerId": data.playerId,
-    }, { $set: { "registeredPlayers.$.paid": data.paid } }, updateOptions)
+      "registeredPlayers.id": data.playerId,
+    },
+    { $set: { "registeredPlayers.$.paid": data.paid } },
+    updateOptions,
+  );
 
 
   if (!result) throw new Error("failed to update player paid status");
-
 
   backendService.backendState.activePoolComp = result;
 }

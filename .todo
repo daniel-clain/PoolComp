@@ -1,4 +1,6 @@
 important:
+  ☐ for big comp, when changing outcome of matches, 2nd chance needs to be re-randomised to take the update into account
+    ☐ there is a bug that can create multiple active comps
     ☐ shouldnt be able to clear/change a slot if its next slot is already assigned
     ☐ everything updates on every change, need to rerender only when necessary
 

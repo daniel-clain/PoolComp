@@ -10,3 +10,35 @@ alwaysApply: true
 - Use SCSS files for styling, organized by feature folder. No TypeScript style objects.
 - Do not use `aria-*`, `role`, or `alt` attributes anywhere in this app.
 - Never use abbreviations or acronyms in variable names, function names, or type names. Every name must be fully descriptive so a human can understand its meaning at a glance. Code is read far more than it is written — optimise for cognitive ease, not keystroke economy. `slotWithPosition` not `swp`, `aspectRatio` not `ar`, `connector` not `conn`, `repository` not `repo`.
+
+
+- When a block of logic has a clear meaning, extract it into a named function. Name the function after what it does, not how it does it.
+- If that helper is only used inside one parent function, nest it there as a local function declaration. Nesting makes the scope obvious: the helper exists only for that parent, and is not a reusable module export.
+
+```typescript
+// ❌ BAD — helper looks like a shared module export, even though only one caller uses it
+export function tournamentHasChampionPlayer(slots: Slot[]): boolean {
+  if (!slots.length) return false;
+  const [firstPlaceSlot] = slots;
+  return Boolean(firstPlaceSlot.playerId);
+}
+
+export function activePoolCompHasChampionPlayer(comp: PoolComp): boolean {
+  if (!tournamentHasChampionPlayer(comp.slots)) return false;
+  if (comp.secondChanceSlots && !tournamentHasChampionPlayer(comp.secondChanceSlots)) return false;
+  return true;
+}
+
+// ✅ GOOD — helper is nested, so its scope and purpose are obvious
+export function activePoolCompHasChampionPlayer(comp: PoolComp): boolean {
+  if (!tournamentHasChampionPlayer(comp.slots)) return false;
+  if (comp.secondChanceSlots && !tournamentHasChampionPlayer(comp.secondChanceSlots)) return false;
+  return true;
+
+  function tournamentHasChampionPlayer(slots: Slot[]): boolean {
+    if (!slots.length) return false;
+    const [firstPlaceSlot] = slots;
+    return Boolean(firstPlaceSlot.playerId);
+  }
+}
+```

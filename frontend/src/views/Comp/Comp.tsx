@@ -32,23 +32,37 @@ export function Comp() {
 
   const tournamentTabActive = compActiveTab === "Main Comp" || activeTabIsSecondChance
 
+  const canAddMorePlayersDisabled = !canAddMorePlayers(comp.slots);
+
   const secondChancePlayerPool = useMemo(() => {
     console.log('getting second chance player pool');
     return getSecondChancePlayersPool(comp, compHistory);
   }, [comp.slots]);
   console.log('secondChancePlayerPool', secondChancePlayerPool);
 
+
+  const compDate = comp.date;
+  const compDateString = compDate
+    ? new Date(compDate).toLocaleDateString("en-AU", { day: "numeric", month: "long", year: "numeric" })
+    : "";
+
   return (
     <comp-view>
       <top-row>
         <comp-tabs>
           <TabBar
-            tabs={["Main Comp", ...(isBigComp ? ["2nd Chance Comp"] as CompTab[] : []), "Players", "Money"]}
+            tabs={[
+              "Main Comp",
+              ...(isBigComp ? ["2nd Chance Comp"] as CompTab[] : []),
+              "Players",
+              "Money"
+            ]}
             selectedTab={compActiveTab}
             onTabSelected={setCompActiveTab}
           />
         </comp-tabs>
         {compActions()}
+        <comp-date>{compDateString}</comp-date>
       </top-row>
       {compMainPanel()}
       {compActionsBottom()}
@@ -59,7 +73,6 @@ export function Comp() {
 
   function compMainPanel() {
 
-    const canAddMorePlayersDisabled = !canAddMorePlayers(comp.slots);
     return (
       <comp-main-panel>
         {tournamentTabActive ? (
@@ -86,8 +99,7 @@ export function Comp() {
 
     const unassignedPlayers = getUnassignedPlayers(comp, activeTabIsSecondChance, compHistory).length;
 
-    const randomiseMatchupsDisabled =
-      (comp.registeredPlayers.length < 5 || compStarted(comp.slots));
+    const randomiseMatchupsDisabled = compStarted(activeTabIsSecondChance ? comp.secondChanceSlots! : comp.slots);
 
 
     return (
@@ -107,7 +119,7 @@ export function Comp() {
           <assign-players-container>
             <button
               type="button"
-              disabled={autoAssignPlayers}
+              disabled={autoAssignPlayers || canAddMorePlayersDisabled}
               onClick={() => {
                 send(['assignPlayers', { isSecondChanceComp: activeTabIsSecondChance }]);
                 if (compActiveTab == 'Players') setCompActiveTab("Main Comp");
@@ -116,7 +128,7 @@ export function Comp() {
               Assign Players ({unassignedPlayers})
             </button>
             <label>
-              <input type="checkbox" checked={autoAssignPlayers} onChange={() => {
+              <input type="checkbox" disabled={canAddMorePlayersDisabled} checked={autoAssignPlayers} onChange={() => {
                 send(['setAutoAssignPlayers', { autoAssignPlayers: !autoAssignPlayers, isSecondChanceComp: activeTabIsSecondChance }]);
 
                 if (compActiveTab == 'Players') setCompActiveTab("Main Comp");
@@ -133,7 +145,7 @@ export function Comp() {
       return null;
     }
 
-    const completeCompDisabled = !activePoolCompHasChampionPlayer(comp.slots);
+    const completeCompDisabled = !activePoolCompHasChampionPlayer(comp);
     return (
       <comp-actions-bottom>
         <button onClick={() => {

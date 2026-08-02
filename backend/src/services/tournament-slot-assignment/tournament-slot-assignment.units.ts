@@ -4,17 +4,17 @@ import { poolCompConfig } from "../../../../shared/poolCompConfig.js";
 import { getFirstRoundMatchupsFromAllTournamentSlots, getFirstRoundSlotsFromAllTournamentSlots, getMatchupNextRoundSlot, getNextRoundSlots, getSlotsMatchup, getSlotsNextRoundSlot } from "../../../../shared/tournament-slot.service.js";
 
 
-export function tournamentNeedsSizeIncrease(registeredPlayers: RegisteredPlayer[], existingSlots: Slot[]): boolean {
-  const existingFirstRoundSize = getFirstRoundSlotsFromAllTournamentSlots(existingSlots).length;
-  const newFirstRoundSize = getFirstRoundSize(registeredPlayers.length);
+export function tournamentNeedsSizeIncrease(playerPool: RegisteredPlayer[], tournamentSlots: Slot[]): boolean {
+  const existingFirstRoundSize = getFirstRoundSlotsFromAllTournamentSlots(tournamentSlots).length;
+  const newFirstRoundSize = getFirstRoundSize(playerPool.length);
   return newFirstRoundSize > existingFirstRoundSize;
 }
 
 
-export function mapTournamentSlotsToNextRoundSize(registeredPlayers: RegisteredPlayer[], existingSlots: Slot[]): Slot[] {
+export function mapTournamentSlotsToNextRoundSize(playerPool: RegisteredPlayer[], tournamentSlots: Slot[]): Slot[] {
 
-  const existingFirstRoundSlots = getFirstRoundSlotsFromAllTournamentSlots(existingSlots);
-  const newFirstRoundSize = getFirstRoundSize(registeredPlayers.length);
+  const existingFirstRoundSlots = getFirstRoundSlotsFromAllTournamentSlots(tournamentSlots);
+  const newFirstRoundSize = getFirstRoundSize(playerPool.length);
   const newSlots = getTournamentSlotsFromFirstRoundSize(newFirstRoundSize);
   const newFirstRoundSlots = getFirstRoundSlotsFromAllTournamentSlots(newSlots);
   existingFirstRoundSlots.forEach((slot, index) => {

@@ -1,3 +1,4 @@
+import orderBy from "lodash/orderBy.js";
 import type { Matchup, PoolComp, RegisteredPlayer, Slot } from "./domain.js";
 
 export function getSlotSourceMatchup(slot: Slot, tournamentSlots: Slot[]): Matchup | undefined {
@@ -105,7 +106,8 @@ export function getUnassignedPlayers(
 export function getSecondChancePlayersPool(comp: PoolComp, compHistory: PoolComp[]): RegisteredPlayer[] {
   return comp.registeredPlayers.filter(player => {
 
-    const lostTheirFirstGame = comp.slots.some(slot => {
+    const orderedSlots: Slot[] = orderBy(comp.slots, 'id');
+    const lostTheirFirstGame = orderedSlots.some(slot => {
       if (slot.playerId != player.id) {
         return false;
       }

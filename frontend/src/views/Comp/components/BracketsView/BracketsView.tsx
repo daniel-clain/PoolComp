@@ -3,7 +3,8 @@ import { useAppContext } from "../../../../AppContext";
 import crownImage from "../../../../assets/crown.png";
 import diningVoucherImage from "../../../../assets/dining-voucher.jpg";
 import { ScalingImage } from "../../../../components/ScalingImage/ScalingImage";
-import { calculateBigCompFirstPrizeMoney, calculateBigCompSecondPrizeMoney, calculateFirstPrizeMoney, calculateSecondChanceFirstPrizeMoney } from "../../../../services/poolComp.service";
+import { calculateBigCompFirstPrizeMoney, calculateBigCompSecondPrizeMoney, calculateSecondChanceFirstPrizeMoney } from "../../../../services/bigComp.service";
+import { calculateFirstPrizeMoney } from "../../../../services/poolComp.service";
 import { TournamentStructure } from "./components/TournamentStructure/TournamentStructure";
 
 
@@ -28,15 +29,8 @@ export function BracketsView() {
 
   const textBoxes = useMemo(() => {
     {
-      const compDate = comp.date;
-      const compDateString = compDate
-        ? new Date(compDate).toLocaleDateString("en-AU", { day: "numeric", month: "long", year: "numeric" })
-        : "";
-
 
       const { firstPrizeElem, secondPrizeElem } = getFirstAndSecondPrizeElems()!
-
-
 
       return (
         <text-box-container>
@@ -49,10 +43,6 @@ export function BracketsView() {
           <text-box>
             <text-box-label>SECOND PRIZE</text-box-label>
             {secondPrizeElem}
-          </text-box>
-          <text-box>
-            <text-box-label>DATE</text-box-label>
-            <text-box-value>{compDateString}</text-box-value>
           </text-box>
         </text-box-container>
       );
@@ -116,7 +106,7 @@ export function BracketsView() {
       }
 
     }
-  }, [comp]);
+  }, [comp, compActiveTab]);
 
   return <brackets-view>
 

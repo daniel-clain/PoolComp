@@ -12,7 +12,7 @@ export async function assignPlayers(
 
   const updatedActiveCompResult = await backendService.mongoDbService.activeCompCollection.findOneAndUpdate(
     { id: activeComp.id },
-    { $set: { slots: updatedSlots } },
+    { $set: { ...(data.isSecondChanceComp ? { secondChanceSlots: updatedSlots } : { slots: updatedSlots }) } },
     updateOptions,
   );
   if (!updatedActiveCompResult) throw new Error("Active comp not found");
