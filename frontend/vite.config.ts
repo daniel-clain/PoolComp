@@ -1,9 +1,17 @@
 import { defineConfig } from "vite";
+import checker from "vite-plugin-checker";
 
-export default defineConfig(({ mode }) => {
+export default defineConfig(() => {
   const backendPort = "3000";
 
   return {
+    plugins: [
+      checker({
+        typescript: {
+          tsconfigPath: "./tsconfig.json",
+        },
+      }),
+    ],
     server: {
       host: true,
       // Quick tunnels use a new *.trycloudflare.com host each run; allow any Host for local dev.

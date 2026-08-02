@@ -9,7 +9,7 @@ import { Leaderboard } from "./views/Leaderboard/Leaderboard";
 import { Players } from "./views/Players/Players";
 
 export function App() {
-  const { activePoolComp, activeHistoricalComp, activeView, orientation, send } = useAppContext();
+  const { activePoolComp, activeHistoricalComp, activeView, orientation } = useAppContext();
 
   return (
     <app-container className={`is-${orientation}`}>

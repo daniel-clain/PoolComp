@@ -1,8 +1,10 @@
 import orderBy from "lodash/orderBy.js";
-import { calculateBigCompFirstPrizeMoney } from "../../../../frontend/src/services/bigComp.service.js";
-import { calculateFirstPrizeMoney } from "../../../../frontend/src/services/poolComp.service.js";
 import { convertToPoolComp } from "../../../../shared/data-convert.service.js";
 import type { LeaderboardEntry } from "../../../../shared/domain.js";
+import {
+  calculateBigCompFirstPrizeMoney,
+  calculateFirstPrizeMoney,
+} from "../../../../shared/prize-money.service.js";
 import type { BackendService } from "../../services/backend.service.js";
 
 export async function getLeaderboard(backendService: BackendService): Promise<void> {

@@ -1,3 +1,5 @@
+export { roundToNearest5 } from "../../../shared/prize-money.service";
+
 export function formatAud(amount: number): string {
   return new Intl.NumberFormat("en-AU", {
     style: "currency",
@@ -5,9 +7,4 @@ export function formatAud(amount: number): string {
     minimumFractionDigits: 0,
     maximumFractionDigits: 0,
   }).format(amount);
-}
-
-
-export function roundToNearest5(number: number): number {
-  return Math.round(number / 5) * 5;
 }

@@ -5,7 +5,6 @@ import {
   type Slot
 } from "../../../shared/domain";
 
-import { poolCompConfig } from "../../../shared/poolCompConfig";
 import { getFirstRoundSlotsFromAllTournamentSlots, getSlotSourceMatchup, tournamentHasHadAssignment } from "../../../shared/tournament-slot.service";
 
 export function canSetSlot(slot: Slot, slots: Slot[]): boolean {
@@ -134,12 +133,5 @@ export function canAddMorePlayers(tournamentSlots: Slot[]): boolean {
 }
 
 
-export function calculateFirstPrizeMoney(comp: PoolComp) {
-  const { registeredPlayers } = comp
-  return (
-    (registeredPlayers.length * poolCompConfig.buyIn) *
-    (1 - poolCompConfig.bigComp.contributionPercentage) +
-    poolCompConfig.barInput
-  );
-}
+export { calculateFirstPrizeMoney } from "../../../shared/prize-money.service";
 

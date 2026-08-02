@@ -3,6 +3,7 @@
   "private": true,
   "type": "module",
   "dependencies": {
+    "@types/lodash": "^4.17.25",
     "date-fns": "^4.4.0",
     "lodash": "^4.18.1"
   }
