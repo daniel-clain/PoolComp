@@ -184,7 +184,6 @@ table-container {
   panel-heading {
     font-weight: 700;
     text-transform: uppercase;
-    color: $color-view-title;
     @include cq-responsive((font-size: 4,
       ));
   }

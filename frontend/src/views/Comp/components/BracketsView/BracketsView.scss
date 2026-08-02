@@ -12,7 +12,8 @@ brackets-view {
 
     text-box-container {
       align-items: end;
-      justify-content: space-between;
+      justify-content: start;
+      gap: 4cqw;
 
       text-box {
         width: 32cqw;
@@ -38,6 +39,7 @@ brackets-view {
     }
 
     right-container {
+      display: flex;
       width: 20cqw;
 
 
@@ -45,7 +47,7 @@ brackets-view {
         display: flex;
         flex-direction: column;
         flex: 3;
-        gap: 3cqh;
+        gap: 10cqh;
 
         text-box {
           text-box-value {
@@ -79,6 +81,7 @@ brackets-view {
         font-weight: 700;
         text-transform: uppercase;
         text-align: center;
+        color: $color-view-title;
         @include cq-responsive((font-size: 3,
           ));
       }
