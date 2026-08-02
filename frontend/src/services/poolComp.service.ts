@@ -65,18 +65,24 @@ export function activePoolCompHasChampionPlayer(comp: PoolComp): boolean {
   }
 }
 
-export function getFinalists(comp: PoolComp, players: Player[]): {
-  firstPlace: Player;
-  secondPlace: Player;
+export function getFinalists(comp: PoolComp): {
+  firstPlace: Player | undefined;
+  secondPlace: Player | undefined;
 } {
-  const [firstPlaceSlot, finalistSlot1, finalistSlot2] = comp.slots
+  const [firstPlaceSlot, finalistSlot1, finalistSlot2] = comp.slots;
+  if (!firstPlaceSlot || !finalistSlot1 || !finalistSlot2) {
+    return { firstPlace: undefined, secondPlace: undefined };
+  }
 
-  const secondPlaceSlot = firstPlaceSlot.player?.id === finalistSlot1.player?.id ? finalistSlot2 : finalistSlot1
+  const secondPlaceSlot =
+    firstPlaceSlot.player?.id === finalistSlot1.player?.id
+      ? finalistSlot2
+      : finalistSlot1;
 
-  const firstPlace = players.find((player) => player.id === firstPlaceSlot.player?.id)!
-  const secondPlace = players.find((player) => player.id === secondPlaceSlot.player?.id)!
-
-  return { firstPlace, secondPlace };
+  return {
+    firstPlace: firstPlaceSlot.player,
+    secondPlace: secondPlaceSlot.player,
+  };
 }
 
 

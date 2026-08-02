@@ -39,7 +39,7 @@ export function CompPlayers({ registeredPlayers, canAddMorePlayersDisabled }: { 
                   }
                   disabled={compHasStarted || !userIsCompManager}
                 >
-                  {players.find((player) => player.id === registeredPlayer.id)!.name}
+                  {registeredPlayer.name}
                 </button>
                 <input
                   type="checkbox"

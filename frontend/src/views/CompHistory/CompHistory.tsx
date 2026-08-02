@@ -11,22 +11,17 @@ import {
 } from "../../services/poolComp.service";
 
 export function CompHistory() {
-  const { compHistory, players, viewHistoricalComp } = useAppContext();
+  const { compHistory, viewHistoricalComp } = useAppContext();
 
   const tableColumns = ['Date', 'Players', '1st Place', '2nd Place', 'Prize Pool', 'Big Comp'] as const;
   type TableColumnName = (typeof tableColumns)[number]
 
 
   const getColumnData = useCallback((comp: PoolComp, column: TableColumnName) => {
-    const { firstPlace, secondPlace } = getFinalists(
-      comp,
-      players,
-    );
     const isBigComp = Boolean(comp.secondChanceSlots?.length);
 
     switch (column) {
       case 'Date': {
-
         const compDateString = comp.date
           ? format(parseISO(comp.date), "d MMM", { locale: enAU })
           : "";
@@ -36,12 +31,12 @@ export function CompHistory() {
         return comp.registeredPlayers.length;
       }
       case '1st Place': {
-
-
-        return firstPlace.name;
+        const { firstPlace } = getFinalists(comp);
+        return firstPlace?.name ?? "-";
       }
       case '2nd Place': {
-        return secondPlace.name;
+        const { secondPlace } = getFinalists(comp);
+        return secondPlace?.name ?? "-";
       }
       case 'Prize Pool': {
         const prizeMoney =
@@ -52,7 +47,7 @@ export function CompHistory() {
         return isBigComp ? '🤑' : '-';
       }
     }
-  }, [players, compHistory]);
+  }, [compHistory]);
 
 
   return (
