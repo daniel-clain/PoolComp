@@ -16,7 +16,11 @@ landing-view {
   @include cq-responsive((padding-top: 8,
     ));
 
-  button {
+  button.do-thing {
+    margin: auto;
+  }
+
+  button.start-game {
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.04em;

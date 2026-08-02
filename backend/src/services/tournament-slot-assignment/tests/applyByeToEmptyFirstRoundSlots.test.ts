@@ -3,7 +3,7 @@ import random from "lodash/random";
 import { describe, expect, test } from "vitest";
 
 
-import { Slot } from "../../../../../shared/domain.js";
+import { RegisteredPlayer, Slot } from "../../../../../shared/domain.js";
 import { getFirstRoundSlotsFromAllTournamentSlots } from "../../../../../shared/tournament-slot.service.js";
 import {
   applyByeToEmptyFirstRoundSlots,
@@ -19,15 +19,16 @@ describe("applyByeToEmptyFirstRoundSlots", function () {
     const firstRoundSlots = getFirstRoundSlotsFromAllTournamentSlots(slots);
 
     firstRoundSlots.forEach((slot, i) => {
-      slot.playerId = `player${i + 1}`;
+      slot.player = { id: `player-${i + 1}`, name: `Player ${i + 1}` } as RegisteredPlayer;
     })
     for (let i = 0; i < 2; i++) {
       const randomSlot = firstRoundSlots[random(firstRoundSlots.length)]!;
-      if (!randomSlot.playerId) {
+      if (!randomSlot.player) {
         i--;
         continue;
+      } else {
+        delete randomSlot.player;
       }
-      delete randomSlot.playerId;
     }
 
     applyByeToEmptyFirstRoundSlots(slots)

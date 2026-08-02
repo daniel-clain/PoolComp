@@ -1,5 +1,6 @@
 @use "./mixins.scss" as *;
 @use "./variables.scss" as *;
+@use "sass:color";
 
 body {
   margin: 0;
@@ -98,6 +99,72 @@ button {
 no-data-message {
   @include cq-responsive((font-size: 4,
     ));
+}
+
+table-container {
+  display: block;
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  border: 1px solid $color-button-border;
+  border-radius: 0.375rem;
+  background: $color-panel-bg;
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    color: $color-white-text;
+
+    thead {
+      tr {
+        th {
+          position: sticky;
+          top: 0;
+          font-weight: 700;
+          text-transform: uppercase;
+          text-align: left;
+          color: $color-white-text;
+          background: $color-dark-bg;
+          white-space: nowrap;
+          @include cq-responsive((padding: 1.8 2,
+              font-size: 3,
+            ));
+        }
+      }
+    }
+
+    tbody {
+      tr {
+        border-bottom: 1px solid color.adjust(#252525, $lightness: 10%);
+        transition: background 0.15s;
+
+        &:last-child {
+          border-bottom: none;
+        }
+
+        &:nth-child(even) {
+          background: color.adjust($color-panel-bg, $lightness: 3%);
+        }
+
+        &:hover {
+          background: color.adjust($color-panel-bg, $lightness: 10%);
+        }
+
+        &.is-clickable {
+          cursor: pointer;
+        }
+
+        td {
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          @include cq-responsive((padding: 2 2,
+              font-size: 3,
+            ));
+        }
+      }
+    }
+  }
 }
 
 .panel-container {

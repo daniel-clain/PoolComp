@@ -1,11 +1,13 @@
-import { useAppContext } from "../../AppContext";
+import { useAppContext, type View } from "../../AppContext";
+
+const navigationViews: View[] = ["Pool Comp", "Players", "Comp History", "Leaderboard"];
 
 export function Header() {
   const { connectionStatus, activeView, setActiveView, actionInProgress, clearHistoricalComp } = useAppContext();
   return (
     <header>
       <nav-tabs>
-        {(["Pool Comp", "Players", "Comp History"] as const).map((viewName) => (
+        {navigationViews.map((viewName) => (
           <button
             key={viewName}
             className={activeView === viewName ? "active" : ""}

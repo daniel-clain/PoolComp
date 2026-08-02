@@ -1,4 +1,4 @@
-import { useAppContext } from "../../../../../../../AppContext";
+
 import type { SlotWithPosition } from "../../../../../../../services/tournamentStructure.service";
 
 type Props = {
@@ -7,12 +7,11 @@ type Props = {
 };
 
 export function SlotElement({ slotWithPosition, onSelect }: Props) {
-  const { players } = useAppContext();
   const { slot, x, y, width, height, fontSize } = slotWithPosition;
 
   let label = "";
-  if (slot.playerId) {
-    label = players.find((player) => player.id === slot.playerId)?.name ?? "";
+  if (slot.player) {
+    label = slot.player.name ?? "";
   } else if (slot.isBye) {
     label = "BYE";
   } else {

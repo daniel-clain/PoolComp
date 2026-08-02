@@ -11,7 +11,9 @@ import { removePlayerFromComp } from "./removePlayerFromComp/removePlayerFromCom
 import { setAutoAssignPlayers } from "./setAutoAssignPlayers/setAutoAssignPlayers.js";
 import { togglePlayerPaid } from "./togglePlayerPaid/togglePlayerPaid.js";
 
+import { doThing } from "./_doThing/_doThing.js";
 import { convertToBigComp } from "./convertToBigComp/convertToBigComp.js";
+import { getLeaderboard } from "./getLeaderboard/getLeaderboard.js";
 import { updatePlayer } from "./updatePlayer/updatePlayer.js";
 
 /* source of truth for frontend send messages */
@@ -29,6 +31,8 @@ export const messagesFromFrontend = {
   assignPlayers,
   setAutoAssignPlayers,
   convertToBigComp,
+  getLeaderboard,
+  doThing,
 }
 export type MessagesFromFrontend = typeof messagesFromFrontend
 

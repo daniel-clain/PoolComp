@@ -5,10 +5,11 @@ import { ViewContainer } from "./components/ViewContainer/ViewContainer";
 import { Comp } from "./views/Comp/Comp";
 import { CompHistory } from "./views/CompHistory/CompHistory";
 import { LandingPage } from "./views/LandingPage/LandingPage";
+import { Leaderboard } from "./views/Leaderboard/Leaderboard";
 import { Players } from "./views/Players/Players";
 
 export function App() {
-  const { activePoolComp: activePoolComp, activeHistoricalComp, activeView, orientation } = useAppContext();
+  const { activePoolComp, activeHistoricalComp, activeView, orientation, send } = useAppContext();
 
   return (
     <app-container className={`is-${orientation}`}>
@@ -23,6 +24,8 @@ export function App() {
                 return <CompHistory />;
               case "Players":
                 return <Players />;
+              case "Leaderboard":
+                return <Leaderboard />;
             }
           })()}
         </ViewContainer>

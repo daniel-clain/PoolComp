@@ -50,7 +50,7 @@ export function SlotPlayerSelect({ selectedSlot, selectPosition, onClose, }: Pro
         top: `${selectPosition.y}cqh`
       }}
     >
-      {selectedSlot.playerId && (
+      {selectedSlot.player && (
         <button className="danger" onClick={() => handlePick(undefined)}>
           Clear
         </button>

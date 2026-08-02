@@ -7,7 +7,7 @@ export async function assignPlayers(
   data: { isSecondChanceComp: boolean },
 ): Promise<void> {
   const activeComp = backendService.getActiveComp();
-  const compHistory = backendService.backendState.compHistory;
+  const compHistory = backendService.getCompHistory();
   const updatedSlots = autoAssignUnassignedPlayers(activeComp, data.isSecondChanceComp, compHistory);
 
   const updatedActiveCompResult = await backendService.mongoDbService.activeCompCollection.findOneAndUpdate(

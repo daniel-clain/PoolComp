@@ -20,7 +20,6 @@ export function CompPlayers({ registeredPlayers, canAddMorePlayersDisabled }: { 
     (player) => !player.deactivated,
   );
 
-  console.log('isCompManager', userIsCompManager)
 
   return (
     <comp-players>

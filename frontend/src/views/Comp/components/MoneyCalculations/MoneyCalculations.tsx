@@ -1,6 +1,7 @@
 import { poolCompConfig } from "../../../../../../shared/poolCompConfig";
 import { useAppContext } from "../../../../AppContext";
-import { calculateCompBigCompContribution, calculateFirstPrizeMoney } from "../../../../services/poolComp.service";
+import { calculateCompBigCompContribution } from "../../../../services/bigComp.service";
+import { calculateFirstPrizeMoney } from "../../../../services/poolComp.service";
 
 export function MoneyCalculations() {
 

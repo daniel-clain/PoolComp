@@ -52,7 +52,7 @@ function getAllCompsSinceLastBigComp(compHistory: PoolComp[]): PoolComp[] {
   return compHistory.slice(lastBigCompIndex + 1)
 }
 
-function getBigCompTotalPrizePool(comp: PoolComp, compHistory: PoolComp[]): number {
+export function getBigCompTotalPrizePool(comp: PoolComp, compHistory: PoolComp[]): number {
   const normalFirstPlacePrizeMoney = calculateFirstPrizeMoney(comp)
   const compsSinceLastBigComp = getAllCompsSinceLastBigComp(compHistory)
   const bigCompFund = compsSinceLastBigComp.reduce((acc, comp) => acc + comp.registeredPlayers.length * poolCompConfig.buyIn * poolCompConfig.bigComp.contributionPercentage, 0)

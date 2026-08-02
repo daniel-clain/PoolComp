@@ -1,6 +1,7 @@
 
 import _ from "lodash";
 import { WebSocket } from "ws";
+import { convertToPoolComp } from "../../../shared/data-convert.service.js";
 import type { BackendState, Player, PoolComp } from "../../../shared/domain.js";
 import type { MessageToFrontend } from "../../../shared/messageToFrontend.js";
 import type { MongoDbService } from "./mongo-db.service.js";
@@ -14,6 +15,7 @@ export function createBackendService(mongoDbService: MongoDbService, websocketSe
     mongoDbService,
     backendState,
     getActiveComp,
+    getCompHistory,
     getPlayerById,
     loadDatabaseDataIntoBackendState,
     sentToClient,
@@ -21,8 +23,10 @@ export function createBackendService(mongoDbService: MongoDbService, websocketSe
   }
 
   function getActiveComp(): PoolComp {
-    if (!backendState.activePoolComp) throw new Error("No active comp found");
-    return backendState.activePoolComp;
+    return convertToPoolComp(backendState.activePoolComp, backendState);
+  }
+  function getCompHistory(): PoolComp[] {
+    return backendState.compHistory.map(comp => convertToPoolComp(comp, backendState));
   }
   function getPlayerById(playerId: string): Player {
     const player = backendState.players.find(player => player.id === playerId);
@@ -32,6 +36,7 @@ export function createBackendService(mongoDbService: MongoDbService, websocketSe
 
   async function loadDatabaseDataIntoBackendState() {
     const [players, activePoolComp, compHistory] = await mongoDbService.getAllData();
+
     backendState.activePoolComp = activePoolComp;
     backendState.compHistory = compHistory;
     backendState.players = _.orderBy(players, ['name'], ['asc']);

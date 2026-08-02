@@ -7,7 +7,7 @@ export async function randomiseMatchups(
   data: { isSecondChanceComp: boolean },
 ): Promise<void> {
   const activeComp = backendService.getActiveComp();
-  const compHistory = backendService.backendState.compHistory;
+  const compHistory = await backendService.getCompHistory();
   const updatedSlots = randomiseAllMatchups(activeComp, data.isSecondChanceComp, compHistory);
   console.log(`updatedSlots: ${JSON.stringify(updatedSlots)}`);
   const updatedActiveCompResult = await backendService.mongoDbService.activeCompCollection.findOneAndUpdate(

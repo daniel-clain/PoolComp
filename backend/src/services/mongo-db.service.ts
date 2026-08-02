@@ -1,7 +1,7 @@
 import { MongoClient, type Db, type FindOneAndUpdateOptions } from "mongodb";
 import type {
   Player,
-  PoolComp
+  PoolComp_D
 } from "../../../shared/domain.js";
 
 export const updateOptions: FindOneAndUpdateOptions = {
@@ -15,13 +15,13 @@ export async function createMongoDbService() {
 
   const playersCollection = database.collection<Player>("Players");
   const activeCompCollection =
-    database.collection<PoolComp>("ActiveComp");
-  const compHistoryCollection = database.collection<PoolComp>("CompHistory");
+    database.collection<PoolComp_D>("ActiveComp");
+  const compHistoryCollection = database.collection<PoolComp_D>("CompHistory");
 
 
 
 
-  return { playersCollection, activeCompCollection, compHistoryCollection, getAllData }
+  return { playersCollection, activeCompCollection, compHistoryCollection, getAllData, getAllHistoryData }
 
   async function connectToDatabase(): Promise<Db> {
     const mongoConnectionString = process.env.MONGODB_URI;
@@ -55,7 +55,7 @@ export async function createMongoDbService() {
     throw new Error("MongoDB connection failed after all retries.");
   }
 
-  async function getAllData(): Promise<[Player[], PoolComp | null, PoolComp[]]> {
+  async function getAllData(): Promise<[Player[], PoolComp_D | null, PoolComp_D[]]> {
     const [playerDocuments, activeCompDocument, historyDocuments] =
       await Promise.all([
         playersCollection.find({}, { projection: { _id: 0 } }).toArray(),
@@ -64,6 +64,12 @@ export async function createMongoDbService() {
       ]);
     return [playerDocuments, activeCompDocument, historyDocuments];
   }
+
+  async function getAllHistoryData(): Promise<PoolComp_D[]> {
+    return compHistoryCollection.find({}, { projection: { _id: 0 } }).sort({ date: -1 }).toArray();
+  }
+
+
 
 }
 export type MongoDbService = Awaited<ReturnType<typeof createMongoDbService>>;

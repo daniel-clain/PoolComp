@@ -1,8 +1,9 @@
-import type { PoolComp, Slot } from "../../../../shared/domain.js";
+import type { Matchup, PoolComp, RegisteredPlayer, Slot } from "../../../../shared/domain.js";
 
 import _ from "lodash";
 
 import { getSecondChancePlayersPool, getUnassignedPlayers } from "../../../../shared/tournament-slot.service.js";
+
 import {
   applyByeToEmptyFirstRoundSlots,
   autoAdvanceByeMatchups,
@@ -24,14 +25,16 @@ export function autoAssignUnassignedPlayers(comp: PoolComp, isSecondChanceComp: 
   const unassignedPlayers = getUnassignedPlayers(comp, isSecondChanceComp, compHistory);
   console.log(`unassignedPlayers: ${JSON.stringify(unassignedPlayers)}`);
   unassignedPlayers.forEach(player => {
-    updatedSlots = assignPlayer({ ...comp, ...(isSecondChanceComp ? { secondChanceSlots: updatedSlots } : { slots: updatedSlots }) }, player.id, isSecondChanceComp);
+    updatedSlots = assignPlayer({ ...comp, ...(isSecondChanceComp ? { secondChanceSlots: updatedSlots } : { slots: updatedSlots }) }, player, isSecondChanceComp);
   })
   return updatedSlots;
 }
 
-export function assignPlayer(comp: PoolComp, playerId: string, isSecondChanceComp: boolean): Slot[] {
+export function assignPlayer(comp: PoolComp, player: RegisteredPlayer, isSecondChanceComp: boolean): Slot[] {
   let updatedSlots: Slot[] = _.cloneDeep(isSecondChanceComp ? comp.secondChanceSlots! : comp.slots!);
-  console.log(`assigning player ${playerId} to slots: ${JSON.stringify(updatedSlots)}`);
+
+  applyByeToEmptyFirstRoundSlots(updatedSlots)
+  console.log(`assigning player ${player.name}`);
   const matchupsWithAnAvailableSlot = getMatchupsWithAnAvailableSlot(updatedSlots)
   let availableSlot: Slot
   if (matchupsWithAnAvailableSlot.some(matchupHasTwoEmptySlots)) {
@@ -39,18 +42,26 @@ export function assignPlayer(comp: PoolComp, playerId: string, isSecondChanceCom
     availableSlot = getRandomSlotFromMatchup(matchup);
   } else {
     const matchup = getRandomMatchup(matchupsWithAnAvailableSlot);
-    availableSlot = matchup.slot1.playerId ? matchup.slot2 : matchup.slot1;
+    if (!matchup) {
+      console.log(`no matchup found`);
+    }
+    console.log(`matchup: ${JSON.stringify(matchup)}`);
+    availableSlot = matchup.slot1.player?.id ? matchup.slot2 : matchup.slot1;
   }
   clearSlotsAutoAdvance(availableSlot!, updatedSlots)
   updatedSlots.find(slot => {
     if (slot.id === availableSlot.id)
-      return slot.playerId = playerId;
+      return slot.player = player;
   })
 
   applyByeToEmptyFirstRoundSlots(updatedSlots)
   autoAdvanceByeMatchups(updatedSlots)
 
   return updatedSlots;
+}
+
+export function getOtherSlot(slot: Slot, matchup: Matchup): Slot {
+  return matchup.slot1.id === slot.id ? matchup.slot2 : matchup.slot1;
 }
 
 export function randomiseAllMatchups(comp: PoolComp, isSecondChanceComp: boolean, compHistory: PoolComp[]): Slot[] {
@@ -67,30 +78,30 @@ export function randomiseAllMatchups(comp: PoolComp, isSecondChanceComp: boolean
   return assignedSlots;
 }
 
-export function removePlayerFromSlots(comp: PoolComp, playerId: string): Slot[] {
+export function removePlayerFromSlots(comp: PoolComp, player: RegisteredPlayer): Slot[] {
   let updatedSlots: Slot[] = _.cloneDeep(comp.slots);
-  clearPlayerFromTournament(playerId, updatedSlots)
+  clearPlayerFromTournament(player, updatedSlots)
   applyByeToEmptyFirstRoundSlots(updatedSlots)
   autoAdvanceByeMatchups(updatedSlots)
 
   return updatedSlots
 }
 
-export function handleManualAssignPlayerToSlot(comp: PoolComp, slotId: number, playerId: string | undefined, autoAssignPlayers: boolean, isSecondChanceComp: boolean): Slot[] {
+export function handleManualAssignPlayerToSlot(comp: PoolComp, slotId: number, player: RegisteredPlayer | undefined, autoAssignPlayers: boolean, isSecondChanceComp: boolean): Slot[] {
   let updatedSlots: Slot[] = _.cloneDeep(isSecondChanceComp ? comp.secondChanceSlots! : comp.slots!);
   const targetSlot = updatedSlots.find(slot => slot.id === slotId)
   if (slotIsFirstRoundSlot(slotId, updatedSlots)) {
-    const playerAlreadyInSlot = targetSlot?.playerId
+    const playerAlreadyInSlot = targetSlot?.player
     if (playerAlreadyInSlot)
       clearPlayerFromTournament(playerAlreadyInSlot, updatedSlots)
 
 
-    playerId && clearPlayerFromTournament(playerId, updatedSlots)
+    player && clearPlayerFromTournament(player, updatedSlots)
 
     clearSlotsAutoAdvance(targetSlot!, updatedSlots)
     updatedSlots.find(slot => {
       if (slot.id === slotId)
-        return slot.playerId = playerId
+        return slot.player = player
 
     })
     if (playerAlreadyInSlot && autoAssignPlayers)
@@ -106,7 +117,7 @@ export function handleManualAssignPlayerToSlot(comp: PoolComp, slotId: number, p
 
     updatedSlots.find(slot => {
       if (slot.id === slotId)
-        return playerId ? slot.playerId = playerId : delete slot.playerId
+        return player ? slot.player = player : delete slot.player
     })
   }
   return updatedSlots

@@ -1,12 +1,10 @@
 import orderBy from "lodash/orderBy";
-import type { RefObject } from "react";
 import {
   type Player,
   type PoolComp,
   type Slot
 } from "../../../shared/domain";
 
-import type { MessageToBackend } from "../../../shared/messageToBackend";
 import { poolCompConfig } from "../../../shared/poolCompConfig";
 import { getFirstRoundSlotsFromAllTournamentSlots, getSlotSourceMatchup, tournamentHasHadAssignment } from "../../../shared/tournament-slot.service";
 
@@ -14,7 +12,7 @@ export function canSetSlot(slot: Slot, slots: Slot[]): boolean {
 
   const sourceMatchup = getSlotSourceMatchup(slot, slots)
 
-  return !sourceMatchup || (Boolean(sourceMatchup?.slot1.playerId) && Boolean(sourceMatchup?.slot2.playerId));
+  return !sourceMatchup || (Boolean(sourceMatchup?.slot1.player?.id) && Boolean(sourceMatchup?.slot2.player?.id));
 }
 
 export type PlayerChoice = {
@@ -33,7 +31,7 @@ export function getPlayerChoicesForSlot(
   if (sourceMatchup) {
     const { slot1, slot2 } = sourceMatchup
     return bracketPlayers.reduce((acc, { id }) => {
-      if (id === slot1.playerId || id === slot2.playerId) {
+      if (id === slot1.player?.id || id === slot2.player?.id) {
         acc.push({ player: bracketPlayers.find((player) => player.id === id)! })
       }
       return acc
@@ -41,7 +39,7 @@ export function getPlayerChoicesForSlot(
   }
   const { unassignedPlayers, assignedPlayers } = bracketPlayers.reduce((acc, { id }) => {
     const player = bracketPlayers.find((player) => player.id === id)!
-    if (slots.some(slot => slot.playerId === id)) {
+    if (slots.some(slot => slot.player?.id === id)) {
       acc.assignedPlayers.push({ player })
     } else {
       acc.unassignedPlayers.push({ player, isUnassigned: true })
@@ -63,7 +61,7 @@ export function activePoolCompHasChampionPlayer(comp: PoolComp): boolean {
   function tournamentHasChampionPlayer(slots: Slot[]): boolean {
     if (!slots.length) return false;
     const [firstPlaceSlot] = slots;
-    return Boolean(firstPlaceSlot.playerId);
+    return Boolean(firstPlaceSlot.player?.id);
   }
 }
 
@@ -73,29 +71,15 @@ export function getFinalists(comp: PoolComp, players: Player[]): {
 } {
   const [firstPlaceSlot, finalistSlot1, finalistSlot2] = comp.slots
 
-  const secondPlaceSlot = firstPlaceSlot.playerId === finalistSlot1.playerId ? finalistSlot2 : finalistSlot1
+  const secondPlaceSlot = firstPlaceSlot.player?.id === finalistSlot1.player?.id ? finalistSlot2 : finalistSlot1
 
-  const firstPlace = players.find((player) => player.id === firstPlaceSlot.playerId)!
-  const secondPlace = players.find((player) => player.id === secondPlaceSlot.playerId)!
+  const firstPlace = players.find((player) => player.id === firstPlaceSlot.player?.id)!
+  const secondPlace = players.find((player) => player.id === secondPlaceSlot.player?.id)!
 
   return { firstPlace, secondPlace };
 }
 
 
-export function createPoolCompService(
-  sendMessageToBackendRef: RefObject<
-    ((message: MessageToBackend) => void) | null
-  >,
-) {
-
-  function send(message: MessageToBackend) {
-    sendMessageToBackendRef.current?.(message);
-  }
-
-  return {
-    send,
-  };
-}
 
 export function canAddMorePlayers(tournamentSlots: Slot[]): boolean {
   if (!tournamentHasHadAssignment(tournamentSlots)) {
@@ -104,7 +88,7 @@ export function canAddMorePlayers(tournamentSlots: Slot[]): boolean {
   const firstRoundSlots = getFirstRoundSlotsFromAllTournamentSlots(tournamentSlots)
   const currentPlayerIds = new Set(
     firstRoundSlots
-      .map((slot) => slot.playerId)
+      .map((slot) => slot.player?.id)
       .filter((playerId): playerId is string => Boolean(playerId)),
   )
 
@@ -120,12 +104,12 @@ export function canAddMorePlayers(tournamentSlots: Slot[]): boolean {
       continue
     }
 
-    if (!slot.playerId) {
+    if (!slot.player?.id) {
       continue
     }
 
-    const firstPlayerId = sourceMatchup.slot1.playerId
-    const secondPlayerId = sourceMatchup.slot2.playerId
+    const firstPlayerId = sourceMatchup.slot1.player?.id
+    const secondPlayerId = sourceMatchup.slot2.player?.id
     if (!firstPlayerId || !secondPlayerId) {
       continue
     }

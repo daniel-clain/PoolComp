@@ -1,5 +1,8 @@
-
+import { useCallback } from "react";
+import type { PoolComp } from "../../../../shared/domain";
 import { useAppContext } from "../../AppContext";
+import { Table } from "../../components/Table/Table";
+import { getBigCompTotalPrizePool } from "../../services/bigComp.service";
 import {
   calculateFirstPrizeMoney,
   getFinalists,
@@ -8,6 +11,45 @@ import {
 export function CompHistory() {
   const { compHistory, players, viewHistoricalComp } = useAppContext();
 
+  const tableColumns = ['Date', 'Players', '1st Place', '2nd Place', 'Prize Pool', 'Big Comp'] as const;
+  type TableColumnName = (typeof tableColumns)[number]
+
+
+  const getColumnData = useCallback((comp: PoolComp, column: TableColumnName) => {
+    const { firstPlace, secondPlace } = getFinalists(
+      comp,
+      players,
+    );
+    const isBigComp = Boolean(comp.secondChanceSlots?.length);
+
+    switch (column) {
+      case 'Date': {
+        const compDateString = comp.date
+          ? new Date(comp.date).toLocaleDateString("en-AU", { day: "numeric", month: "long" })
+          : "";
+        return compDateString;
+      }
+      case 'Players': {
+        return comp.registeredPlayers.length;
+      }
+      case '1st Place': {
+
+
+        return firstPlace.name;
+      }
+      case '2nd Place': {
+        return secondPlace.name;
+      }
+      case 'Prize Pool': {
+        const prizeMoney =
+          isBigComp ? getBigCompTotalPrizePool(comp, compHistory) : calculateFirstPrizeMoney(comp);
+        return `$${prizeMoney}`;
+      }
+      case 'Big Comp': {
+        return isBigComp ? '🤑' : '-';
+      }
+    }
+  }, [players, compHistory]);
 
 
   return (
@@ -16,43 +58,17 @@ export function CompHistory() {
       {compHistory.length === 0 ? (
         <no-data-message>No comp history yet.</no-data-message>
       ) : (
-        <history-table>
-          <history-table-header>
-            <history-cell>Date</history-cell>
-            <history-cell>Players</history-cell>
-            <history-cell>1st Place</history-cell>
-            <history-cell>2nd Place</history-cell>
-            <history-cell>Prize</history-cell>
-          </history-table-header>
-          <history-table-body>
-            {compHistory.map((comp) => {
-              const { firstPlace, secondPlace } = getFinalists(
-                comp,
-                players,
-              );
-              const compDateString = comp.date
-                ? new Date(comp.date).toLocaleDateString("en-AU", { day: "numeric", month: "long", year: "numeric" })
-                : "";
-              const playersCount = comp.registeredPlayers.length;
-              const prizeMoney =
-                calculateFirstPrizeMoney(comp);
-              return (
-                <history-row
-                  key={comp.id}
-                  onClick={() => viewHistoricalComp(comp)}
-                >
-                  <history-cell>
-                    {compDateString}
-                  </history-cell>
-                  <history-cell>{playersCount}</history-cell>
-                  <history-cell>{firstPlace.name}</history-cell>
-                  <history-cell>{secondPlace.name}</history-cell>
-                  <history-cell>${prizeMoney}</history-cell>
-                </history-row>
-              );
-            })}
-          </history-table-body>
-        </history-table>
+        <Table
+          columns={[...tableColumns]}
+          rows={compHistory.map((comp) => ({
+            key: comp.id,
+            cells: tableColumns.map((column) => getColumnData(comp, column)),
+          }))}
+          onRowClick={(compId) => {
+            const comp = compHistory.find((historyComp) => historyComp.id === compId);
+            if (comp) viewHistoricalComp(comp);
+          }}
+        />
       )}
     </history-view>
   );

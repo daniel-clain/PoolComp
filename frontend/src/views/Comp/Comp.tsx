@@ -4,8 +4,7 @@ import leavesImage from "../../assets/crossleaves.png";
 import { ScalingImage } from "../../components/ScalingImage/ScalingImage";
 import { TabBar } from "../../components/TabBar/TabBar";
 
-import { useMemo } from "react";
-import { compStarted, getSecondChancePlayersPool, getUnassignedPlayers } from "../../../../shared/tournament-slot.service";
+import { compStarted, getUnassignedPlayers } from "../../../../shared/tournament-slot.service";
 import { activePoolCompHasChampionPlayer, canAddMorePlayers } from "../../services/poolComp.service";
 import { BracketsView } from "./components/BracketsView/BracketsView";
 import { CompPlayers } from "./components/CompPlayers/CompPlayers";
@@ -28,17 +27,12 @@ export function Comp() {
   const comp = activeHistoricalComp ?? activePoolComp!;
   const isBigComp = comp.secondChanceSlots
 
+  const activeTabIsMainComp = compActiveTab === "Main Comp"
   const activeTabIsSecondChance = compActiveTab === "2nd Chance Comp"
 
-  const tournamentTabActive = compActiveTab === "Main Comp" || activeTabIsSecondChance
+  const tournamentTabActive = activeTabIsMainComp || activeTabIsSecondChance
 
   const canAddMorePlayersDisabled = !canAddMorePlayers(comp.slots);
-
-  const secondChancePlayerPool = useMemo(() => {
-    console.log('getting second chance player pool');
-    return getSecondChancePlayersPool(comp, compHistory);
-  }, [comp.slots]);
-  console.log('secondChancePlayerPool', secondChancePlayerPool);
 
 
   const compDate = comp.date;
@@ -119,7 +113,7 @@ export function Comp() {
           <assign-players-container>
             <button
               type="button"
-              disabled={autoAssignPlayers || canAddMorePlayersDisabled}
+              disabled={autoAssignPlayers || (activeTabIsMainComp && canAddMorePlayersDisabled)}
               onClick={() => {
                 send(['assignPlayers', { isSecondChanceComp: activeTabIsSecondChance }]);
                 if (compActiveTab == 'Players') setCompActiveTab("Main Comp");
@@ -148,9 +142,15 @@ export function Comp() {
     const completeCompDisabled = !activePoolCompHasChampionPlayer(comp);
     return (
       <comp-actions-bottom>
-        <button onClick={() => {
-          send(['convertToBigComp']);
-        }}>Convert to Big Comp</button>
+        <button
+          type="button"
+          disabled={Boolean(isBigComp)}
+          onClick={() => {
+            send(['convertToBigComp']);
+          }}
+        >
+          {isBigComp ? 'Is' : 'Convert to'} Big Comp {isBigComp ? '✅' : ''}
+        </button>
         <button
           type="button"
           disabled={completeCompDisabled}

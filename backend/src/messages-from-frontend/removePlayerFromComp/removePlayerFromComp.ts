@@ -8,7 +8,8 @@ export async function removePlayerFromComp(
   data: { playerId: string }
 ) {
   const comp = backendService.getActiveComp();
-  const updatedSlots = removePlayerFromSlots(comp, data.playerId);
+  const player = comp.registeredPlayers.find(player => player.id === data.playerId)!;
+  const updatedSlots = removePlayerFromSlots(comp, player);
   const updatedActiveCompResult = await backendService.mongoDbService.activeCompCollection.findOneAndUpdate(
     { id: comp.id },
     {

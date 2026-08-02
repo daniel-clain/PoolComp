@@ -17,6 +17,7 @@ async function bootstrap(): Promise<void> {
   const app = express();
   const httpServer = http.createServer(app);
   const backendState: BackendState = {
+    leaderboard: [],
     players: [],
     activePoolComp: null,
     compHistory: [],
@@ -28,7 +29,9 @@ async function bootstrap(): Promise<void> {
   const backendService = createBackendService(mongoDbService, websocketService, backendState);
   await backendService.loadDatabaseDataIntoBackendState()
 
-  websocketService.onClientConnected.subscribe((socket) => {
+  websocketService.onClientConnected.subscribe(async (socket) => {
+    await backendService.loadDatabaseDataIntoBackendState();
+
     backendService.sentToClient(socket, { message: 'allData', data: backendState })
   })
 
@@ -57,6 +60,7 @@ async function bootstrap(): Promise<void> {
         process.exitCode = 1;
       })
       .finally(() => {
+        console.log("actionQueue finished");
         backendService.sendToAllClients({
           message: 'allData',
           data: backendState

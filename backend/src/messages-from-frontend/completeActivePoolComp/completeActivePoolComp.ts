@@ -3,7 +3,9 @@ import type { BackendService } from "../../services/backend.service.js";
 export async function completeActivePoolComp(
   backendService: BackendService
 ): Promise<void> {
-  const activeComp = backendService.getActiveComp();
+  const activeComp = backendService.backendState.activePoolComp;
+
+  if (!activeComp) throw "No active comp";
 
   await backendService.mongoDbService.compHistoryCollection.insertOne(activeComp);
   await backendService.mongoDbService.activeCompCollection.deleteOne({
