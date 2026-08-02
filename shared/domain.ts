@@ -17,14 +17,14 @@ export type RegisteredPlayer = Player & {
 
 export type PoolComp = {
   id: string;
-  date: Date;
+  date: string;
   slots: Slot[];
   registeredPlayers: RegisteredPlayer[];
   secondChanceSlots?: Slot[];
 };
 export type PoolComp_D = {
   id: string;
-  date: Date;
+  date: string;
   slots: Slot_D[];
   registeredPlayers: RegisteredPlayer_D[];
   secondChanceSlots?: Slot_D[];

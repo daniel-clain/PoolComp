@@ -1,28 +1,29 @@
-import type { BackendState, PoolComp, PoolComp_D, RegisteredPlayer, RegisteredPlayer_D, Slot, Slot_D } from "./domain";
+import type { BackendState, PoolComp, PoolComp_D, RegisteredPlayer, RegisteredPlayer_D, Slot, Slot_D } from "./domain.js";
 
 export function convertToRegisteredPlayerData(registeredPlayer: RegisteredPlayer): RegisteredPlayer_D {
-  const { id, ...restOfRegisteredPlayer } = registeredPlayer;
   return {
-    ...restOfRegisteredPlayer,
-    playerId: id
+    playerId: registeredPlayer.id,
+    paid: registeredPlayer.paid,
   }
 }
 
 export function convertToSlotData(slot: Slot): Slot_D {
-  const { player, ...restOfSlot } = slot;
   return {
-    ...restOfSlot,
-    ...player ? { playerId: player.id } : {},
+    id: slot.id,
+    ...(slot.isBye ? { isBye: true } : {}),
+    ...(slot.player ? { playerId: slot.player.id } : {}),
   }
 }
 
 export function convertToPoolCompData(poolComp: PoolComp): PoolComp_D {
-  const { registeredPlayers, slots, secondChanceSlots, ...restOfPoolComp } = poolComp;
   return {
-    ...restOfPoolComp,
-    registeredPlayers: registeredPlayers.map(convertToRegisteredPlayerData),
-    slots: slots.map(convertToSlotData),
-    ...secondChanceSlots ? { secondChanceSlots: secondChanceSlots.map(convertToSlotData) } : {}
+    id: poolComp.id,
+    date: poolComp.date,
+    registeredPlayers: poolComp.registeredPlayers.map(convertToRegisteredPlayerData),
+    slots: poolComp.slots.map(convertToSlotData),
+    ...(poolComp.secondChanceSlots
+      ? { secondChanceSlots: poolComp.secondChanceSlots.map(convertToSlotData) }
+      : {}),
   }
 }
 
@@ -31,43 +32,48 @@ export function convertToPoolComp(poolCompData: PoolComp_D, backendState: Backen
     throw "Pool comp data is invalid";
   }
 
-  const { registeredPlayers, slots, secondChanceSlots, ...restOfPoolComp } = poolCompData;
+  const convertedRegisteredPlayers = poolCompData.registeredPlayers.map((registeredPlayerData) =>
+    convertToRegisteredPlayer(registeredPlayerData, backendState),
+  );
 
-  const convertedRegisteredPlayers = registeredPlayers.map(registeredPlayerData => convertToRegisteredPlayer(registeredPlayerData, backendState));
+  const convertedSlots = poolCompData.slots.map((slotData) =>
+    convertToSlot(slotData, convertedRegisteredPlayers),
+  );
 
-
-  const convertedSlots = slots.map(slotData => convertToSlot(slotData, convertedRegisteredPlayers));
-
-
-  const convertedSecondChanceSlots = secondChanceSlots ? secondChanceSlots.map(slotData => convertToSlot(slotData, convertedRegisteredPlayers)) : undefined;
-
+  const convertedSecondChanceSlots = poolCompData.secondChanceSlots
+    ? poolCompData.secondChanceSlots.map((slotData) =>
+      convertToSlot(slotData, convertedRegisteredPlayers),
+    )
+    : undefined;
 
   return {
-    ...restOfPoolComp,
+    id: poolCompData.id,
+    date: poolCompData.date,
     registeredPlayers: convertedRegisteredPlayers,
     slots: convertedSlots,
-    ...secondChanceSlots ? { secondChanceSlots: convertedSecondChanceSlots } : {}
+    ...(convertedSecondChanceSlots
+      ? { secondChanceSlots: convertedSecondChanceSlots }
+      : {}),
   }
 }
 
-export function convertToRegisteredPlayer(registeredPlayerData: RegisteredPlayer_D, backendState: BackendState): RegisteredPlayer {
-  if (!registeredPlayerData.playerId) {
-    console.log("Registered player data is invalid", registeredPlayerData);
-  }
-  const { playerId, ...restOfRegisteredPlayer } = registeredPlayerData;
-  const player = backendState.players.find(player => player.id === playerId);
-  if (!player) throw `Player not found: ${playerId}`
+export function convertToRegisteredPlayer(
+  registeredPlayerData: RegisteredPlayer_D,
+  backendState: BackendState,
+): RegisteredPlayer {
+  const player = backendState.players.find((player) => player.id === registeredPlayerData.playerId);
+  if (!player) throw `Player not found: ${registeredPlayerData.playerId}`
   return {
     ...player,
-    ...restOfRegisteredPlayer
+    paid: registeredPlayerData.paid,
   }
 }
 
 export function convertToSlot(slotData: Slot_D, registeredPlayers: RegisteredPlayer[]): Slot {
-  const { playerId, ...restOfSlot } = slotData;
-  const player = registeredPlayers.find(player => player.id === playerId);
+  const player = registeredPlayers.find((player) => player.id === slotData.playerId);
   return {
-    ...restOfSlot,
-    ...player ? { player } : {}
+    id: slotData.id,
+    ...(slotData.isBye ? { isBye: true } : {}),
+    ...(player ? { player } : {}),
   }
 }

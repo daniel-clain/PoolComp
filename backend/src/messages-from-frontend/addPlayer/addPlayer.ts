@@ -1,14 +1,15 @@
 import _ from "lodash";
-import { randomUUID } from "node:crypto";
 import type { Player } from "../../../../shared/domain.js";
 import type { BackendService } from "../../services/backend.service.js";
+import { createUniqueFourDigitId, getAllUsedIds } from "../../services/short-id.service.js";
 
 export async function addPlayer(
   backendService: BackendService,
   data: { name: string },
 ): Promise<void> {
+  const usedIds = await getAllUsedIds(backendService.mongoDbService);
   const newPlayer: Player = {
-    id: randomUUID(),
+    id: createUniqueFourDigitId(usedIds),
     name: data.name.trim(),
     deactivated: false,
   };

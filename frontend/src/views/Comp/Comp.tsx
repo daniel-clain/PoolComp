@@ -1,3 +1,5 @@
+import { format, parseISO } from "date-fns";
+import { enAU } from "date-fns/locale";
 import { useAppContext, type CompTab } from "../../AppContext";
 import ballImage from "../../assets/8ball.png";
 import leavesImage from "../../assets/crossleaves.png";
@@ -5,6 +7,7 @@ import { ScalingImage } from "../../components/ScalingImage/ScalingImage";
 import { TabBar } from "../../components/TabBar/TabBar";
 
 import { compStarted, getUnassignedPlayers } from "../../../../shared/tournament-slot.service";
+import { isBigCompValid } from "../../services/bigComp.service";
 import { activePoolCompHasChampionPlayer, canAddMorePlayers } from "../../services/poolComp.service";
 import { BracketsView } from "./components/BracketsView/BracketsView";
 import { CompPlayers } from "./components/CompPlayers/CompPlayers";
@@ -33,11 +36,11 @@ export function Comp() {
   const tournamentTabActive = activeTabIsMainComp || activeTabIsSecondChance
 
   const canAddMorePlayersDisabled = !canAddMorePlayers(comp.slots);
+  const bigCompValidation = isBigCompValid(compHistory, new Date(comp.date));
 
 
-  const compDate = comp.date;
-  const compDateString = compDate
-    ? new Date(compDate).toLocaleDateString("en-AU", { day: "numeric", month: "long", year: "numeric" })
+  const compDateString = comp.date
+    ? format(parseISO(comp.date), "EEE do MMM", { locale: enAU })
     : "";
 
   return (
@@ -55,15 +58,35 @@ export function Comp() {
             onTabSelected={setCompActiveTab}
           />
         </comp-tabs>
-        {compActions()}
         <comp-date>{compDateString}</comp-date>
+        {compActions()}
       </top-row>
       {compMainPanel()}
+      {isBigComp && bigCompStatusBar()}
       {compActionsBottom()}
       <ScalingImage id="eight-ball-image" src={ballImage} />
       <ScalingImage id="bg-leaves-image" src={leavesImage} />
     </comp-view>
   );
+
+  function bigCompStatusBar() {
+    const isValid = bigCompValidation === true;
+
+    return (
+      <big-comp-status className={isValid ? "is-valid" : "is-invalid"}>
+        <status-arrow>➜</status-arrow>
+        {isValid ? (
+          <status-message>Big Comp Valid</status-message>
+        ) : (
+          <status-errors>
+            {bigCompValidation.map((error) => (
+              <status-error key={error}>{error}</status-error>
+            ))}
+          </status-errors>
+        )}
+      </big-comp-status>
+    );
+  }
 
   function compMainPanel() {
 
@@ -144,9 +167,12 @@ export function Comp() {
       <comp-actions-bottom>
         <button
           type="button"
-          disabled={Boolean(isBigComp)}
           onClick={() => {
-            send(['convertToBigComp']);
+            if (isBigComp) {
+              send(['convertToBigComp', { cancel: true }]);
+            } else {
+              send(['convertToBigComp', {}]);
+            }
           }}
         >
           {isBigComp ? 'Is' : 'Convert to'} Big Comp {isBigComp ? '✅' : ''}

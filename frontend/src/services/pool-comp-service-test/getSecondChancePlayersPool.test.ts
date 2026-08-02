@@ -21,7 +21,7 @@ function createPlayerSlot(id: number, playerName: string): Slot {
 function createComp(slots: Slot[], registeredPlayers: RegisteredPlayer[]): PoolComp {
   return {
     id: "comp-1",
-    date: new Date(),
+    date: "2026-08-02",
     slots,
     registeredPlayers,
   };

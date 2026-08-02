@@ -1,3 +1,4 @@
+import { convertToSlotData } from "../../../../shared/data-convert.service.js";
 import type { BackendService } from "../../services/backend.service.js";
 import { updateOptions } from "../../services/mongo-db.service.js";
 import { randomiseAllMatchups } from "../../services/tournament-slot-assignment/tournament-slot-assignment.service.js";
@@ -7,12 +8,13 @@ export async function randomiseMatchups(
   data: { isSecondChanceComp: boolean },
 ): Promise<void> {
   const activeComp = backendService.getActiveComp();
-  const compHistory = await backendService.getCompHistory();
+  const compHistory = backendService.getCompHistory();
   const updatedSlots = randomiseAllMatchups(activeComp, data.isSecondChanceComp, compHistory);
-  console.log(`updatedSlots: ${JSON.stringify(updatedSlots)}`);
+  const updatedSlotsData = updatedSlots.map(convertToSlotData);
+  console.log(`updatedSlots: ${JSON.stringify(updatedSlotsData)}`);
   const updatedActiveCompResult = await backendService.mongoDbService.activeCompCollection.findOneAndUpdate(
     { id: activeComp.id },
-    { $set: { ...(data.isSecondChanceComp ? { secondChanceSlots: updatedSlots } : { slots: updatedSlots }) } },
+    { $set: { ...(data.isSecondChanceComp ? { secondChanceSlots: updatedSlotsData } : { slots: updatedSlotsData }) } },
     updateOptions,
   );
   if (!updatedActiveCompResult) throw new Error("Active comp not found");

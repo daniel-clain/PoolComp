@@ -5,12 +5,13 @@ export async function togglePlayerPaid(
   backendService: BackendService,
   data: { playerId: string, paid: boolean },
 ): Promise<void> {
-  const activeComp = backendService.getActiveComp();
+  const activeComp = backendService.backendState.activePoolComp;
+  if (!activeComp) throw new Error("No active comp found");
 
   const result = await backendService.mongoDbService.activeCompCollection.findOneAndUpdate(
     {
       id: activeComp.id,
-      "registeredPlayers.id": data.playerId,
+      "registeredPlayers.playerId": data.playerId,
     },
     { $set: { "registeredPlayers.$.paid": data.paid } },
     updateOptions,

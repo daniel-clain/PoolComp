@@ -1,5 +1,5 @@
 import { convertToRegisteredPlayerData, convertToSlotData } from "../../../../shared/data-convert.service.js";
-import type { RegisteredPlayer, RegisteredPlayer_D, Slot, Slot_D } from "../../../../shared/domain.js";
+import type { RegisteredPlayer, Slot } from "../../../../shared/domain.js";
 import { tournamentHasHadAssignment } from "../../../../shared/tournament-slot.service.js";
 import type { BackendService } from "../../services/backend.service.js";
 import { updateOptions } from "../../services/mongo-db.service.js";
@@ -29,12 +29,15 @@ export async function addPlayerToComp(
       false
     );
   }
-  const updatedRegisteredPlayersData: RegisteredPlayer_D[] = updatedRegisteredPlayers.map(convertToRegisteredPlayerData)
-  const updatedSlotsData: Slot_D[] = updatedSlots.map(convertToSlotData)
 
   const updatedCompResult = await backendService.mongoDbService.activeCompCollection.findOneAndUpdate(
     { id: comp.id },
-    { $set: { slots: updatedSlotsData, registeredPlayers: updatedRegisteredPlayersData } },
+    {
+      $set: {
+        slots: updatedSlots.map(convertToSlotData),
+        registeredPlayers: updatedRegisteredPlayers.map(convertToRegisteredPlayerData),
+      },
+    },
     updateOptions,
   );
   if (!updatedCompResult) throw new Error("Active comp not found");

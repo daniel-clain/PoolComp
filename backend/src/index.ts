@@ -6,6 +6,7 @@ import type { BackendState } from "../../shared/domain.js";
 import { MessageToBackend } from "../../shared/messageToBackend.js";
 import { poolCompConfig } from "../../shared/poolCompConfig.js";
 import { messagesFromFrontend } from "./messages-from-frontend/messages-from-frontend.js";
+import { createActionQueueService } from "./services/action-queue.service.js";
 import { createBackendService } from "./services/backend.service.js";
 import { createMongoDbService } from "./services/mongo-db.service.js";
 import { createWebSocketService } from "./services/websockets.service.js";
@@ -27,6 +28,7 @@ async function bootstrap(): Promise<void> {
   const mongoDbService = await createMongoDbService();
   const websocketService = createWebSocketService(httpServer);
   const backendService = createBackendService(mongoDbService, websocketService, backendState);
+  const actionQueueService = createActionQueueService(backendService);
   await backendService.loadDatabaseDataIntoBackendState()
 
   websocketService.onClientConnected.subscribe(async (socket) => {
@@ -35,43 +37,14 @@ async function bootstrap(): Promise<void> {
     backendService.sentToClient(socket, { message: 'allData', data: backendState })
   })
 
-  let actionQueue: Promise<void> | null = null;
-
   websocketService.onMessageFromClient.subscribe((jsonString) => {
     const [message, data]: MessageToBackend = JSON.parse(jsonString);
 
     console.log("message from frontend:", message, data ?? '');
 
-    if (!actionQueue) {
-      console.log("actionInProgress: true");
-      backendService.sendToAllClients({
-        message: 'actionInProgress',
-        data: true
-      })
-    }
-
-
-
-    actionQueue = (actionQueue || Promise.resolve()).then(() => {
-      return messagesFromFrontend[message](backendService, data as any)
-    })
-      .catch((error: unknown) => {
-        console.error("Fatal:", error);
-        process.exitCode = 1;
-      })
-      .finally(() => {
-        console.log("actionQueue finished");
-        backendService.sendToAllClients({
-          message: 'allData',
-          data: backendState
-        })
-        backendService.sendToAllClients({
-          message: 'actionInProgress',
-          data: false
-        })
-      })
-
-    actionQueue = null;
+    actionQueueService.enqueueAction(() =>
+      messagesFromFrontend[message](backendService, data as any)
+    );
   })
 
   app.use(express.static(frontendDistributionPath));

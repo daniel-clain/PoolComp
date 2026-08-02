@@ -8,9 +8,34 @@ comp-view {
     display: flex;
     gap: 2cqh;
 
+    comp-date {
+      margin-left: auto;
+      font-family: Georgia, "Times New Roman", Times, serif;
+      font-style: italic;
+      font-weight: 600;
+      color: $color-view-title;
+      align-self: center;
+      @include cq-responsive((font-size: 4));
+    }
+
     .is-portrait & {
-      flex-direction: column;
-      gap: 1cqh;
+      flex-wrap: wrap;
+
+      comp-actions {
+        width: 100%;
+      }
+
+    }
+
+    .is-landscape & {
+      comp-actions {
+        order: 2
+      }
+
+      comp-date {
+        order: 3;
+        margin-left: auto;
+      }
     }
   }
 
@@ -20,6 +45,51 @@ comp-view {
     flex-direction: column;
     flex: 1;
     min-height: 0;
+  }
+
+  big-comp-status {
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
+    border-style: solid;
+    @include cq-responsive((gap: 2,
+        padding: 1.5 2,
+        border-width: 0.3,
+        border-radius: 1,
+        font-size: 2.8,
+      ));
+
+    status-arrow {
+      font-weight: 700;
+      @include cq-responsive((font-size: 5));
+    }
+
+    status-message {
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+
+    status-errors {
+      display: flex;
+      flex-direction: column;
+      @include cq-responsive((gap: 0.8));
+    }
+
+    status-error {
+      display: block;
+    }
+
+    &.is-valid {
+      color: $color-dark-text;
+      background: $color-button-active-bg;
+      border-color: $color-button-active-border;
+    }
+
+    &.is-invalid {
+      color: $color-danger-text;
+      background: $color-button-danger-bg;
+      border-color: $color-button-danger-border;
+    }
   }
 
 
@@ -58,6 +128,7 @@ comp-view {
     position: absolute;
     bottom: 0;
     right: 0;
+    z-index: -1;
   }
 
   #bg-leaves-image {

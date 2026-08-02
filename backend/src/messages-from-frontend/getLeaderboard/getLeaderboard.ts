@@ -1,5 +1,4 @@
-
-import sortBy from "lodash/sortBy.js";
+import orderBy from "lodash/orderBy.js";
 import { calculateBigCompFirstPrizeMoney } from "../../../../frontend/src/services/bigComp.service.js";
 import { calculateFirstPrizeMoney } from "../../../../frontend/src/services/poolComp.service.js";
 import { convertToPoolComp } from "../../../../shared/data-convert.service.js";
@@ -11,7 +10,7 @@ export async function getLeaderboard(backendService: BackendService): Promise<vo
     (poolCompData) => convertToPoolComp(poolCompData, backendService.backendState),
   );
   const players = backendService.backendState.players;
-  const leaderboard: LeaderboardEntry[] = sortBy(
+  const leaderboard: LeaderboardEntry[] = orderBy(
     players
       .map((player) => ({
         player,

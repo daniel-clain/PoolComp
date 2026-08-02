@@ -23,6 +23,7 @@ export function createBackendService(mongoDbService: MongoDbService, websocketSe
   }
 
   function getActiveComp(): PoolComp {
+    if (!backendState.activePoolComp) throw new Error("No active comp found");
     return convertToPoolComp(backendState.activePoolComp, backendState);
   }
   function getCompHistory(): PoolComp[] {

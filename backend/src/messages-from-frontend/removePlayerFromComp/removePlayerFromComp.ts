@@ -1,3 +1,4 @@
+import { convertToSlotData } from "../../../../shared/data-convert.service.js";
 import type { BackendService } from "../../services/backend.service.js";
 import { updateOptions } from "../../services/mongo-db.service.js";
 import { removePlayerFromSlots } from "../../services/tournament-slot-assignment/tournament-slot-assignment.service.js";
@@ -13,8 +14,8 @@ export async function removePlayerFromComp(
   const updatedActiveCompResult = await backendService.mongoDbService.activeCompCollection.findOneAndUpdate(
     { id: comp.id },
     {
-      $pull: { registeredPlayers: { id: data.playerId } },
-      $set: { slots: updatedSlots },
+      $pull: { registeredPlayers: { playerId: data.playerId } },
+      $set: { slots: updatedSlots.map(convertToSlotData) },
     },
     updateOptions,
   );

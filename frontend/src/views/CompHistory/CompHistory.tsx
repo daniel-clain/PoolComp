@@ -1,3 +1,5 @@
+import { format, parseISO } from "date-fns";
+import { enAU } from "date-fns/locale";
 import { useCallback } from "react";
 import type { PoolComp } from "../../../../shared/domain";
 import { useAppContext } from "../../AppContext";
@@ -24,8 +26,9 @@ export function CompHistory() {
 
     switch (column) {
       case 'Date': {
+
         const compDateString = comp.date
-          ? new Date(comp.date).toLocaleDateString("en-AU", { day: "numeric", month: "long" })
+          ? format(parseISO(comp.date), "d MMM", { locale: enAU })
           : "";
         return compDateString;
       }

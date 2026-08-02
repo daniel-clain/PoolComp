@@ -63,7 +63,7 @@ describe("autoAssignUnassignedPlayers", function () {
 
     const activePoolComp: PoolComp = {
       id: "active",
-      date: new Date("2026-05-06T10:00:00.000Z"),
+      date: "2026-05-06",
       slots,
       registeredPlayers,
     }
