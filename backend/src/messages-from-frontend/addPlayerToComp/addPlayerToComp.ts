@@ -11,6 +11,11 @@ export async function addPlayerToComp(
   data: { playerId: string }
 ) {
   const comp = backendService.getActiveComp();
+  const playerAlreadyAdded = comp.registeredPlayers.some(registeredPlayer => registeredPlayer.id === data.playerId);
+
+  if (playerAlreadyAdded) {
+    throw 'tried to add a player that is already added';
+  }
 
   const player = backendService.backendState.players.find(player => player.id === data.playerId)!;
 

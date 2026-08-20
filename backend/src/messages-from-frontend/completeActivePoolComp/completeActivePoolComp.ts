@@ -8,19 +8,19 @@ export async function completeActivePoolComp(
   if (!activeComp) throw "No active comp";
 
   await backendService.mongoDbService.compHistoryCollection.insertOne(activeComp);
-  await backendService.mongoDbService.activeCompCollection.deleteOne({
-    id: activeComp.id,
-  });
-
-  const updatedActiveComp = await backendService.mongoDbService.activeCompCollection.findOne(
-    { id: activeComp.id },
-    { projection: { _id: 0 } },
-  );
-  backendService.backendState.activePoolComp = updatedActiveComp;
 
   const updatedCompHistory = await backendService.mongoDbService.compHistoryCollection
     .find({}, { projection: { _id: 0 } })
     .sort({ date: -1 })
     .toArray();
   backendService.backendState.compHistory = updatedCompHistory
+
+
+  const deletedResult = await backendService.mongoDbService.activeCompCollection.deleteOne({
+    id: activeComp.id,
+  });
+
+  if (deletedResult.deletedCount !== 1) throw "Failed to delete active comp";
+
+  backendService.backendState.activePoolComp = null;
 }

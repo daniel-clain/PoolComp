@@ -8,6 +8,8 @@ import type { MongoDbService } from "./mongo-db.service.js";
 import type { WebSocketService } from "./websockets.service.js";
 
 
+const maximumStoredBackendErrors = 50;
+
 export function createBackendService(mongoDbService: MongoDbService, websocketService: WebSocketService, backendState: BackendState) {
 
 
@@ -18,6 +20,7 @@ export function createBackendService(mongoDbService: MongoDbService, websocketSe
     getCompHistory,
     getPlayerById,
     loadDatabaseDataIntoBackendState,
+    addBackendError,
     sentToClient,
     sendToAllClients
   }
@@ -37,10 +40,18 @@ export function createBackendService(mongoDbService: MongoDbService, websocketSe
 
   async function loadDatabaseDataIntoBackendState() {
     const [players, activePoolComp, compHistory] = await mongoDbService.getAllData();
+    console.log("activePoolComp", activePoolComp);
 
     backendState.activePoolComp = activePoolComp;
     backendState.compHistory = compHistory;
     backendState.players = _.orderBy(players, ['name'], ['asc']);
+  }
+
+  function addBackendError(text: string) {
+    backendState.backendErrors = [
+      { text, timestamp: new Date().toISOString() },
+      ...backendState.backendErrors,
+    ].slice(0, maximumStoredBackendErrors);
   }
 
   function sentToClient(socket: WebSocket, message: MessageToFrontend) {

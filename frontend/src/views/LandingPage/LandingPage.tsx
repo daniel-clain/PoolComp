@@ -5,17 +5,17 @@ export function LandingPage() {
 
   return (
     <landing-view>
-      <button className="start-game active" disabled={activePoolComp !== null} onClick={() => send(['createPoolComp'])}>
+      <button className="new-comp active" disabled={activePoolComp === undefined} onClick={() => send(['createPoolComp'])}>
         New Pool Comp
       </button>
-      <button className="do-thing danger" onClick={(e) => {
+      {/* <button className="do-thing danger" onClick={(e) => {
         if (e.shiftKey) {
           console.log('doing thing');
           send(['doThing', {}]);
         } else {
           window.alert('why would you do this?');
         }
-      }}>Do Thing</button>
+      }}>Do Thing</button> */}
     </landing-view>
   );
 }

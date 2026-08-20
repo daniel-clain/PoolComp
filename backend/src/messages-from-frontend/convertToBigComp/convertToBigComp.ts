@@ -12,6 +12,13 @@ export async function convertToBigComp(
 ) {
   const comp = backendService.getActiveComp();
 
+  if (!data.cancel && comp.secondChanceSlots) {
+    throw new Error("Comp has already been converted to a big comp");
+  }
+  if (data.cancel && !comp.secondChanceSlots) {
+    return;
+  }
+
   const update: UpdateFilter<PoolComp_D> = data?.cancel
     ? { $unset: { secondChanceSlots: true } }
     : {

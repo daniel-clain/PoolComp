@@ -6,13 +6,31 @@ header {
   align-items: center;
 
 
-  @include cq-responsive((gap: 4,
+  @include cq-responsive((gap: 2,
     ));
 
   nav-tabs {
     display: flex;
     margin-right: auto;
     @include cq-responsive((gap: 2,
+      ));
+  }
+
+  errors-count {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    border-style: solid;
+    border-color: $color-button-danger-border;
+    border-radius: 50%;
+    background-color: $color-button-danger-bg;
+    color: $color-danger-text;
+    font-weight: 700;
+    @include cq-responsive((width: 3,
+        height: 3,
+        border-width: 0.4,
+        font-size: 2,
       ));
   }
 

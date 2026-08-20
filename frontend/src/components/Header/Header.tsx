@@ -3,7 +3,15 @@ import { useAppContext, type View } from "../../AppContext";
 const navigationViews: View[] = ["Pool Comp", "Players", "Comp History", "Leaderboard"];
 
 export function Header() {
-  const { connectionStatus, activeView, setActiveView, actionInProgress, clearHistoricalComp } = useAppContext();
+  const {
+    connectionStatus,
+    activeView,
+    setActiveView,
+    actionInProgress,
+    clearHistoricalComp,
+    userIsAdmin,
+    backendErrors,
+  } = useAppContext();
   return (
     <header>
       <nav-tabs>
@@ -17,6 +25,9 @@ export function Header() {
           </button>
         ))}
       </nav-tabs>
+      {userIsAdmin && backendErrors.length > 0 && (
+        <errors-count>{backendErrors.length}</errors-count>
+      )}
       <action-in-progress className={actionInProgress ? "active" : ""} />
       <connection-status data-status={connectionStatus}>
         {connectionStatus}

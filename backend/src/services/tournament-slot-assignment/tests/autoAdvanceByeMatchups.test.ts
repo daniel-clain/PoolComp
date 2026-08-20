@@ -1,6 +1,6 @@
-
 import { describe, expect, test } from "vitest";
 
+import type { RegisteredPlayer } from "../../../../../shared/domain.js";
 import { getFirstRoundSlotsFromAllTournamentSlots, getMatchupNextRoundSlot } from "../../../../../shared/tournament-slot.service.js";
 import {
   applyByeToEmptyFirstRoundSlots,
@@ -8,57 +8,59 @@ import {
   getTournamentSlotsFromFirstRoundSize,
 } from "../tournament-slot-assignment.units.js";
 
-
+function createRegisteredPlayer(name: string): RegisteredPlayer {
+  return { id: name, name, paid: true, deactivated: false };
+}
 
 describe("autoAdvanceByeMatchups", function () {
   test("auto advance players with bye", function () {
     const tournamentSlots = getTournamentSlotsFromFirstRoundSize(8);
     const firstRoundSlots = getFirstRoundSlotsFromAllTournamentSlots(tournamentSlots);
     firstRoundSlots.forEach((slot, i) => {
-      slot.playerId = `player${i + 1}`;
+      slot.player = createRegisteredPlayer(`player${i + 1}`);
     });
     const [slot1, slot2] = firstRoundSlots;
-    slot2.playerId = undefined;
+    delete slot2!.player;
     applyByeToEmptyFirstRoundSlots(tournamentSlots)
     autoAdvanceByeMatchups(tournamentSlots)
 
-    const nextRoundSlot = getMatchupNextRoundSlot({ slot1, slot2 }, tournamentSlots);
+    const nextRoundSlot = getMatchupNextRoundSlot({ slot1: slot1!, slot2: slot2! }, tournamentSlots);
 
-    expect(nextRoundSlot.playerId).toBe(slot1.playerId);
+    expect(nextRoundSlot.player?.id).toBe(slot1!.player?.id);
 
   });
   test("should not auto advance players without a bye", function () {
     const tournamentSlots = getTournamentSlotsFromFirstRoundSize(8);
     const firstRoundSlots = getFirstRoundSlotsFromAllTournamentSlots(tournamentSlots);
     firstRoundSlots.forEach((slot, i) => {
-      slot.playerId = `player${i + 1}`;
+      slot.player = createRegisteredPlayer(`player${i + 1}`);
     });
     const [slot1, slot2] = firstRoundSlots;
     applyByeToEmptyFirstRoundSlots(tournamentSlots)
     autoAdvanceByeMatchups(tournamentSlots)
 
-    const nextRoundSlot = getMatchupNextRoundSlot({ slot1, slot2 }, tournamentSlots);
+    const nextRoundSlot = getMatchupNextRoundSlot({ slot1: slot1!, slot2: slot2! }, tournamentSlots);
 
 
     expect(nextRoundSlot.isBye).toBe(undefined);
-    expect(nextRoundSlot.playerId).toBe(undefined);
+    expect(nextRoundSlot.player).toBe(undefined);
 
   });
   test("should auto advance matchup with 2 byes to next round bye", function () {
     const tournamentSlots = getTournamentSlotsFromFirstRoundSize(8);
     const firstRoundSlots = getFirstRoundSlotsFromAllTournamentSlots(tournamentSlots);
     firstRoundSlots.forEach((slot, i) => {
-      slot.playerId = `player${i + 1}`;
+      slot.player = createRegisteredPlayer(`player${i + 1}`);
     });
     const [slot1, slot2] = firstRoundSlots;
-    slot1.playerId = undefined;
-    slot2.playerId = undefined;
+    delete slot1!.player;
+    delete slot2!.player;
     applyByeToEmptyFirstRoundSlots(tournamentSlots)
     autoAdvanceByeMatchups(tournamentSlots)
 
-    const nextRoundSlot = getMatchupNextRoundSlot({ slot1, slot2 }, tournamentSlots);
+    const nextRoundSlot = getMatchupNextRoundSlot({ slot1: slot1!, slot2: slot2! }, tournamentSlots);
 
-    expect(nextRoundSlot.playerId).toBe(undefined);
+    expect(nextRoundSlot.player).toBe(undefined);
     expect(nextRoundSlot.isBye).toBe(true);
   });
 

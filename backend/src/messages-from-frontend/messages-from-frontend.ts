@@ -7,6 +7,7 @@ import { completeActivePoolComp } from "./completeActivePoolComp/completeActiveP
 import { createPoolComp } from "./createPoolComp/createPoolComp.js";
 import { manualAssignPlayerToSlot } from "./manualAssignPlayerToSlot/manualAssignPlayerToSlot.js";
 import { randomiseMatchups } from "./randomiseMatchups/randomiseMatchups.js";
+import { refreshDatabaseData } from "./refreshDatabaseData/refreshDatabaseData.js";
 import { removePlayerFromComp } from "./removePlayerFromComp/removePlayerFromComp.js";
 import { setAutoAssignPlayers } from "./setAutoAssignPlayers/setAutoAssignPlayers.js";
 import { togglePlayerPaid } from "./togglePlayerPaid/togglePlayerPaid.js";
@@ -32,6 +33,7 @@ export const messagesFromFrontend = {
   setAutoAssignPlayers,
   convertToBigComp,
   getLeaderboard,
+  refreshDatabaseData,
   doThing,
 }
 export type MessagesFromFrontend = typeof messagesFromFrontend

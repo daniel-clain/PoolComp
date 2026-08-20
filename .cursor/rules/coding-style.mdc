@@ -11,6 +11,15 @@ alwaysApply: true
 - Do not use `aria-*`, `role`, or `alt` attributes anywhere in this app.
 - Never use abbreviations or acronyms in variable names, function names, or type names. Every name must be fully descriptive so a human can understand its meaning at a glance. Code is read far more than it is written — optimise for cognitive ease, not keystroke economy. `slotWithPosition` not `swp`, `aspectRatio` not `ar`, `connector` not `conn`, `repository` not `repo`.
 
+- dont write throw error code like this
+```typescript
+throw new Error("Tried to remove a player who is not registered");
+```
+istead write it like this
+```typescript
+throw "Tried to remove a player who is not registered";
+```
+
 
 - When a block of logic has a clear meaning, extract it into a named function. Name the function after what it does, not how it does it.
 - If that helper is only used inside one parent function, nest it there as a local function declaration. Nesting makes the scope obvious: the helper exists only for that parent, and is not a reusable module export.

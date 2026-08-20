@@ -11,7 +11,7 @@ export function Players() {
     ? players
     : players.filter((player) => !player.deactivated);
 
-  const deactivatedPlayersCount = players.length - visiblePlayers.length;
+  const deactivatedPlayersCount = players.filter((player) => player.deactivated).length;
 
 
   function addPlayer() {

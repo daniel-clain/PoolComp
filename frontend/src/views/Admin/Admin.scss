@@ -1,0 +1,53 @@
+@use "../../mixins.scss" as *;
+@use "../../variables.scss" as *;
+
+admin-view {
+  admin-actions {
+    display: flex;
+    justify-content: flex-start;
+
+    button {
+      @include cq-responsive((font-size: 4,
+          padding: 2 3,
+          border-radius: 1,
+        ));
+    }
+  }
+
+  admin-errors {
+    min-height: 0;
+
+    error-list {
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+      min-height: 0;
+      overflow: auto;
+      @include cq-responsive((gap: 2,
+        ));
+
+      error-entry {
+        display: flex;
+        flex-direction: column;
+        border-left: 2px solid $color-button-danger-border;
+        background: $color-dark-bg;
+        @include cq-responsive((padding: 1.5 2,
+            gap: 0.6,
+            border-radius: 1,
+          ));
+
+        error-timestamp {
+          color: $color-status-connecting;
+          @include cq-responsive((font-size: 2.4,
+            ));
+        }
+
+        error-text {
+          word-break: break-word;
+          @include cq-responsive((font-size: 3,
+            ));
+        }
+      }
+    }
+  }
+}

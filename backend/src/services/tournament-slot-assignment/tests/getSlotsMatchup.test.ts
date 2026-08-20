@@ -17,7 +17,7 @@ describe("getSlotsMatchup", function () {
   test("slot id 28 should return matchup { slot1: { id: 27 }, slot2: { id: 28 } }", function () {
     expect(getSlotsMatchup({ id: 28 }, tournamentSlots)).toEqual({ slot1: { id: 27 }, slot2: { id: 28 } });
   })
-  test("slot id 0 should return undefined", function () {
-    expect(getSlotsMatchup({ id: 0 }, tournamentSlots)).toBeUndefined();
+  test("slot id 0 should throw", function () {
+    expect(() => getSlotsMatchup({ id: 0 }, tournamentSlots)).toThrow("Slot 0 should not be called");
   })
 })

@@ -11,6 +11,7 @@ import {
   type SetStateAction,
 } from "react";
 import {
+  type BackendError,
   type BackendState,
   type FrontendState,
   type LeaderboardEntry,
@@ -24,12 +25,14 @@ import { useOrientation } from "./hooks/useOrientation";
 
 import { convertToPoolComp } from "../../shared/data-convert.service";
 import { tournamentHasHadAssignment } from "../../shared/tournament-slot.service";
+
+import { readLocalStorageVariable, setLocalStorageVariable } from "./services/localStorageService.service";
 import type {
   ConnectionStatus,
 } from "./services/websockets.service";
 import { createWebSocketService } from "./services/websockets.service";
 
-export type View = "Pool Comp" | "Players" | "Comp History" | "Leaderboard";
+export type View = "Pool Comp" | "Players" | "Comp History" | "Leaderboard" | "Admin";
 
 export const compTabs = ["Main Comp", "2nd Chance Comp", "Players", "Money"] as const;
 export type CompTab = (typeof compTabs)[number];
@@ -42,6 +45,8 @@ type AppContextValue = FrontendState & {
   orientation: "portrait" | "landscape";
   userIsCompManager: boolean;
   setUserIsCompManager: (userIsCompManager: boolean) => void;
+  userIsAdmin: boolean;
+  setUserIsAdmin: (userIsAdmin: boolean) => void;
   activeView: View;
   setActiveView: (view: View) => void;
   connectionStatus: ConnectionStatus;
@@ -59,11 +64,12 @@ type AppContextValue = FrontendState & {
 const AppContext = createContext<AppContextValue | undefined>(undefined);
 
 export function AppProvider({ children }: { children: ReactNode }) {
-  const [activePoolComp, setActivePoolComp] = useState<PoolComp | null>(null);
+  const [activePoolComp, setActivePoolComp] = useState<PoolComp | null | undefined>(undefined);
   const [compHistory, setCompHistory] = useState<PoolComp[]>([]);
   const [players, setPlayers] = useState<Player[]>([]);
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
   const [autoAssignPlayers, setAutoAssignPlayers] = useState(false);
+  const [backendErrors, setBackendErrors] = useState<BackendError[]>([]);
 
   const [activeView, setActiveView] = useState<View>("Pool Comp");
   const [connectionStatus, setConnectionStatus] =
@@ -75,11 +81,29 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   const [compActiveTab, setCompActiveTab] = useState<CompTab>("Players");
 
-  const isCompManager = localStorage.getItem('userIsCompManager') === 'true'
-
-  const [userIsCompManager, setUserIsCompManager] = useState(isCompManager);
+  const [userIsCompManager, setUserIsCompManager] = useState(false);
+  const [userIsAdmin, setUserIsAdmin] = useState(false);
 
   const initialCompTabHasBeenSet = useRef(false);
+
+  useEffect(() => {
+    const isCompManager = readLocalStorageVariable("isCompManager");
+    if (isCompManager) {
+      setUserIsCompManager(true);
+    }
+    const isAdmin = readLocalStorageVariable("isAdmin");
+    if (isAdmin) {
+      setUserIsAdmin(true);
+    }
+  }, []);
+
+  useEffect(() => {
+    setLocalStorageVariable("isCompManager", userIsCompManager);
+  }, [userIsCompManager]);
+
+  useEffect(() => {
+    setLocalStorageVariable("isAdmin", userIsAdmin);
+  }, [userIsAdmin]);
 
   useEffect(() => {
     if (initialCompTabHasBeenSet.current) return;
@@ -117,7 +141,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
             const convertedActivePoolComp = activePoolCompData
               ? convertToPoolComp(activePoolCompData, stateUpdateFromBackend)
               : null;
-            setStateIfChanged<PoolComp | null>(setActivePoolComp, convertedActivePoolComp);
+            setStateIfChanged<PoolComp | null | undefined>(setActivePoolComp, convertedActivePoolComp);
           } else if (key === "compHistory") {
             const compHistoryData = stateUpdateFromBackend.compHistory;
             if (!compHistoryData) continue;
@@ -136,6 +160,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
             setStateIfChanged(
               setLeaderboard,
               stateUpdateFromBackend.leaderboard,
+            );
+          } else if (key === "backendErrors") {
+            setStateIfChanged(
+              setBackendErrors,
+              stateUpdateFromBackend.backendErrors,
             );
           }
         }
@@ -191,11 +220,14 @@ export function AppProvider({ children }: { children: ReactNode }) {
         setCompActiveTab,
         userIsCompManager,
         setUserIsCompManager,
+        userIsAdmin,
+        setUserIsAdmin,
         activePoolComp,
         compHistory,
         players,
         leaderboard,
         autoAssignPlayers,
+        backendErrors,
         send
       }}
     >

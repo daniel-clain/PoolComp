@@ -1,0 +1,2 @@
+* app tracks action in progress, use it to block buttons and inputs while action is in progress
+* badge for error count

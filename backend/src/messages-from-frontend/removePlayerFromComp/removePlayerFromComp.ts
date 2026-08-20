@@ -9,7 +9,10 @@ export async function removePlayerFromComp(
   data: { playerId: string }
 ) {
   const comp = backendService.getActiveComp();
-  const player = comp.registeredPlayers.find(player => player.id === data.playerId)!;
+  const player = comp.registeredPlayers.find(player => player.id === data.playerId);
+  if (!player) {
+    throw "Tried to remove a player who is not registered";
+  }
   const updatedSlots = removePlayerFromSlots(comp, player);
   const updatedActiveCompResult = await backendService.mongoDbService.activeCompCollection.findOneAndUpdate(
     { id: comp.id },

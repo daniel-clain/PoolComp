@@ -2,9 +2,45 @@ import { type ReactNode } from "react";
 import { useAppContext } from "../../AppContext";
 
 export function ViewContainer({ children }: { children: ReactNode }) {
-  const { userIsCompManager, setUserIsCompManager } = useAppContext();
+  const {
+    userIsCompManager,
+    setUserIsCompManager,
+    userIsAdmin,
+    setUserIsAdmin,
+    setActiveView,
+  } = useAppContext();
   const pockets = 6;
   const studs = 18;
+
+  function handlePocketClick(pocketIndex: number) {
+    if (pocketIndex === 0) {
+      if (userIsCompManager) {
+        setUserIsCompManager(false);
+        return;
+      }
+      const compManagerAccessCode = "123";
+      const enteredCode = window.prompt("Enter comp manager access code");
+      if (enteredCode === compManagerAccessCode) {
+        setUserIsCompManager(true);
+      } else {
+        window.alert("Denied 👎");
+      }
+    }
+    if (pocketIndex === 1) {
+      if (!userIsAdmin) {
+        const adminAccessCode = "147";
+        const enteredCode = window.prompt("Admin access code");
+        if (enteredCode === adminAccessCode) {
+          setUserIsAdmin(true);
+          setActiveView("Admin");
+        } else {
+          window.alert("Denied 👎");
+        }
+      } else {
+        setActiveView("Admin");
+      }
+    }
+  }
 
   return (
     <view-container>
@@ -13,19 +49,12 @@ export function ViewContainer({ children }: { children: ReactNode }) {
         <table-frame>
           <table-felt />
           <table-pockets>
-            {Array.from({ length: pockets }).map((_, i) => (
-              <table-pocket key={i + 1} id={`pocket-${i + 1}`} onClick={() => {
-                if (i === 0) {
-                  console.log('clicked')
-                  if (!userIsCompManager) {
-                    localStorage.setItem('userIsCompManager', 'true')
-                    setUserIsCompManager(true)
-                  } else {
-                    localStorage.removeItem('userIsCompManager')
-                    setUserIsCompManager(false)
-                  }
-                }
-              }} />
+            {Array.from({ length: pockets }).map((_, pocketIndex) => (
+              <table-pocket
+                key={pocketIndex + 1}
+                id={`pocket-${pocketIndex + 1}`}
+                onClick={() => handlePocketClick(pocketIndex)}
+              />
             ))}
           </table-pockets>
           <table-studs>

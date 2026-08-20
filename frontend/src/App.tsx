@@ -2,6 +2,7 @@ import { useAppContext } from "./AppContext";
 import { Header } from "./components/Header/Header";
 import { Modal } from "./components/Modal/Modal";
 import { ViewContainer } from "./components/ViewContainer/ViewContainer";
+import { Admin } from "./views/Admin/Admin";
 import { Comp } from "./views/Comp/Comp";
 import { CompHistory } from "./views/CompHistory/CompHistory";
 import { LandingPage } from "./views/LandingPage/LandingPage";
@@ -26,6 +27,8 @@ export function App() {
                 return <Players />;
               case "Leaderboard":
                 return <Leaderboard />;
+              case "Admin":
+                return <Admin />;
             }
           })()}
         </ViewContainer>

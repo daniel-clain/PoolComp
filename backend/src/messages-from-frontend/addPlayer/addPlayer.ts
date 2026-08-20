@@ -7,6 +7,7 @@ export async function addPlayer(
   backendService: BackendService,
   data: { name: string },
 ): Promise<void> {
+
   const usedIds = await getAllUsedIds(backendService.mongoDbService);
   const newPlayer: Player = {
     id: createUniqueFourDigitId(usedIds),

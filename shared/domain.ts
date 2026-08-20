@@ -39,20 +39,28 @@ export type LeaderboardEntry = {
   wins: number;
   totalMoneyMade: number;
 };
+
+export type BackendError = {
+  text: string;
+  timestamp: string;
+};
+
 export type BackendState = {
   leaderboard: LeaderboardEntry[];
-  activePoolComp: PoolComp_D | null;
+  activePoolComp: PoolComp_D | null | undefined;
   compHistory: PoolComp_D[];
   players: Player[];
   autoAssignPlayers: boolean;
   poolCompConfig: PoolCompConfig;
+  backendErrors: BackendError[];
 };
 
 
 export type FrontendState = {
   leaderboard: LeaderboardEntry[];
-  activePoolComp: PoolComp | null;
+  activePoolComp: PoolComp | null | undefined;
   compHistory: PoolComp[];
   players: Player[];
   autoAssignPlayers: boolean;
+  backendErrors: BackendError[];
 };

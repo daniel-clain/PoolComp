@@ -8,7 +8,7 @@ export function createActionQueueService(backendService: BackendService) {
     enqueueAction,
   };
 
-  function enqueueAction(action: () => void | Promise<void>): void {
+  function enqueueAction(action: () => void | Promise<void>, actionName: string): void {
     if (actionsInFlight === 0) {
       console.log("actionInProgress: true");
       backendService.sendToAllClients({
@@ -21,8 +21,9 @@ export function createActionQueueService(backendService: BackendService) {
     actionQueue = actionQueue
       .then(() => action())
       .catch((error: unknown) => {
-        console.error("Fatal:", error);
-        process.exitCode = 1;
+        const errorText = error instanceof Error ? error.message : String(error);
+        console.error(`action failed: ${actionName}`, error);
+        backendService.addBackendError(`${actionName}: ${errorText}`);
       })
       .finally(() => {
         actionsInFlight -= 1;

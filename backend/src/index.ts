@@ -20,10 +20,11 @@ async function bootstrap(): Promise<void> {
   const backendState: BackendState = {
     leaderboard: [],
     players: [],
-    activePoolComp: null,
+    activePoolComp: undefined,
     compHistory: [],
     autoAssignPlayers: false,
     poolCompConfig: poolCompConfig,
+    backendErrors: [],
   }
   const mongoDbService = await createMongoDbService();
   const websocketService = createWebSocketService(httpServer);
@@ -31,10 +32,11 @@ async function bootstrap(): Promise<void> {
   const actionQueueService = createActionQueueService(backendService);
   await backendService.loadDatabaseDataIntoBackendState()
 
-  websocketService.onClientConnected.subscribe(async (socket) => {
-    await backendService.loadDatabaseDataIntoBackendState();
-
-    backendService.sentToClient(socket, { message: 'allData', data: backendState })
+  websocketService.onClientConnected.subscribe(() => {
+    actionQueueService.enqueueAction(
+      () => backendService.loadDatabaseDataIntoBackendState(),
+      "loadDatabaseDataIntoBackendState",
+    );
   })
 
   websocketService.onMessageFromClient.subscribe((jsonString) => {
@@ -42,8 +44,9 @@ async function bootstrap(): Promise<void> {
 
     console.log("message from frontend:", message, data ?? '');
 
-    actionQueueService.enqueueAction(() =>
-      messagesFromFrontend[message](backendService, data as any)
+    actionQueueService.enqueueAction(
+      () => messagesFromFrontend[message](backendService, data as any),
+      message,
     );
   })
 

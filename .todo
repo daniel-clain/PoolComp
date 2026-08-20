@@ -1,15 +1,15 @@
 important:
   ☐ for big comp, when changing outcome of matches, 2nd chance needs to be re-randomised to take the update into account
-    ☐ there is a bug that can create multiple active comps
-    ☐ shouldnt be able to clear/change a slot if its next slot is already assigned
-    ☐ everything updates on every change, need to rerender only when necessary
-
+  ☐ shouldnt be able to clear/change a slot if its next slot is already assigned
+  ☐ everything updates on every change, need to rerender only when necessary
+  ☐ add/remove registered players, lock it down, not for historical comps, not when comp has started
+  ☐ Reviewthe app from a non manager's perspective
+  ☐ leader board shows when the data is from
+  ☐  validation on new or update player, dont let them create players with the same name, let them know if that player already exists and is deactivated
 
 
 
 minor:
-    ☐ non manager users only see registered players, not all players
-    ☐ historical comp title too lage on landscapep
     ☐ make sure ui components dont have more nesting elements than necessary
     ☐ remove players needs a confirm
 
