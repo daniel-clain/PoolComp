@@ -15,7 +15,7 @@ view-container {
         right: $frame-width,
         top: $frame-width,
         bottom: $frame-width,
-        padding: 6 4,
+        padding: 4 4,
       ));
 
     &>* {
@@ -23,7 +23,7 @@ view-container {
       height: 100cqh;
       display: flex;
       flex-direction: column;
-      @include cq-responsive((gap: 6,
+      @include cq-responsive((gap: 4,
         ));
     }
   }

@@ -6,9 +6,9 @@ import leavesImage from "../../assets/crossleaves.png";
 import { ScalingImage } from "../../components/ScalingImage/ScalingImage";
 import { TabBar } from "../../components/TabBar/TabBar";
 
-import { compStarted, getUnassignedPlayers } from "../../../../shared/tournament-slot.service";
+import { canAddMorePlayers, compStarted, getUnassignedPlayers } from "../../../../shared/tournament-slot.service";
 import { isBigCompValid } from "../../services/bigComp.service";
-import { activePoolCompHasChampionPlayer, canAddMorePlayers } from "../../services/poolComp.service";
+import { activePoolCompHasChampionPlayer } from "../../services/poolComp.service";
 import { BracketsView } from "./components/BracketsView/BracketsView";
 import { CompPlayers } from "./components/CompPlayers/CompPlayers";
 import { MoneyCalculations } from "./components/MoneyCalculations/MoneyCalculations";
@@ -72,18 +72,14 @@ export function Comp() {
   function bigCompStatusBar() {
     const isValid = bigCompValidation === true;
 
-    return (
-      <big-comp-status className={isValid ? "is-valid" : "is-invalid"}>
+    return isValid ? null : (
+      <big-comp-status className="is-invalid">
         <status-arrow>➜</status-arrow>
-        {isValid ? (
-          <status-message>Big Comp Valid</status-message>
-        ) : (
-          <status-errors>
-            {bigCompValidation.map((error) => (
-              <status-error key={error}>{error}</status-error>
-            ))}
-          </status-errors>
-        )}
+        <status-errors>
+          {bigCompValidation.map((error) => (
+            <status-error key={error}>{error}</status-error>
+          ))}
+        </status-errors>
       </big-comp-status>
     );
   }

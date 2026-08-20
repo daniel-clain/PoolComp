@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react";
 import type { Slot } from "../../../../../../../../../shared/domain";
-import { getSecondChancePlayersPool } from "../../../../../../../../../shared/tournament-slot.service";
+import { changingSlotAffectsSecondChanceComp, getSecondChancePlayersPool, mainCompChangeWouldRemoveAPlayedSecondChancePlayer, secondChanceCompMatchAlreadyPlayedMessage } from "../../../../../../../../../shared/tournament-slot.service";
 import { useAppContext } from "../../../../../../../AppContext";
 import { getPlayerChoicesForSlot } from "../../../../../../../services/poolComp.service";
 
@@ -14,7 +14,7 @@ type Props = {
 };
 
 export function SlotPlayerSelect({ selectedSlot, selectPosition, onClose, }: Props) {
-  const { activePoolComp, send, compActiveTab, activeHistoricalComp, compHistory } = useAppContext();
+  const { activePoolComp, send, compActiveTab, activeHistoricalComp, compHistory, setModalContent } = useAppContext();
   const panelRef = useRef<HTMLElement>(null);
 
   const comp = activeHistoricalComp || activePoolComp!;
@@ -38,8 +38,26 @@ export function SlotPlayerSelect({ selectedSlot, selectPosition, onClose, }: Pro
   if (choices.length === 0) return null;
 
   function handlePick(playerId: string | undefined) {
-    send(['manualAssignPlayerToSlot', { slotId: selectedSlot.id, playerId, isSecondChanceComp: compActiveTab === '2nd Chance Comp' }]);
+    const isSecondChanceComp = compActiveTab === '2nd Chance Comp';
+
+    if (changeWouldRemoveAPlayedSecondChancePlayer()) {
+      setModalContent(secondChanceCompMatchAlreadyPlayedMessage);
+      onClose();
+      return;
+    }
+
+    send(['manualAssignPlayerToSlot', { slotId: selectedSlot.id, playerId, isSecondChanceComp }]);
     onClose();
+
+    function changeWouldRemoveAPlayedSecondChancePlayer(): boolean {
+      if (!changingSlotAffectsSecondChanceComp(comp, selectedSlot.id, isSecondChanceComp)) return false;
+
+      const updatedMainCompSlots = comp.slots.map(slot => slot.id === selectedSlot.id
+        ? { ...slot, player: comp.registeredPlayers.find(registeredPlayer => registeredPlayer.id === playerId) }
+        : slot);
+
+      return mainCompChangeWouldRemoveAPlayedSecondChancePlayer(comp, updatedMainCompSlots, compHistory);
+    }
   }
 
   return (

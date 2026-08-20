@@ -11,36 +11,49 @@ comp-players {
 
   .is-portrait & {
     flex-direction: column;
+
+    player-grid {
+      grid-template-columns: repeat(4, auto);
+    }
   }
 
   .is-landscape & {
     flex-direction: row;
     align-self: start;
+
+    registered-players-panel,
+    all-players-panel {
+      flex: none;
+      min-width: 30cqw
+    }
+
+    player-grid {
+      grid-template-columns: repeat(3, auto);
+    }
   }
 
 
   player-grid {
     overflow: auto;
     display: grid;
+    justify-content: start;
     align-content: start;
-
-    grid-template-columns: repeat(3, minmax(0, 1fr));
 
     @include cq-responsive((gap: 2,
       ));
 
     button {
-      flex: 1;
       text-align: left;
-      @include cq-responsive((max-width: 20,
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      @include cq-responsive((width: 16,
         ));
     }
   }
 
   registered-player-cell {
     display: flex;
-    align-items: stretch;
-
-
+    align-items: center;
   }
 }

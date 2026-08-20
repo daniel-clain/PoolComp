@@ -1,6 +1,6 @@
 import { toCompDateOnly } from "../../../../shared/comp-date.js";
 import { convertToSlotData } from "../../../../shared/data-convert.service.js";
-import { PoolComp_D } from "../../../../shared/domain.js";
+import type { PoolComp_D } from "../../../../shared/domain.js";
 import { poolCompConfig } from "../../../../shared/poolCompConfig.js";
 import type { BackendService } from "../../services/backend.service.js";
 import { createUniqueFourDigitId, getAllUsedIds } from "../../services/short-id.service.js";

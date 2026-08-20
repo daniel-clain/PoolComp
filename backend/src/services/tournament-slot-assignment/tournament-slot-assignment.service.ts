@@ -2,7 +2,7 @@ import type { Matchup, PoolComp, RegisteredPlayer, Slot } from "../../../../shar
 
 import _ from "lodash";
 
-import { getSecondChancePlayersPool, getUnassignedPlayers } from "../../../../shared/tournament-slot.service.js";
+import { getPlayersInTournament, getSecondChancePlayersPool, getUnassignedPlayers, slotCanBeChangedWithoutClearingMatchResult } from "../../../../shared/tournament-slot.service.js";
 
 import {
   applyByeToEmptyFirstRoundSlots,
@@ -14,8 +14,10 @@ import {
   getRandomMatchup,
   getRandomSlotFromMatchup,
   getTournamentSlotsFromFirstRoundSize,
+  mapTournamentSlotsToNextRoundSize,
   matchupHasTwoEmptySlots,
-  slotIsFirstRoundSlot
+  slotIsFirstRoundSlot,
+  tournamentNeedsSizeIncrease
 } from "./tournament-slot-assignment.units.js";
 
 
@@ -78,6 +80,34 @@ export function randomiseAllMatchups(comp: PoolComp, isSecondChanceComp: boolean
   return assignedSlots;
 }
 
+export function refreshSecondChanceSlots(comp: PoolComp, compHistory: PoolComp[]): Slot[] {
+  let updatedSecondChanceSlots: Slot[] = _.cloneDeep(comp.secondChanceSlots!);
+  const secondChancePlayersPool = getSecondChancePlayersPool(comp, compHistory);
+
+  removePlayersWhoAreNoLongerInTheSecondChancePool();
+
+  if (tournamentNeedsSizeIncrease(secondChancePlayersPool, updatedSecondChanceSlots)) {
+    updatedSecondChanceSlots = mapTournamentSlotsToNextRoundSize(secondChancePlayersPool, updatedSecondChanceSlots);
+  }
+
+  return autoAssignUnassignedPlayers(
+    { ...comp, secondChanceSlots: updatedSecondChanceSlots },
+    true,
+    compHistory,
+  );
+
+  function removePlayersWhoAreNoLongerInTheSecondChancePool() {
+    const playersNoLongerInThePool = getPlayersInTournament(updatedSecondChanceSlots)
+      .filter(player => !secondChancePlayersPool.some(poolPlayer => poolPlayer.id === player.id));
+
+    if (!playersNoLongerInThePool.length) return;
+
+    playersNoLongerInThePool.forEach(player => clearPlayerFromTournament(player, updatedSecondChanceSlots));
+    applyByeToEmptyFirstRoundSlots(updatedSecondChanceSlots);
+    autoAdvanceByeMatchups(updatedSecondChanceSlots);
+  }
+}
+
 export function removePlayerFromSlots(comp: PoolComp, player: RegisteredPlayer): Slot[] {
   let updatedSlots: Slot[] = _.cloneDeep(comp.slots);
   clearPlayerFromTournament(player, updatedSlots)
@@ -90,6 +120,15 @@ export function removePlayerFromSlots(comp: PoolComp, player: RegisteredPlayer):
 export function handleManualAssignPlayerToSlot(comp: PoolComp, slotId: number, player: RegisteredPlayer | undefined, autoAssignPlayers: boolean, isSecondChanceComp: boolean): Slot[] {
   let updatedSlots: Slot[] = _.cloneDeep(isSecondChanceComp ? comp.secondChanceSlots! : comp.slots!);
   const targetSlot = updatedSlots.find(slot => slot.id === slotId)
+  if (!targetSlot) {
+    throw "Slot not found";
+  }
+  if (targetSlot.player?.id === player?.id) {
+    return updatedSlots;
+  }
+  if (!slotCanBeChangedWithoutClearingMatchResult(targetSlot, updatedSlots)) {
+    throw "Slot cannot be changed because a later matchup has already been assigned";
+  }
   if (slotIsFirstRoundSlot(slotId, updatedSlots)) {
     const playerAlreadyInSlot = targetSlot?.player
     if (playerAlreadyInSlot)
@@ -98,14 +137,21 @@ export function handleManualAssignPlayerToSlot(comp: PoolComp, slotId: number, p
 
     player && clearPlayerFromTournament(player, updatedSlots)
 
-    clearSlotsAutoAdvance(targetSlot!, updatedSlots)
+    clearSlotsAutoAdvance(targetSlot, updatedSlots)
     updatedSlots.find(slot => {
       if (slot.id === slotId)
         return slot.player = player
 
     })
     if (playerAlreadyInSlot && autoAssignPlayers)
-      updatedSlots = assignPlayer({ ...comp, slots: updatedSlots }, playerAlreadyInSlot, isSecondChanceComp)
+      updatedSlots = assignPlayer(
+        {
+          ...comp,
+          ...(isSecondChanceComp ? { secondChanceSlots: updatedSlots } : { slots: updatedSlots }),
+        },
+        playerAlreadyInSlot,
+        isSecondChanceComp,
+      )
     else {
       applyByeToEmptyFirstRoundSlots(updatedSlots)
       autoAdvanceByeMatchups(updatedSlots)

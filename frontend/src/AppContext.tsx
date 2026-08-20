@@ -84,8 +84,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [userIsCompManager, setUserIsCompManager] = useState(false);
   const [userIsAdmin, setUserIsAdmin] = useState(false);
 
-  const initialCompTabHasBeenSet = useRef(false);
-
   useEffect(() => {
     const isCompManager = readLocalStorageVariable("isCompManager");
     if (isCompManager) {
@@ -106,14 +104,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
   }, [userIsAdmin]);
 
   useEffect(() => {
-    if (initialCompTabHasBeenSet.current) return;
-    const slots = activePoolComp?.slots;
-    if (!slots) return; // wait until allData has active comp + slots
+    if (!activePoolComp) return;
     setCompActiveTab(
-      tournamentHasHadAssignment(slots) ? "Main Comp" : "Players"
+      tournamentHasHadAssignment(activePoolComp.slots) ? "Main Comp" : "Players"
     );
-    initialCompTabHasBeenSet.current = true;
-  }, [activePoolComp?.slots]);
+  }, [activePoolComp?.id]);
 
 
   function viewHistoricalComp(comp: PoolComp) {

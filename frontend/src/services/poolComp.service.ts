@@ -5,9 +5,12 @@ import {
   type Slot
 } from "../../../shared/domain";
 
-import { getFirstRoundSlotsFromAllTournamentSlots, getSlotSourceMatchup, tournamentHasHadAssignment } from "../../../shared/tournament-slot.service";
+import { getSlotSourceMatchup, slotCanBeChangedWithoutClearingMatchResult } from "../../../shared/tournament-slot.service";
 
 export function canSetSlot(slot: Slot, slots: Slot[]): boolean {
+  if (!slotCanBeChangedWithoutClearingMatchResult(slot, slots)) {
+    return false;
+  }
 
   const sourceMatchup = getSlotSourceMatchup(slot, slots)
 
@@ -84,53 +87,6 @@ export function getFinalists(comp: PoolComp): {
   };
 }
 
-
-
-export function canAddMorePlayers(tournamentSlots: Slot[]): boolean {
-  if (!tournamentHasHadAssignment(tournamentSlots)) {
-    return true
-  }
-  const firstRoundSlots = getFirstRoundSlotsFromAllTournamentSlots(tournamentSlots)
-  const currentPlayerIds = new Set(
-    firstRoundSlots
-      .map((slot) => slot.player?.id)
-      .filter((playerId): playerId is string => Boolean(playerId)),
-  )
-
-  if (currentPlayerIds.size === 0) {
-    return true
-  }
-
-  const playersWithResolvedPlayerVersusPlayerMatchup = new Set<string>()
-
-  for (const slot of tournamentSlots) {
-    const sourceMatchup = getSlotSourceMatchup(slot, tournamentSlots)
-    if (!sourceMatchup) {
-      continue
-    }
-
-    if (!slot.player?.id) {
-      continue
-    }
-
-    const firstPlayerId = sourceMatchup.slot1.player?.id
-    const secondPlayerId = sourceMatchup.slot2.player?.id
-    if (!firstPlayerId || !secondPlayerId) {
-      continue
-    }
-
-    playersWithResolvedPlayerVersusPlayerMatchup.add(firstPlayerId)
-    playersWithResolvedPlayerVersusPlayerMatchup.add(secondPlayerId)
-  }
-
-  const everyCurrentPlayerHasResolvedPlayerVersusPlayerMatchup = Array.from(
-    currentPlayerIds,
-  ).every((playerId) =>
-    playersWithResolvedPlayerVersusPlayerMatchup.has(playerId),
-  )
-
-  return !everyCurrentPlayerHasResolvedPlayerVersusPlayerMatchup
-}
 
 
 export { calculateFirstPrizeMoney } from "../../../shared/prize-money.service";

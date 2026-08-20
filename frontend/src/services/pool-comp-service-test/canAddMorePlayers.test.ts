@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vitest";
 import type { RegisteredPlayer, Slot } from "../../../../shared/domain";
-import { canAddMorePlayers } from "../poolComp.service";
+import { canAddMorePlayers } from "../../../../shared/tournament-slot.service";
 
 function createRegisteredPlayer(name: string): RegisteredPlayer {
   return {

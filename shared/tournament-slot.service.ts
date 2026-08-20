@@ -75,6 +75,127 @@ export function getSlotsNextRoundSlot(slot: Slot, tournamentSlots: Slot[]): Slot
 }
 
 
+export const secondChanceCompMatchAlreadyPlayedMessage =
+  "This match result can't be changed because it would remove a 2nd Chance Comp player who has already played a match.";
+
+
+export function everyPlayerHasHadTheirFirstMatch(tournamentSlots: Slot[]): boolean {
+  if (!tournamentHasHadAssignment(tournamentSlots)) {
+    return false
+  }
+
+  const firstRoundSlots = getFirstRoundSlotsFromAllTournamentSlots(tournamentSlots)
+  const currentPlayerIds = new Set(
+    firstRoundSlots
+      .map((slot) => slot.player?.id)
+      .filter((playerId): playerId is string => Boolean(playerId)),
+  )
+
+  if (currentPlayerIds.size === 0) {
+    return false
+  }
+
+  const playersWithResolvedPlayerVersusPlayerMatchup = new Set<string>()
+
+  for (const slot of tournamentSlots) {
+    const sourceMatchup = getSlotSourceMatchup(slot, tournamentSlots)
+    if (!sourceMatchup) {
+      continue
+    }
+
+    if (!slot.player?.id) {
+      continue
+    }
+
+    const firstPlayerId = sourceMatchup.slot1.player?.id
+    const secondPlayerId = sourceMatchup.slot2.player?.id
+    if (!firstPlayerId || !secondPlayerId) {
+      continue
+    }
+
+    playersWithResolvedPlayerVersusPlayerMatchup.add(firstPlayerId)
+    playersWithResolvedPlayerVersusPlayerMatchup.add(secondPlayerId)
+  }
+
+  return Array.from(currentPlayerIds).every((playerId) =>
+    playersWithResolvedPlayerVersusPlayerMatchup.has(playerId),
+  )
+}
+
+
+export function canAddMorePlayers(tournamentSlots: Slot[]): boolean {
+  return !everyPlayerHasHadTheirFirstMatch(tournamentSlots)
+}
+
+
+export function getPlayersInTournament(tournamentSlots: Slot[]): RegisteredPlayer[] {
+  return tournamentSlots.reduce((playersInTournament, slot) => {
+    const alreadyCollected = slot.player
+      && playersInTournament.some(player => player.id === slot.player!.id)
+    if (slot.player && !alreadyCollected) {
+      playersInTournament.push(slot.player)
+    }
+    return playersInTournament
+  }, [] as RegisteredPlayer[])
+}
+
+
+export function playerHasPlayedAResolvedMatchup(player: RegisteredPlayer, tournamentSlots: Slot[]): boolean {
+  return tournamentSlots.some(slot => {
+    if (slot.id === 0 || slot.player?.id !== player.id) return false;
+
+    const matchup = getSlotsMatchup(slot, tournamentSlots)
+    const matchupHasTwoPlayers = Boolean(matchup.slot1.player) && Boolean(matchup.slot2.player)
+    if (!matchupHasTwoPlayers) return false;
+
+    return Boolean(getSlotsNextRoundSlot(slot, tournamentSlots)?.player)
+  })
+}
+
+
+export function mainCompChangeWouldRemoveAPlayedSecondChancePlayer(
+  comp: PoolComp,
+  updatedMainCompSlots: Slot[],
+  compHistory: PoolComp[],
+): boolean {
+  const secondChanceSlots = comp.secondChanceSlots
+  if (!secondChanceSlots?.length) return false;
+
+  const updatedSecondChancePlayersPool = getSecondChancePlayersPool(
+    { ...comp, slots: updatedMainCompSlots },
+    compHistory,
+  )
+
+  return getPlayersInTournament(secondChanceSlots)
+    .filter(player => !updatedSecondChancePlayersPool.some(poolPlayer => poolPlayer.id === player.id))
+    .some(player => playerHasPlayedAResolvedMatchup(player, secondChanceSlots))
+}
+
+
+export function changingSlotAffectsSecondChanceComp(
+  comp: PoolComp,
+  slotId: number,
+  isSecondChanceComp: boolean,
+): boolean {
+  if (isSecondChanceComp) return false;
+  if (!comp.secondChanceSlots?.length) return false;
+
+  const changedSlotIsFirstRoundSlot = getFirstRoundSlotsFromAllTournamentSlots(comp.slots)
+    .some(firstRoundSlot => firstRoundSlot.id === slotId);
+
+  return !changedSlotIsFirstRoundSlot;
+}
+
+
+export function slotCanBeChangedWithoutClearingMatchResult(
+  slot: Slot,
+  tournamentSlots: Slot[],
+): boolean {
+  const nextRoundSlot = getSlotsNextRoundSlot(slot, tournamentSlots);
+  return !nextRoundSlot?.player;
+}
+
+
 export function getSlotsMatchup(slot: Slot, tournamentSlots: Slot[]): Matchup {
   if (slot.id === 0) {
     throw 'Slot 0 should not be called';

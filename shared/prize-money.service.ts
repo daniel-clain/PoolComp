@@ -25,8 +25,8 @@ export function calculateCompBigCompContribution(comp: PoolComp): number {
 
 export function getBigCompTotalPrizePool(comp: PoolComp, compHistory: PoolComp[]): number {
   const normalFirstPlacePrizeMoney = calculateFirstPrizeMoney(comp);
-  const compsSinceLastBigComp = getAllCompsSinceLastBigComp(compHistory);
-  const bigCompFund = compsSinceLastBigComp.reduce(
+  const fourMostRecentComps = compHistory.slice(0, 4);
+  const bigCompFund = fourMostRecentComps.reduce(
     (accumulator, historyComp) =>
       accumulator +
       historyComp.registeredPlayers.length *
@@ -55,6 +55,7 @@ export function calculateSecondChanceFirstPrizeMoney(
   compHistory: PoolComp[],
 ): number {
   const totalBigCompPrizePool = getBigCompTotalPrizePool(comp, compHistory);
+  console.log('totalBigCompPrizePool', totalBigCompPrizePool);
   const mainCompPrizePool = calculateMainCompPrizePool(comp, compHistory);
   return totalBigCompPrizePool - mainCompPrizePool;
 }
@@ -62,14 +63,4 @@ export function calculateSecondChanceFirstPrizeMoney(
 function calculateMainCompPrizePool(comp: PoolComp, compHistory: PoolComp[]): number {
   const totalBigCompPrizePool = getBigCompTotalPrizePool(comp, compHistory);
   return roundToNearest5(totalBigCompPrizePool * poolCompConfig.bigComp.mainCompPercentage);
-}
-
-function getAllCompsSinceLastBigComp(compHistory: PoolComp[]): PoolComp[] {
-  const lastBigCompIndex = Math.max(
-    compHistory.findIndex(
-      (poolComp) => poolComp.secondChanceSlots && poolComp.secondChanceSlots.length > 0,
-    ),
-    4,
-  );
-  return compHistory.slice(lastBigCompIndex + 1);
 }
