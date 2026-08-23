@@ -1,6 +1,6 @@
 import { useAppContext, type View } from "../../AppContext";
 
-const navigationViews: View[] = ["Pool Comp", "Players", "Comp History", "Leaderboard"];
+const navigationViews: View[] = ["Pool Comp", "Players", "Comp History", "Stats"];
 
 export function Header() {
   const {

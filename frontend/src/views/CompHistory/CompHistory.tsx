@@ -1,6 +1,6 @@
 import { format, parseISO } from "date-fns";
 import { enAU } from "date-fns/locale";
-import { useCallback } from "react";
+import { useCallback, useEffect } from "react";
 import type { PoolComp } from "../../../../shared/domain";
 import { useAppContext } from "../../AppContext";
 import { Table } from "../../components/Table/Table";
@@ -11,7 +11,11 @@ import {
 } from "../../services/poolComp.service";
 
 export function CompHistory() {
-  const { compHistory, viewHistoricalComp } = useAppContext();
+  const { compHistory, viewHistoricalComp, send } = useAppContext();
+
+  useEffect(() => {
+    send(["getFullCompHistory"]);
+  }, []);
 
   const tableColumns = ['Date', 'Players', '1st Place', '2nd Place', 'Prize Pool', 'Big Comp'] as const;
   type TableColumnName = (typeof tableColumns)[number]

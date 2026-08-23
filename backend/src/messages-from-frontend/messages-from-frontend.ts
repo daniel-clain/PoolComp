@@ -14,7 +14,7 @@ import { togglePlayerPaid } from "./togglePlayerPaid/togglePlayerPaid.js";
 
 import { doThing } from "./_doThing/_doThing.js";
 import { convertToBigComp } from "./convertToBigComp/convertToBigComp.js";
-import { getLeaderboard } from "./getLeaderboard/getLeaderboard.js";
+import { getFullCompHistory } from "./getFullCompHistory/getFullCompHistory.js";
 import { updatePlayer } from "./updatePlayer/updatePlayer.js";
 
 /* source of truth for frontend send messages */
@@ -32,7 +32,7 @@ export const messagesFromFrontend = {
   assignPlayers,
   setAutoAssignPlayers,
   convertToBigComp,
-  getLeaderboard,
+  getFullCompHistory,
   refreshDatabaseData,
   doThing,
 }

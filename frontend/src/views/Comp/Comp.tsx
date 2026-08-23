@@ -7,7 +7,7 @@ import { ScalingImage } from "../../components/ScalingImage/ScalingImage";
 import { TabBar } from "../../components/TabBar/TabBar";
 
 import { canAddMorePlayers, compStarted, getUnassignedPlayers } from "../../../../shared/tournament-slot.service";
-import { isBigCompValid } from "../../services/bigComp.service";
+import { getBigCompErrors } from "../../services/bigComp.service";
 import { activePoolCompHasChampionPlayer } from "../../services/poolComp.service";
 import { BracketsView } from "./components/BracketsView/BracketsView";
 import { CompPlayers } from "./components/CompPlayers/CompPlayers";
@@ -36,7 +36,7 @@ export function Comp() {
   const tournamentTabActive = activeTabIsMainComp || activeTabIsSecondChance
 
   const canAddMorePlayersDisabled = !canAddMorePlayers(comp.slots);
-  const bigCompValidation = isBigCompValid(compHistory, new Date(comp.date));
+  const bigCompErrors = getBigCompErrors(compHistory, comp);
 
 
   const compDateString = comp.date
@@ -62,25 +62,24 @@ export function Comp() {
         {compActions()}
       </top-row>
       {compMainPanel()}
-      {isBigComp && bigCompStatusBar()}
+      {bigCompErrorsElem && bigCompErrorsElem()}
       {compActionsBottom()}
       <ScalingImage id="eight-ball-image" src={ballImage} />
       <ScalingImage id="bg-leaves-image" src={leavesImage} />
     </comp-view>
   );
 
-  function bigCompStatusBar() {
-    const isValid = bigCompValidation === true;
+  function bigCompErrorsElem() {
+    if (!bigCompErrors) return null;
 
-    return isValid ? null : (
-      <big-comp-status className="is-invalid">
-        <status-arrow>➜</status-arrow>
+    return (
+      <big-comp-errors>
         <status-errors>
-          {bigCompValidation.map((error) => (
+          {bigCompErrors.map((error) => (
             <status-error key={error}>{error}</status-error>
           ))}
         </status-errors>
-      </big-comp-status>
+      </big-comp-errors>
     );
   }
 

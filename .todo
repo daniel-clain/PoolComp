@@ -1,4 +1,7 @@
 important:
+  ☐ rule for people not being in 2nd chance comp is if they have won since last big comp
+  ☐ big comp validation needs to be broken down into well defined rules based on config. test needs to cover more scenarios and edgecases
+  ☐ money tab needs to show better breakdown for big comp. also add in money taken out for xmas. better design
   ☐ for big comp, when changing outcome of matches, 2nd chance needs to be re-randomised to take the update into account
   ☐ shouldnt be able to clear/change a slot if its next slot is already assigned
   ☐ everything updates on every change, need to rerender only when necessary
@@ -10,8 +13,10 @@ important:
 
 
 minor:
+    ☐ precomit hook runs unit tests
     ☐ make sure ui components dont have more nesting elements than necessary
     ☐ remove players needs a confirm
+    ☐ better show a selected historical comp, so its clear its not the current comp, back button in better position
 
 
 precautionary:

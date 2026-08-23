@@ -14,7 +14,6 @@ import {
   type BackendError,
   type BackendState,
   type FrontendState,
-  type LeaderboardEntry,
   type Player,
   type PoolComp,
 } from "../../shared/domain";
@@ -32,7 +31,7 @@ import type {
 } from "./services/websockets.service";
 import { createWebSocketService } from "./services/websockets.service";
 
-export type View = "Pool Comp" | "Players" | "Comp History" | "Leaderboard" | "Admin";
+export type View = "Pool Comp" | "Players" | "Comp History" | "Stats" | "Admin";
 
 export const compTabs = ["Main Comp", "2nd Chance Comp", "Players", "Money"] as const;
 export type CompTab = (typeof compTabs)[number];
@@ -67,7 +66,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [activePoolComp, setActivePoolComp] = useState<PoolComp | null | undefined>(undefined);
   const [compHistory, setCompHistory] = useState<PoolComp[]>([]);
   const [players, setPlayers] = useState<Player[]>([]);
-  const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
   const [autoAssignPlayers, setAutoAssignPlayers] = useState(false);
   const [backendErrors, setBackendErrors] = useState<BackendError[]>([]);
 
@@ -151,11 +149,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
               setAutoAssignPlayers,
               stateUpdateFromBackend.autoAssignPlayers,
             );
-          } else if (key === "leaderboard") {
-            setStateIfChanged(
-              setLeaderboard,
-              stateUpdateFromBackend.leaderboard,
-            );
           } else if (key === "backendErrors") {
             setStateIfChanged(
               setBackendErrors,
@@ -220,7 +213,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
         activePoolComp,
         compHistory,
         players,
-        leaderboard,
         autoAssignPlayers,
         backendErrors,
         send

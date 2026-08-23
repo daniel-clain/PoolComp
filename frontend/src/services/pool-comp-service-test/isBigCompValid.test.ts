@@ -1,8 +1,7 @@
-import { previousThursday, startOfDay, subWeeks } from "date-fns";
 import { describe, expect, test } from "vitest";
 import { toCompDateOnly } from "../../../../shared/comp-date";
 import type { PoolComp, RegisteredPlayer, Slot } from "../../../../shared/domain";
-import { isBigCompValid } from "../bigComp.service";
+import { getBigCompErrors } from "../bigComp.service";
 
 function createRegisteredPlayer(name: string): RegisteredPlayer {
   return {
@@ -17,58 +16,123 @@ function createComp({
   date,
   isBigComp = false,
   winnerName = "Winner",
+  runnerUpName = "Runner Up",
 }: {
   date: Date;
   isBigComp?: boolean;
   winnerName?: string;
+  runnerUpName?: string;
 }): PoolComp {
   const winner = createRegisteredPlayer(winnerName);
-  const slots: Slot[] = [{ id: 0, player: winner }, { id: 1 }, { id: 2 }];
+  const runnerUp = createRegisteredPlayer(runnerUpName);
+  const slots: Slot[] = [{ id: 0, player: winner }, { id: 1, player: runnerUp }, { id: 2, player: winner }];
   const dateOnly = toCompDateOnly(date);
 
   return {
     id: dateOnly,
     date: dateOnly,
     slots,
-    registeredPlayers: [winner],
+    registeredPlayers: [winner, runnerUp],
     ...(isBigComp ? { secondChanceSlots: [{ id: 0 }, { id: 1 }, { id: 2 }] } : {}),
   };
 }
 
-function thursdayWeeksAgo(fromDate: Date, weeksAgo: number): Date {
-  return subWeeks(previousThursday(startOfDay(fromDate)), weeksAgo);
-}
+// August 2026: 3rd Thursday is the 20th. July 2026: 3rd Thursday is the 16th.
+const thisBigCompDate = new Date(2026, 7, 20);
+const lastBigCompDate = new Date(2026, 6, 16);
+const thursdaysInBetween = [new Date(2026, 7, 13), new Date(2026, 7, 6), new Date(2026, 6, 30), new Date(2026, 6, 23)];
 
-describe("isBigCompValid", function () {
-  test("returns true when the last four weekly comps and last six winners look valid", function () {
-    const referenceDate = new Date(2026, 7, 20); // Thursday
-    const compHistory = [
-      createComp({ date: thursdayWeeksAgo(referenceDate, 0) }),
-      createComp({ date: thursdayWeeksAgo(referenceDate, 1) }),
-      createComp({ date: thursdayWeeksAgo(referenceDate, 2) }),
-      createComp({ date: thursdayWeeksAgo(referenceDate, 3), isBigComp: true }),
-      createComp({ date: thursdayWeeksAgo(referenceDate, 4) }),
-      createComp({ date: thursdayWeeksAgo(referenceDate, 5) }),
-    ];
+const thisBigComp = createComp({ date: thisBigCompDate, isBigComp: true });
+const lastBigComp = createComp({ date: lastBigCompDate, isBigComp: true });
 
-    expect(isBigCompValid(compHistory, referenceDate)).toBe(true);
+describe("getBigCompErrors", function () {
+  test("returns false when a normal comp sits on every Thursday since the last big comp", function () {
+    const compHistory = [...thursdaysInBetween.map((date) => createComp({ date })), lastBigComp];
+
+    expect(getBigCompErrors(compHistory, thisBigComp)).toBe(false);
   });
 
-  test("returns errors when history is too short or comps are the wrong type", function () {
-    const referenceDate = new Date(2026, 7, 20);
+  test("returns an error when this comp is not on the 3rd Thursday of the month", function () {
+    const compOnTheFourthThursday = createComp({ date: new Date(2026, 7, 27), isBigComp: true });
     const compHistory = [
-      createComp({ date: thursdayWeeksAgo(referenceDate, 0), isBigComp: true }),
-      createComp({ date: thursdayWeeksAgo(referenceDate, 1) }),
-      createComp({ date: thursdayWeeksAgo(referenceDate, 2) }),
-      createComp({ date: thursdayWeeksAgo(referenceDate, 3) }),
+      createComp({ date: thisBigCompDate }),
+      ...thursdaysInBetween.map((date) => createComp({ date })),
+      lastBigComp,
     ];
 
-    const result = isBigCompValid(compHistory, referenceDate);
+    const errors = getBigCompErrors(compHistory, compOnTheFourthThursday);
 
-    expect(result).not.toBe(true);
-    if (result === true) return;
-    expect(result.some((error) => error.includes("last 6 comps"))).toBe(true);
-    expect(result.some((error) => error.includes("small comp"))).toBe(true);
-    expect(result.some((error) => error.includes("big comp"))).toBe(true);
+    expect(errors).toEqual(["This comp is not on the 3rd thursday of the month"]);
+  });
+
+  test("returns an error when there is no big comp in the history", function () {
+    const compHistory = thursdaysInBetween.map((date) => createComp({ date }));
+
+    expect(getBigCompErrors(compHistory, thisBigComp)).toEqual(["No last big comp found"]);
+  });
+
+  test("returns an error when the last big comp was not on the 3rd Thursday of the month", function () {
+    const lastBigCompOnTheFourthThursday = createComp({ date: new Date(2026, 6, 23), isBigComp: true });
+    const compHistory = [
+      createComp({ date: new Date(2026, 7, 13) }),
+      createComp({ date: new Date(2026, 7, 6) }),
+      createComp({ date: new Date(2026, 6, 30) }),
+      lastBigCompOnTheFourthThursday,
+    ];
+
+    const errors = getBigCompErrors(compHistory, thisBigComp);
+
+    expect(errors).toEqual(["The last big comp (23 July 2026) was not on the 3rd thursday of the month"]);
+  });
+
+  test("returns an error naming every comp since the last big comp that is not on a Thursday", function () {
+    const compHistory = [
+      ...thursdaysInBetween.map((date) => createComp({ date })),
+      createComp({ date: new Date(2026, 7, 11), winnerName: "Tuesday Winner", runnerUpName: "Tuesday Runner Up" }),
+      lastBigComp,
+    ];
+
+    const errors = getBigCompErrors(compHistory, thisBigComp);
+
+    expect(errors).toEqual([
+      "The comp was not on a Thursday. (Date: 11 August 2026, First Place: Tuesday Winner, Second Place: Tuesday Runner Up)",
+    ]);
+  });
+
+  test("returns an error listing every date that has more than one comp", function () {
+    const compHistory = [
+      ...thursdaysInBetween.map((date) => createComp({ date })),
+      createComp({ date: new Date(2026, 6, 30), winnerName: "Other Winner" }),
+      lastBigComp,
+    ];
+
+    const errors = getBigCompErrors(compHistory, thisBigComp);
+
+    expect(errors).toEqual(["More than one comp was found on these dates: 2026-07-30"]);
+  });
+
+  test("returns an error listing every Thursday since the last big comp that has no comp", function () {
+    const compHistory = [createComp({ date: new Date(2026, 7, 13) }), createComp({ date: new Date(2026, 6, 23) }), lastBigComp];
+
+    const errors = getBigCompErrors(compHistory, thisBigComp);
+
+    expect(errors).not.toBe(false);
+    if (errors === false) return;
+    expect(errors).toHaveLength(1);
+    expect(errors[0]).toContain("No comp was found for these Thursdays:");
+  });
+
+  test("treats an extra big comp in between as the last big comp, which then fails the 3rd Thursday check", function () {
+    const compHistory = [
+      createComp({ date: new Date(2026, 7, 13) }),
+      createComp({ date: new Date(2026, 7, 6), isBigComp: true }),
+      createComp({ date: new Date(2026, 6, 30) }),
+      createComp({ date: new Date(2026, 6, 23) }),
+      lastBigComp,
+    ];
+
+    const errors = getBigCompErrors(compHistory, thisBigComp);
+
+    expect(errors).toEqual(["The last big comp (6 August 2026) was not on the 3rd thursday of the month"]);
   });
 });

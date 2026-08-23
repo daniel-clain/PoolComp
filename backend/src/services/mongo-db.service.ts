@@ -60,7 +60,7 @@ export async function createMongoDbService() {
       await Promise.all([
         playersCollection.find({}, { projection: { _id: 0 } }).toArray(),
         activeCompCollection.findOne({}, { projection: { _id: 0 } }),
-        compHistoryCollection.find({}, { projection: { _id: 0 } }).sort({ date: -1 }).limit(10).toArray(),
+        compHistoryCollection.find({}, { projection: { _id: 0 } }).sort({ date: -1 }).limit(5).toArray(),
       ]);
     return [playerDocuments, activeCompDocument, historyDocuments];
   }

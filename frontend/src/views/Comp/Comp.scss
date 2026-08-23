@@ -47,7 +47,7 @@ comp-view {
     min-height: 0;
   }
 
-  big-comp-status {
+  big-comp-errors {
     display: flex;
     align-items: center;
     flex-shrink: 0;
@@ -59,19 +59,13 @@ comp-view {
         font-size: 2.8,
       ));
 
-    status-arrow {
-      font-weight: 700;
-      @include cq-responsive((font-size: 5));
-    }
-
-    status-message {
-      font-weight: 700;
-      text-transform: uppercase;
-    }
 
     status-errors {
       display: flex;
       flex-direction: column;
+      color: $color-danger-text;
+      background: $color-button-danger-bg;
+      border-color: $color-button-danger-border;
       @include cq-responsive((gap: 0.8));
     }
 
@@ -79,17 +73,6 @@ comp-view {
       display: block;
     }
 
-    &.is-valid {
-      color: $color-dark-text;
-      background: $color-button-active-bg;
-      border-color: $color-button-active-border;
-    }
-
-    &.is-invalid {
-      color: $color-danger-text;
-      background: $color-button-danger-bg;
-      border-color: $color-button-danger-border;
-    }
   }
 
 

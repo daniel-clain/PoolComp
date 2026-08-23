@@ -6,8 +6,8 @@ import { Admin } from "./views/Admin/Admin";
 import { Comp } from "./views/Comp/Comp";
 import { CompHistory } from "./views/CompHistory/CompHistory";
 import { LandingPage } from "./views/LandingPage/LandingPage";
-import { Leaderboard } from "./views/Leaderboard/Leaderboard";
 import { Players } from "./views/Players/Players";
+import { Stats } from "./views/Stats/Stats";
 
 export function App() {
   const { activePoolComp, activeHistoricalComp, activeView, orientation } = useAppContext();
@@ -25,8 +25,8 @@ export function App() {
                 return <CompHistory />;
               case "Players":
                 return <Players />;
-              case "Leaderboard":
-                return <Leaderboard />;
+              case "Stats":
+                return <Stats />;
               case "Admin":
                 return <Admin />;
             }

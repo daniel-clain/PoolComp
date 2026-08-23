@@ -18,7 +18,6 @@ async function bootstrap(): Promise<void> {
   const app = express();
   const httpServer = http.createServer(app);
   const backendState: BackendState = {
-    leaderboard: [],
     players: [],
     activePoolComp: undefined,
     compHistory: [],

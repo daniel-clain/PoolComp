@@ -27,7 +27,27 @@ This recalculates live when the active comp player list changes (for example, to
 ## Monthly Big Comp (3rd Thursday)
 
 The regular weekly contribution logic still runs each week and feeds the next month's big comp fund.  
-On big comp day, the accumulated fund from the prior month becomes the prize pool.
+On big comp day, the accumulated fund from the prior month becomes the prize pool. 
+
+Total big comp prize pool = the money set asside from each comp since the last big comp (including the last big comp). 50% of the buy-ins -(minus) $20 for the xmas contribuition. For example:
+  - last big comp players 14
+  - 1st normal players 14
+  - 2nd normal players 15
+  - 3rd normal players 17
+  - 4th normal players 16
+  - this big comp players 21
+
+  - money put asside for this big comp
+    ~ 140/2-20 = 50
+    ~ 140/2-20 = 50
+    ~ 150/2-20 = 55
+    ~ 170/2-20 = 65
+    ~ 160/2-20 = 60
+    ~ total 50 + 50 + 55 + 65 + 60 = 280
+
+  - big comp total money
+    ~ 210/2 + 50 = 155
+    ~ 155 + 280 = 435
 
 Split rules:
 

@@ -1,19 +1,20 @@
 import { useEffect } from "react";
 import { useAppContext } from "../../AppContext";
 import { Table } from "../../components/Table/Table";
+import { getLeaderboard } from "../../services/stats.service";
 
-export function Leaderboard() {
-  const { leaderboard, send } = useAppContext();
-
+export function Stats() {
+  const { players, compHistory, send } = useAppContext();
 
   useEffect(() => {
-
-    send(["getLeaderboard"]);
+    send(["getFullCompHistory"]);
   }, []);
 
+  const leaderboard = getLeaderboard(players, compHistory);
+
   return (
-    <leaderboard-view>
-      <view-title>Leaderboard</view-title>
+    <stats-view>
+      <view-title>Stats</view-title>
       {leaderboard.length === 0 ? (
         <no-data-message>No winners yet.</no-data-message>
       ) : (
@@ -25,8 +26,6 @@ export function Leaderboard() {
           }))}
         />
       )}
-    </leaderboard-view>
+    </stats-view>
   );
-
-
 }

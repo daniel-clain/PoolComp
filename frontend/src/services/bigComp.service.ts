@@ -1,15 +1,16 @@
 import {
-  differenceInCalendarDays,
+  addWeeks,
   format,
+  getDate,
+  isAfter,
+  isBefore,
   isSameDay,
   isThursday,
-  previousThursday,
-  startOfDay,
-  subWeeks,
+  nextThursday
 } from "date-fns"
 import { enAU } from "date-fns/locale"
 import type { PoolComp } from "../../../shared/domain"
-import { poolCompConfig } from "../../../shared/poolCompConfig"
+import { getFinalists } from "./poolComp.service"
 
 export {
   calculateBigCompFirstPrizeMoney,
@@ -19,62 +20,52 @@ export {
   getBigCompTotalPrizePool
 } from "../../../shared/prize-money.service"
 
-export type BigCompValidationResult = true | string[]
+export type BigCompErrors = string[] | false
 
-export function isBigCompValid(compHistory: PoolComp[], referenceDate: Date = new Date()): BigCompValidationResult {
+export function getBigCompErrors(compHistory: PoolComp[], thisBigComp: PoolComp): BigCompErrors {
   const errors: string[] = []
-  const weeksNeededForWinners = poolCompConfig.bigComp.weeksFirstPlaceCantEnterSecondChance
-  const weeksNeededForPrizePool = 4
 
-  if (compHistory.length < weeksNeededForWinners) {
-    errors.push(`Need the last ${weeksNeededForWinners} comps to check recent winners; only ${compHistory.length} available`)
+  // comp history has all the comps since the last big comp
+  // the last big comp was on the 3rd thursday of the month
+  // this comp is the 3rd thursday of the month
+  // there is a normal comp on every thursday since the last big comp
+
+  const thisCompIsOnThe3rdThursdayOfTheMonth = dateIsThe3rdThursdayOfTheMonth(thisBigComp.date)
+  if (!thisCompIsOnThe3rdThursdayOfTheMonth) {
+    errors.push(`This comp is not on the 3rd thursday of the month`)
   }
 
-  if (compHistory.length < weeksNeededForPrizePool) {
-    errors.push(`Need the last ${weeksNeededForPrizePool} comps for the big comp prize pool; only ${compHistory.length} available`)
+  const lastBigComp = getLastBigComp()
+  if (!lastBigComp) {
+    errors.push(`No last big comp found`)
     return errors
   }
 
-  const lastFourComps = compHistory.slice(0, weeksNeededForPrizePool)
-  const lastSixComps = compHistory.slice(0, weeksNeededForWinners)
-  const expectedThursdays = getPreviousThursdays(referenceDate, weeksNeededForPrizePool)
 
-  lastSixComps.forEach((comp, index) => {
-    if (!comp.slots[0]?.player) {
-      errors.push(`Missing a winner on the ${ordinal(index + 1)} most recent of the last ${weeksNeededForWinners} comps`)
+  const lastBigCompWasOnThe3rdThursdayOfTheMonth = dateIsThe3rdThursdayOfTheMonth(lastBigComp.date)
+  if (!lastBigCompWasOnThe3rdThursdayOfTheMonth) {
+    errors.push(`The last big comp (${formatDate(lastBigComp.date)}) was not on the 3rd thursday of the month`)
+  }
+
+  const compsSinceTheLastBigComp = getCompsSinceTheLastBigComp()
+
+
+  compsSinceTheLastBigComp.forEach(comp => {
+    const { firstPlace, secondPlace } = getFinalists(comp)
+    if (!compOnAThursday(comp)) {
+      errors.push(`The comp was not on a Thursday. (Date: ${formatDate(comp.date)}, First Place: ${firstPlace?.name}, Second Place: ${secondPlace?.name})`)
     }
   })
 
-  for (let index = 0; index < 3; index++) {
-    if (isBigComp(lastFourComps[index]!)) {
-      errors.push(`Expected the ${ordinal(index + 1)} most recent comp to be a small comp`)
-    }
+
+  const datesWithMoreThanOneComp = getDatesWithMoreThanOneComp()
+  if (datesWithMoreThanOneComp.length) {
+    errors.push(`More than one comp was found on these dates: ${datesWithMoreThanOneComp.join(", ")}`)
   }
 
-  if (!isBigComp(lastFourComps[3]!)) {
-    errors.push(`Expected the 4th most recent comp to be a big comp`)
-  }
-
-  expectedThursdays.forEach((expectedThursday, index) => {
-    const comp = lastFourComps[index]!
-    const compDate = new Date(comp.date)
-
-    if (!isThursday(compDate)) {
-      errors.push(`The ${ordinal(index + 1)} most recent comp (${formatDate(compDate)}) was not on a Thursday`)
-    }
-
-    if (!isSameDay(compDate, expectedThursday)) {
-      errors.push(`Expected the ${ordinal(index + 1)} most recent comp on Thursday ${formatDate(expectedThursday)}, found ${formatDate(compDate)}`)
-    }
-  })
-
-  for (let index = 0; index < 3; index++) {
-    const newerCompDate = startOfDay(new Date(lastFourComps[index]!.date))
-    const olderCompDate = startOfDay(new Date(lastFourComps[index + 1]!.date))
-    const daysApart = differenceInCalendarDays(newerCompDate, olderCompDate)
-    if (daysApart !== 7) {
-      errors.push(`Expected weekly comps; gap between ${formatDate(olderCompDate)} and ${formatDate(newerCompDate)} was ${daysApart} days`)
-    }
+  const thursdaysWithoutAComp = getThursdaysWithoutAComp()
+  if (thursdaysWithoutAComp.length) {
+    errors.push(`No comp was found for these Thursdays: ${thursdaysWithoutAComp.join(", ")}`)
   }
 
   if (errors.length) {
@@ -82,32 +73,84 @@ export function isBigCompValid(compHistory: PoolComp[], referenceDate: Date = ne
     console.log("comp history:", compHistory)
   }
 
-  return errors.length ? errors : true
+  return errors.length ? errors : false
 
-  function isBigComp(comp: PoolComp): boolean {
-    return Boolean(comp.secondChanceSlots?.length)
+
+  ////////////////////////////////////////////////////
+
+  function dateIsThe3rdThursdayOfTheMonth(date: string): boolean {
+    const dayOfMonth = getDate(date)
+    return isThursday(date) && dayOfMonth >= 15 && dayOfMonth <= 21
   }
 
-  function getPreviousThursdays(fromDate: Date, count: number): Date[] {
-    const thursdays: Date[] = []
-    let cursor = previousThursday(startOfDay(fromDate))
+  function getLastBigComp(): PoolComp | undefined {
+    return compHistory
+      .filter(comp => isBigComp(comp) && isBefore(comp.date, thisBigComp.date))
+      .reduce<PoolComp | undefined>(mostRecentComp, undefined)
 
-    for (let index = 0; index < count; index++) {
-      thursdays.push(cursor)
-      cursor = subWeeks(cursor, 1)
+    function mostRecentComp(latestComp: PoolComp | undefined, comp: PoolComp): PoolComp {
+      if (!latestComp) return comp
+      return isAfter(comp.date, latestComp.date) ? comp : latestComp
+    }
+  }
+
+  function getCompsSinceTheLastBigComp(): PoolComp[] {
+    return compHistory.filter(comp => {
+      return isAfter(comp.date, lastBigComp!.date) && isBefore(comp.date, thisBigComp.date)
+    })
+  }
+
+
+  function getDatesWithMoreThanOneComp(): string[] {
+    const datesAlreadySeen: string[] = []
+    const datesWithMoreThanOneComp: string[] = []
+
+    compsSinceTheLastBigComp.forEach(comp => {
+
+      if (!containsDate(datesAlreadySeen, comp.date)) {
+        datesAlreadySeen.push(comp.date)
+        return
+      }
+
+      if (!containsDate(datesWithMoreThanOneComp, comp.date)) {
+        datesWithMoreThanOneComp.push(comp.date)
+      }
+    })
+
+    return datesWithMoreThanOneComp
+
+    function containsDate(dates: string[], dateToFind: string): boolean {
+      return dates.some(date => isSameDay(date, dateToFind))
+    }
+  }
+
+  function getThursdaysWithoutAComp(): Date[] {
+    return getEveryThursdaySinceTheLastBigComp().filter(thursday => {
+      return !compsSinceTheLastBigComp.some(comp => isSameDay(comp.date, thursday))
+    })
+  }
+
+  function getEveryThursdaySinceTheLastBigComp(): Date[] {
+    const thursdays: Date[] = []
+    let thursday = nextThursday(lastBigComp!.date)
+
+    while (isBefore(thursday, thisBigComp.date)) {
+      thursdays.push(thursday)
+      thursday = addWeeks(thursday, 1)
     }
 
     return thursdays
   }
 
-  function formatDate(date: Date): string {
-    return format(date, "d MMMM yyyy", { locale: enAU })
+  function isBigComp(comp: PoolComp): boolean {
+    return Boolean(comp.secondChanceSlots?.length)
   }
 
-  function ordinal(value: number): string {
-    if (value === 1) return "1st"
-    if (value === 2) return "2nd"
-    if (value === 3) return "3rd"
-    return `${value}th`
+  function compOnAThursday(comp: PoolComp): boolean {
+    return isThursday(comp.date)
+  }
+
+  function formatDate(date: string): string {
+    return format(date, "d MMMM yyyy", { locale: enAU })
   }
 }
