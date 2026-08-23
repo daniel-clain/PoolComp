@@ -1,3 +1,4 @@
+import { addWeeks, getDate, isAfter, isBefore, isThursday, nextThursday, parseISO, startOfMonth, subMonths } from "date-fns";
 import type { PoolComp } from "./domain.js";
 import { poolCompConfig } from "./poolCompConfig.js";
 
@@ -24,17 +25,83 @@ export function calculateCompBigCompContribution(comp: PoolComp): number {
 }
 
 export function getBigCompTotalPrizePool(comp: PoolComp, compHistory: PoolComp[]): number {
-  const normalFirstPlacePrizeMoney = calculateFirstPrizeMoney(comp);
-  const fourMostRecentComps = compHistory.slice(0, 4);
-  const bigCompFund = fourMostRecentComps.reduce(
-    (accumulator, historyComp) =>
-      accumulator +
-      historyComp.registeredPlayers.length *
-      poolCompConfig.buyIn *
-      poolCompConfig.bigComp.contributionPercentage,
+  const bigCompFund = getCompsFromThePreviousMonthsThirdThursday(comp, compHistory).reduce(
+    (accumulator, contributingComp) =>
+      accumulator + calculateCompBigCompContribution(contributingComp),
     0,
   );
-  return bigCompFund + normalFirstPlacePrizeMoney;
+
+  return bigCompFund + calculateFirstPrizeMoney(comp);
+}
+
+export function getCompsFromThePreviousMonthsThirdThursday(
+  comp: PoolComp,
+  compHistory: PoolComp[],
+): PoolComp[] {
+  return getCompsInDateWindow(
+    compHistory,
+    getThirdThursdayOfThePreviousMonth(comp.date),
+    parseISO(comp.date),
+  );
+}
+
+export function getCompsTowardTheNextBigComp(comp: PoolComp, compHistory: PoolComp[]): PoolComp[] {
+  return [
+    ...getCompsInDateWindow(
+      compHistory,
+      getMostRecentThirdThursdayOnOrBefore(comp.date),
+      parseISO(comp.date),
+    ),
+    comp,
+  ];
+}
+
+export function getChristmasContributionTotal(comp: PoolComp, compHistory: PoolComp[]): number {
+  const compsBeforeThisOne = compHistory.filter((historicalComp) =>
+    isBefore(parseISO(historicalComp.date), parseISO(comp.date)),
+  );
+
+  return (compsBeforeThisOne.length + 1) * poolCompConfig.xmasCut;
+}
+
+function getCompsInDateWindow(
+  compHistory: PoolComp[],
+  windowStart: Date,
+  windowEnd: Date,
+): PoolComp[] {
+  return compHistory.filter((historicalComp) => {
+    const historicalCompsDate = parseISO(historicalComp.date);
+    return !isBefore(historicalCompsDate, windowStart) && isBefore(historicalCompsDate, windowEnd);
+  });
+}
+
+export function getThirdThursdayOfTheMonth(date: Date): Date {
+  const firstDayOfTheMonth = startOfMonth(date);
+  const firstThursdayOfTheMonth = isThursday(firstDayOfTheMonth)
+    ? firstDayOfTheMonth
+    : nextThursday(firstDayOfTheMonth);
+
+  return addWeeks(firstThursdayOfTheMonth, 2);
+}
+
+export function getThirdThursdayOfThePreviousMonth(date: string): Date {
+  return getThirdThursdayOfTheMonth(subMonths(parseISO(date), 1));
+}
+
+export function getMostRecentThirdThursdayOnOrBefore(date: string): Date {
+  const parsedDate = parseISO(date);
+  const thisMonthsThirdThursday = getThirdThursdayOfTheMonth(parsedDate);
+
+  if (!isAfter(thisMonthsThirdThursday, parsedDate)) return thisMonthsThirdThursday;
+
+  return getThirdThursdayOfTheMonth(subMonths(parsedDate, 1));
+}
+
+export function dateIsTheThirdThursdayOfTheMonth(date: string): boolean {
+  const parsedDate = parseISO(date);
+  const dayOfTheMonth = getDate(parsedDate);
+
+  return isThursday(parsedDate) && dayOfTheMonth >= 15 && dayOfTheMonth <= 21;
 }
 
 export function calculateBigCompFirstPrizeMoney(comp: PoolComp, compHistory: PoolComp[]): number {
@@ -55,7 +122,6 @@ export function calculateSecondChanceFirstPrizeMoney(
   compHistory: PoolComp[],
 ): number {
   const totalBigCompPrizePool = getBigCompTotalPrizePool(comp, compHistory);
-  console.log('totalBigCompPrizePool', totalBigCompPrizePool);
   const mainCompPrizePool = calculateMainCompPrizePool(comp, compHistory);
   return totalBigCompPrizePool - mainCompPrizePool;
 }

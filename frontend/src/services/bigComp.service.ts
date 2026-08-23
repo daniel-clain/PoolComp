@@ -17,7 +17,12 @@ export {
   calculateBigCompSecondPrizeMoney,
   calculateCompBigCompContribution,
   calculateSecondChanceFirstPrizeMoney,
-  getBigCompTotalPrizePool
+  dateIsTheThirdThursdayOfTheMonth,
+  getBigCompTotalPrizePool,
+  getChristmasContributionTotal,
+  getCompsFromThePreviousMonthsThirdThursday,
+  getCompsTowardTheNextBigComp,
+  getThirdThursdayOfThePreviousMonth
 } from "../../../shared/prize-money.service"
 
 export type BigCompErrors = string[] | false
