@@ -1,4 +1,5 @@
 import { convertToSlotData } from "../../../../shared/data-convert.service.js";
+import { getKnownRegisteredPlayers, poolCompHasUnknownRegisteredPlayers } from "../../../../shared/pool-comp.service.js";
 import type { BackendService } from "../../services/backend.service.js";
 import { updateOptions } from "../../services/mongo-db.service.js";
 import { removePlayerFromSlots } from "../../services/tournament-slot-assignment/tournament-slot-assignment.service.js";
@@ -9,7 +10,11 @@ export async function removePlayerFromComp(
   data: { playerId: string }
 ) {
   const comp = backendService.getActiveComp();
-  const player = comp.registeredPlayers.find(player => player.id === data.playerId);
+  if (poolCompHasUnknownRegisteredPlayers(comp)) {
+    throw "Cannot remove a player from a comp with unknown registered players";
+  }
+  const player = getKnownRegisteredPlayers(comp)
+    .find((registeredPlayer) => registeredPlayer.id === data.playerId);
   if (!player) {
     throw "Tried to remove a player who is not registered";
   }

@@ -62,10 +62,16 @@ export async function recreateShortIds({
     const updatedComp: PoolComp_D = {
       ...compWithoutMongoId,
       id: compIdMap.get(comp.id)!,
-      registeredPlayers: comp.registeredPlayers.map((registeredPlayer) => ({
-        playerId: playerIdMap.get(registeredPlayer.playerId) ?? registeredPlayer.playerId,
-        paid: registeredPlayer.paid,
-      })),
+      registeredPlayers: comp.registeredPlayers.map((registeredPlayer) =>
+        registeredPlayer
+          ? {
+            playerId:
+              playerIdMap.get(registeredPlayer.playerId)
+              ?? registeredPlayer.playerId,
+            paid: registeredPlayer.paid,
+          }
+          : null
+      ),
       slots: rewriteSlotPlayerIds(comp.slots, playerIdMap),
       ...(comp.secondChanceSlots
         ? { secondChanceSlots: rewriteSlotPlayerIds(comp.secondChanceSlots, playerIdMap) }

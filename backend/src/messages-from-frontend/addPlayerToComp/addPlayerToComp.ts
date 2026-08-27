@@ -1,5 +1,6 @@
 import { convertToRegisteredPlayerData, convertToSlotData } from "../../../../shared/data-convert.service.js";
 import type { RegisteredPlayer, Slot } from "../../../../shared/domain.js";
+import { getKnownRegisteredPlayers, poolCompHasUnknownRegisteredPlayers } from "../../../../shared/pool-comp.service.js";
 import { tournamentHasHadAssignment } from "../../../../shared/tournament-slot.service.js";
 import type { BackendService } from "../../services/backend.service.js";
 import { updateOptions } from "../../services/mongo-db.service.js";
@@ -11,7 +12,13 @@ export async function addPlayerToComp(
   data: { playerId: string }
 ) {
   const comp = backendService.getActiveComp();
-  const playerAlreadyAdded = comp.registeredPlayers.some(registeredPlayer => registeredPlayer.id === data.playerId);
+  if (poolCompHasUnknownRegisteredPlayers(comp)) {
+    throw "Cannot add a player to a comp with unknown registered players";
+  }
+  const knownRegisteredPlayers = getKnownRegisteredPlayers(comp);
+  const playerAlreadyAdded = knownRegisteredPlayers.some(
+    (registeredPlayer) => registeredPlayer.id === data.playerId,
+  );
 
   if (playerAlreadyAdded) {
     throw 'tried to add a player that is already added';
@@ -20,7 +27,10 @@ export async function addPlayerToComp(
   const player = backendService.backendState.players.find(player => player.id === data.playerId)!;
 
   const newRegisteredPlayer: RegisteredPlayer = { ...player, paid: false };
-  const updatedRegisteredPlayers: RegisteredPlayer[] = [...comp.registeredPlayers, newRegisteredPlayer];
+  const updatedRegisteredPlayers: RegisteredPlayer[] = [
+    ...knownRegisteredPlayers,
+    newRegisteredPlayer,
+  ];
 
   let updatedSlots: Slot[] = comp.slots;
 

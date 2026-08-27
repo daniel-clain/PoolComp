@@ -1,4 +1,5 @@
 import { convertToSlotData } from "../../../../shared/data-convert.service.js";
+import { getKnownRegisteredPlayers, poolCompHasUnknownRegisteredPlayers } from "../../../../shared/pool-comp.service.js";
 import { changingSlotAffectsSecondChanceComp, mainCompChangeWouldRemoveAPlayedSecondChancePlayer, secondChanceCompMatchAlreadyPlayedMessage } from "../../../../shared/tournament-slot.service.js";
 import type { BackendService } from "../../services/backend.service.js";
 import { updateOptions } from "../../services/mongo-db.service.js";
@@ -9,8 +10,12 @@ export async function manualAssignPlayerToSlot(
   data: { slotId: number; playerId: string | undefined; isSecondChanceComp: boolean },
 ): Promise<void> {
   const activeComp = backendService.getActiveComp();
+  if (poolCompHasUnknownRegisteredPlayers(activeComp)) {
+    throw "Cannot assign slots in a comp with unknown registered players";
+  }
   const compHistory = backendService.getCompHistory();
-  const player = activeComp.registeredPlayers.find(player => player.id === data.playerId);
+  const player = getKnownRegisteredPlayers(activeComp)
+    .find((registeredPlayer) => registeredPlayer.id === data.playerId);
 
   const secondChanceCompNeedsRefreshing = changingSlotAffectsSecondChanceComp(activeComp, data.slotId, data.isSecondChanceComp);
 

@@ -1,5 +1,6 @@
 import { useEffect, useRef } from "react";
 import type { Slot } from "../../../../../../../../../shared/domain";
+import { getKnownRegisteredPlayers } from "../../../../../../../../../shared/pool-comp.service";
 import { changingSlotAffectsSecondChanceComp, getSecondChancePlayersPool, mainCompChangeWouldRemoveAPlayedSecondChancePlayer, secondChanceCompMatchAlreadyPlayedMessage } from "../../../../../../../../../shared/tournament-slot.service";
 import { useAppContext } from "../../../../../../../AppContext";
 import { getPlayerChoicesForSlot } from "../../../../../../../services/poolComp.service";
@@ -21,7 +22,10 @@ export function SlotPlayerSelect({ selectedSlot, selectPosition, onClose, }: Pro
 
   const slots = compActiveTab === 'Main Comp' ? comp?.slots! : comp?.secondChanceSlots!;
 
-  const bracketPlayers = compActiveTab === 'Main Comp' ? comp.registeredPlayers : getSecondChancePlayersPool(comp, compHistory);
+  const knownRegisteredPlayers = getKnownRegisteredPlayers(comp);
+  const bracketPlayers = compActiveTab === 'Main Comp'
+    ? knownRegisteredPlayers
+    : getSecondChancePlayersPool(comp, compHistory);
 
   useEffect(() => {
     function handlePointerDown(event: PointerEvent) {
@@ -53,7 +57,12 @@ export function SlotPlayerSelect({ selectedSlot, selectPosition, onClose, }: Pro
       if (!changingSlotAffectsSecondChanceComp(comp, selectedSlot.id, isSecondChanceComp)) return false;
 
       const updatedMainCompSlots = comp.slots.map(slot => slot.id === selectedSlot.id
-        ? { ...slot, player: comp.registeredPlayers.find(registeredPlayer => registeredPlayer.id === playerId) }
+        ? {
+          ...slot,
+          player: knownRegisteredPlayers.find(
+            (registeredPlayer) => registeredPlayer.id === playerId,
+          ),
+        }
         : slot);
 
       return mainCompChangeWouldRemoveAPlayedSecondChancePlayer(comp, updatedMainCompSlots, compHistory);

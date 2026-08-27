@@ -19,7 +19,11 @@ export function convertToPoolCompData(poolComp: PoolComp): PoolComp_D {
   return {
     id: poolComp.id,
     date: poolComp.date,
-    registeredPlayers: poolComp.registeredPlayers.map(convertToRegisteredPlayerData),
+    registeredPlayers: poolComp.registeredPlayers.map((registeredPlayer) =>
+      registeredPlayer
+        ? convertToRegisteredPlayerData(registeredPlayer)
+        : null
+    ),
     slots: poolComp.slots.map(convertToSlotData),
     ...(poolComp.secondChanceSlots
       ? { secondChanceSlots: poolComp.secondChanceSlots.map(convertToSlotData) }
@@ -33,7 +37,9 @@ export function convertToPoolComp(poolCompData: PoolComp_D, backendState: Backen
   }
 
   const convertedRegisteredPlayers = poolCompData.registeredPlayers.map((registeredPlayerData) =>
-    convertToRegisteredPlayer(registeredPlayerData, backendState),
+    registeredPlayerData
+      ? convertToRegisteredPlayer(registeredPlayerData, backendState)
+      : null,
   );
 
   const convertedSlots = poolCompData.slots.map((slotData) =>
@@ -69,8 +75,13 @@ export function convertToRegisteredPlayer(
   }
 }
 
-export function convertToSlot(slotData: Slot_D, registeredPlayers: RegisteredPlayer[]): Slot {
-  const player = registeredPlayers.find((player) => player.id === slotData.playerId);
+export function convertToSlot(
+  slotData: Slot_D,
+  registeredPlayers: Array<RegisteredPlayer | null>,
+): Slot {
+  const player = registeredPlayers.find(
+    (registeredPlayer) => registeredPlayer?.id === slotData.playerId,
+  );
   return {
     id: slotData.id,
     ...(slotData.isBye ? { isBye: true } : {}),

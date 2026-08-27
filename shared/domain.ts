@@ -19,14 +19,14 @@ export type PoolComp = {
   id: string;
   date: string;
   slots: Slot[];
-  registeredPlayers: RegisteredPlayer[];
+  registeredPlayers: Array<RegisteredPlayer | null>;
   secondChanceSlots?: Slot[];
 };
 export type PoolComp_D = {
   id: string;
   date: string;
   slots: Slot_D[];
-  registeredPlayers: RegisteredPlayer_D[];
+  registeredPlayers: Array<RegisteredPlayer_D | null>;
   secondChanceSlots?: Slot_D[];
 };
 

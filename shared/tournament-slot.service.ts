@@ -1,5 +1,6 @@
 import orderBy from "lodash/orderBy.js";
 import type { Matchup, PoolComp, RegisteredPlayer, Slot } from "./domain.js";
+import { getKnownRegisteredPlayers } from "./pool-comp.service.js";
 
 export function getSlotSourceMatchup(slot: Slot, tournamentSlots: Slot[]): Matchup | undefined {
   const [slot1, slot2] = tournamentSlots.filter(s => s.id === slot.id * 2 + 1 || s.id === slot.id * 2 + 2)
@@ -234,14 +235,17 @@ export function getUnassignedPlayers(
   compHistory: PoolComp[]
 ): RegisteredPlayer[] {
   const slots = isSecondChanceComp ? comp.secondChanceSlots! : comp.slots!;
-  const bracketPlayers = isSecondChanceComp ? getSecondChancePlayersPool(comp, compHistory) : comp.registeredPlayers;
+  const bracketPlayers = isSecondChanceComp
+    ? getSecondChancePlayersPool(comp, compHistory)
+    : getKnownRegisteredPlayers(comp);
 
   return bracketPlayers.filter(player => !slots.some(slot => slot.player?.id === player.id));
 }
 
 export function getSecondChancePlayersPool(comp: PoolComp, compHistory: PoolComp[]): RegisteredPlayer[] {
 
-  const playersWhoLostTheirFirstGame = comp.registeredPlayers.filter(lostTheirFirstGame);
+  const playersWhoLostTheirFirstGame = getKnownRegisteredPlayers(comp)
+    .filter(lostTheirFirstGame);
 
   const secondChancePlayersPool = playersWhoLostTheirFirstGame.filter(haventWonRecently);
   console.log(`secondChancePlayersPool: `, secondChancePlayersPool);

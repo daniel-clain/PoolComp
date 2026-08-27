@@ -2,6 +2,7 @@ import type { Matchup, PoolComp, RegisteredPlayer, Slot } from "../../../../shar
 
 import _ from "lodash";
 
+import { getKnownRegisteredPlayers } from "../../../../shared/pool-comp.service.js";
 import { getPlayersInTournament, getSecondChancePlayersPool, getUnassignedPlayers, slotCanBeChangedWithoutClearingMatchResult } from "../../../../shared/tournament-slot.service.js";
 
 import {
@@ -67,7 +68,9 @@ export function getOtherSlot(slot: Slot, matchup: Matchup): Slot {
 }
 
 export function randomiseAllMatchups(comp: PoolComp, isSecondChanceComp: boolean, compHistory: PoolComp[]): Slot[] {
-  const players = isSecondChanceComp ? getSecondChancePlayersPool(comp, compHistory) : comp.registeredPlayers;
+  const players = isSecondChanceComp
+    ? getSecondChancePlayersPool(comp, compHistory)
+    : getKnownRegisteredPlayers(comp);
   const newFirstRoundSize = getFirstRoundSize(players.length);
   const slots = getTournamentSlotsFromFirstRoundSize(newFirstRoundSize);
   if (isSecondChanceComp) {

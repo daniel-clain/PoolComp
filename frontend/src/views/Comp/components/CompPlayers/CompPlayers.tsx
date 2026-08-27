@@ -3,7 +3,13 @@ import type { RegisteredPlayer } from "../../../../../../shared/domain";
 import { compStarted } from "../../../../../../shared/tournament-slot.service";
 import { useAppContext } from "../../../../AppContext";
 
-export function CompPlayers({ registeredPlayers, canAddMorePlayersDisabled }: { registeredPlayers: RegisteredPlayer[], canAddMorePlayersDisabled: boolean }) {
+export function CompPlayers({
+  registeredPlayers,
+  canAddMorePlayersDisabled,
+}: {
+  registeredPlayers: Array<RegisteredPlayer | null>;
+  canAddMorePlayersDisabled: boolean;
+}) {
   const {
     players,
     send,
@@ -29,28 +35,38 @@ export function CompPlayers({ registeredPlayers, canAddMorePlayersDisabled }: { 
           <no-data-message>No players registered yet.</no-data-message>
         ) : (
           <player-grid>
-            {registeredPlayers.map((registeredPlayer) => (
-              <registered-player-cell key={registeredPlayer.id}>
-                <button
-                  type="button"
-                  className="active"
-                  onClick={() =>
-                    send(['removePlayerFromComp', { playerId: registeredPlayer.id }])
-                  }
-                  disabled={compHasStarted || !userIsCompManager}
-                >
-                  {registeredPlayer.name}
-                </button>
-                <input
-                  type="checkbox"
-                  checked={registeredPlayer.paid}
-                  onChange={() =>
-                    send(['togglePlayerPaid', { playerId: registeredPlayer.id, paid: !registeredPlayer.paid }])
-                  }
-                  disabled={!userIsCompManager}
-                />
-              </registered-player-cell>
-            ))}
+            {registeredPlayers.map((registeredPlayer, index) =>
+              registeredPlayer
+                ? (
+                  <registered-player-cell key={registeredPlayer.id}>
+                    <button
+                      type="button"
+                      className="active"
+                      onClick={() =>
+                        send(['removePlayerFromComp', { playerId: registeredPlayer.id }])
+                      }
+                      disabled={compHasStarted || !userIsCompManager}
+                    >
+                      {registeredPlayer.name}
+                    </button>
+                    <input
+                      type="checkbox"
+                      checked={registeredPlayer.paid}
+                      onChange={() =>
+                        send(['togglePlayerPaid', { playerId: registeredPlayer.id, paid: !registeredPlayer.paid }])
+                      }
+                      disabled={!userIsCompManager}
+                    />
+                  </registered-player-cell>
+                )
+                : (
+                  <registered-player-cell key={`unknown-player-${index}`}>
+                    <button type="button" disabled>
+                      Unknown player
+                    </button>
+                  </registered-player-cell>
+                )
+            )}
           </player-grid>
         )}
       </registered-players-panel>
@@ -59,7 +75,7 @@ export function CompPlayers({ registeredPlayers, canAddMorePlayersDisabled }: { 
         <player-grid>
           {databasePlayersForGrid.map((player) => {
             const isRegistered = registeredPlayers.some(
-              (registeredPlayer) => registeredPlayer.id === player.id,
+              (registeredPlayer) => registeredPlayer?.id === player.id,
             );
             return (
               <button

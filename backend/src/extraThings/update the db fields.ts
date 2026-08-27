@@ -45,7 +45,9 @@ export async function updateDataFieldNames({
     const comps = await collection.find({}).toArray();
 
     for (const comp of comps) {
-      const registeredPlayersSource = (comp.registeredPlayers ?? []) as Record<string, unknown>[];
+      const registeredPlayersSource = (comp.registeredPlayers ?? []) as Array<
+        Record<string, unknown> | null
+      >;
       const slotsSource = (comp.slots ?? []) as Record<string, unknown>[];
       const secondChanceSlotsSource = comp.secondChanceSlots
         ? (comp.secondChanceSlots as Record<string, unknown>[])
@@ -97,9 +99,12 @@ export async function updateDataFieldNames({
   }
 
   function normalizeRegisteredPlayer(
-    record: Record<string, unknown>,
+    record: Record<string, unknown> | null,
     location: string,
-  ): RegisteredPlayer_D {
+  ): RegisteredPlayer_D | null {
+    if (record === null) {
+      return null;
+    }
     const workingRecord = { ...record };
 
     for (const mapping of registeredPlayerFieldMappings) {
@@ -194,8 +199,8 @@ export async function updateDataFieldNames({
   }
 
   function recordsMatch(
-    before: Record<string, unknown>[],
-    after: Array<RegisteredPlayer_D | Slot_D>,
+    before: Array<Record<string, unknown> | null>,
+    after: Array<RegisteredPlayer_D | Slot_D | null>,
   ): boolean {
     return JSON.stringify(before) === JSON.stringify(after);
   }
