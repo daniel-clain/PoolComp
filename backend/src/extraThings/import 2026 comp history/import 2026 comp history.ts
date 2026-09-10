@@ -14,8 +14,6 @@ import {
   type HistoricalCompetitionSourceEntry,
 } from "./import 2026 comp history.data.js";
 
-export const singleTestImportCompetitionDate = "2026-07-02";
-
 type ProposedHistoricalCompetition = Omit<PoolComp_D, "id">;
 
 type HistoricalCompetitionProposal = {
@@ -58,6 +56,12 @@ export type HistoricalCompetitionImportPreview = {
   };
 };
 
+export type SafeHistoricalCompetitionImportDecision = {
+  canWrite: boolean;
+  skipReason: string | undefined;
+  competitionsToInsert: HistoricalCompetitionImportClassification[];
+};
+
 export async function preview2026CompHistoryImport({
   playersCollection,
   compHistoryCollection,
@@ -80,7 +84,7 @@ export async function preview2026CompHistoryImport({
   return preview;
 }
 
-export async function insertSingleTest2026CompHistoryImport({
+export async function insert2026CompHistoryImport({
   playersCollection,
   activeCompCollection,
   compHistoryCollection,
@@ -93,25 +97,30 @@ export async function insertSingleTest2026CompHistoryImport({
     playersCollection,
     compHistoryCollection,
   });
-  const allowedInsert = getSingleTestImportInsert(preview);
-  if (!allowedInsert) {
-    console.log(
-      `TEST INSERT skipped: no safe insert for ${singleTestImportCompetitionDate}`,
-    );
+  const importDecision = getSafeHistoricalCompetitionImportDecision(preview);
+  if (!importDecision.canWrite) {
+    console.log(`IMPORT skipped: ${importDecision.skipReason}`);
+    console.log("No database changes were made.");
+    return;
+  }
+  if (importDecision.competitionsToInsert.length === 0) {
+    console.log("IMPORT skipped: every source competition is already in CompHistory");
     console.log("No database changes were made.");
     return;
   }
 
-  const existingCompetitionsOnAllowedDate = await compHistoryCollection
-    .find({}, { projection: { _id: 0, date: 1 } })
-    .toArray();
-  const allowedDateAlreadyExists = existingCompetitionsOnAllowedDate.some(
-    (existingCompetition) =>
-      toCompDateOnly(existingCompetition.date) === singleTestImportCompetitionDate,
+  const existingCompetitionDates = new Set(
+    (await compHistoryCollection
+      .find({}, { projection: { _id: 0, date: 1 } })
+      .toArray())
+      .map((existingCompetition) => toCompDateOnly(existingCompetition.date)),
   );
-  if (allowedDateAlreadyExists) {
+  const datesThatAppearedAfterPreview = importDecision.competitionsToInsert
+    .map((classification) => classification.proposal.competition.date)
+    .filter((competitionDate) => existingCompetitionDates.has(competitionDate));
+  if (datesThatAppearedAfterPreview.length > 0) {
     console.log(
-      `TEST INSERT skipped: CompHistory already has ${singleTestImportCompetitionDate}`,
+      `IMPORT skipped: CompHistory already has ${datesThatAppearedAfterPreview.join(", ")}`,
     );
     console.log("No database changes were made.");
     return;
@@ -122,34 +131,57 @@ export async function insertSingleTest2026CompHistoryImport({
     activeCompCollection,
     compHistoryCollection,
   });
-  const newCompetition: PoolComp_D = {
-    id: createUniqueFourDigitId(usedIds),
-    ...allowedInsert.proposal.competition,
-  };
-  const insertResult = await compHistoryCollection.insertOne(newCompetition);
-  if (!insertResult.acknowledged) {
-    throw "TEST INSERT failed: CompHistory insert was not acknowledged";
-  }
-  console.log(
-    `TEST INSERT inserted one CompHistory record: ${newCompetition.date} id=${newCompetition.id}`,
+  const newCompetitions: PoolComp_D[] = importDecision.competitionsToInsert.map(
+    (classification) => {
+      const id = createUniqueFourDigitId(usedIds);
+      usedIds.add(id);
+      return {
+        id,
+        ...classification.proposal.competition,
+      };
+    },
   );
+  const insertResult = await compHistoryCollection.insertMany(newCompetitions, {
+    ordered: true,
+  });
+  if (!insertResult.acknowledged) {
+    throw "IMPORT failed: CompHistory insert was not acknowledged";
+  }
+
+  console.log(
+    `IMPORT inserted ${newCompetitions.length} CompHistory record${newCompetitions.length === 1 ? "" : "s"}:`,
+  );
+  for (const newCompetition of newCompetitions) {
+    console.log(`  ${newCompetition.date} id=${newCompetition.id}`);
+  }
 }
 
-export function getSingleTestImportInsert(
+export function getSafeHistoricalCompetitionImportDecision(
   preview: HistoricalCompetitionImportPreview,
-): HistoricalCompetitionImportClassification | undefined {
+): SafeHistoricalCompetitionImportDecision {
   if (preview.validation.errors.length > 0) {
-    return undefined;
+    return {
+      canWrite: false,
+      skipReason: "validation failed",
+      competitionsToInsert: [],
+    };
+  }
+  if (preview.totals.conflict > 0) {
+    return {
+      canWrite: false,
+      skipReason:
+        "existing CompHistory conflicts with the import data; nothing was inserted",
+      competitionsToInsert: [],
+    };
   }
 
-  const allowedInserts = preview.classifications.filter((classification) =>
-    classification.kind === "wouldInsert"
-    && classification.proposal.competition.date === singleTestImportCompetitionDate
-  );
-  if (allowedInserts.length !== 1) {
-    return undefined;
-  }
-  return allowedInserts[0];
+  return {
+    canWrite: true,
+    skipReason: undefined,
+    competitionsToInsert: preview.classifications.filter(
+      (classification) => classification.kind === "wouldInsert",
+    ),
+  };
 }
 
 export function createHistoricalCompetitionImportPreview({

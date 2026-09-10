@@ -7,8 +7,7 @@ import { dateIsTheThirdThursdayOfTheMonth } from "../../../../shared/prize-money
 import {
   createHistoricalCompetitionImportPreview,
   createHistoricalCompetitionProposal,
-  getSingleTestImportInsert,
-  singleTestImportCompetitionDate,
+  getSafeHistoricalCompetitionImportDecision,
   validateHistoricalCompetitionImport,
 } from "./import 2026 comp history";
 import {
@@ -227,29 +226,97 @@ describe("2026 comp history import preview", function () {
     expect(preview.totals.wouldInsert).toBe(0);
   });
 
-  test("allows a test insert only for 2 July 2026 when that date is a would-insert", function () {
-    const preview = createHistoricalCompetitionImportPreview({
-      sourceEntries,
+  test("inserts missing competitions and skips exact duplicates", function () {
+    const duplicateSourceEntry = sourceEntries.find((entry) =>
+      entry.competitionDate === "2026-07-16"
+    )!;
+    const insertSourceEntry = sourceEntries.find((entry) =>
+      entry.competitionDate === "2026-07-02"
+    )!;
+    const duplicateProposal = createHistoricalCompetitionProposal({
+      sourceEntry: duplicateSourceEntry,
       sourcePlayerNameToDatabasePlayerName,
+      databasePlayers,
+    });
+    const preview = createHistoricalCompetitionImportPreview({
+      sourceEntries: [duplicateSourceEntry, insertSourceEntry],
+      sourcePlayerNameToDatabasePlayerName,
+      databasePlayers,
+      existingCompetitions: [{
+        id: "1000",
+        ...duplicateProposal.competition,
+      }],
+    });
+    const importDecision = getSafeHistoricalCompetitionImportDecision(preview);
+
+    expect(importDecision.canWrite).toBe(true);
+    expect(importDecision.competitionsToInsert).toHaveLength(1);
+    expect(importDecision.competitionsToInsert[0]?.proposal.competition.date)
+      .toBe("2026-07-02");
+  });
+
+  test("refuses to write when any existing competition conflicts with the import", function () {
+    const matchingSourceEntry = sourceEntries.find((entry) =>
+      entry.competitionDate === "2026-07-16"
+    )!;
+    const conflictingSourceEntry = sourceEntries.find((entry) =>
+      entry.competitionDate === "2026-08-20"
+    )!;
+    const matchingProposal = createHistoricalCompetitionProposal({
+      sourceEntry: matchingSourceEntry,
+      sourcePlayerNameToDatabasePlayerName,
+      databasePlayers,
+    });
+    const conflictingProposal = createHistoricalCompetitionProposal({
+      sourceEntry: conflictingSourceEntry,
+      sourcePlayerNameToDatabasePlayerName,
+      databasePlayers,
+    });
+    const preview = createHistoricalCompetitionImportPreview({
+      sourceEntries: [matchingSourceEntry, conflictingSourceEntry],
+      sourcePlayerNameToDatabasePlayerName,
+      databasePlayers,
+      existingCompetitions: [
+        {
+          id: "1000",
+          ...matchingProposal.competition,
+        },
+        {
+          id: "1001",
+          ...conflictingProposal.competition,
+          secondChanceSlots: [
+            { id: 0, playerId: getPlayerId("Roxy") },
+            { id: 1, playerId: getPlayerId("Roxy") },
+            { id: 2, playerId: getPlayerId("Scorgie") },
+          ],
+        },
+      ],
+    });
+    const importDecision = getSafeHistoricalCompetitionImportDecision(preview);
+
+    expect(preview.totals.wouldInsert).toBe(0);
+    expect(preview.totals.conflict).toBe(1);
+    expect(importDecision.canWrite).toBe(false);
+    expect(importDecision.competitionsToInsert).toEqual([]);
+  });
+
+  test("refuses to write when import validation fails", function () {
+    const preview = createHistoricalCompetitionImportPreview({
+      sourceEntries: [
+        createRegularSourceEntry({
+          mainCompetitionFirstPlaceName: "Unmapped Winner",
+          mainCompetitionSecondPlaceName: "Unmapped Runner",
+        }),
+      ],
+      sourcePlayerNameToDatabasePlayerName: {},
       databasePlayers,
       existingCompetitions: [],
     });
-    const allowedInsert = getSingleTestImportInsert(preview);
-    const wouldInsertDates = preview.classifications
-      .filter((classification) => classification.kind === "wouldInsert")
-      .map((classification) => classification.proposal.competition.date);
+    const importDecision = getSafeHistoricalCompetitionImportDecision(preview);
 
-    expect(wouldInsertDates.length).toBeGreaterThan(1);
-    expect(wouldInsertDates).toContain(singleTestImportCompetitionDate);
-    expect(allowedInsert?.kind).toBe("wouldInsert");
-    expect(allowedInsert?.proposal.competition.date).toBe("2026-07-02");
-    expect(allowedInsert?.proposal.competition.registeredPlayers).toHaveLength(18);
-    expect(getSingleTestImportInsert({
-      ...preview,
-      classifications: preview.classifications.filter((classification) =>
-        classification.proposal.competition.date !== singleTestImportCompetitionDate
-      ),
-    })).toBeUndefined();
+    expect(preview.validation.errors.length).toBeGreaterThan(0);
+    expect(importDecision.canWrite).toBe(false);
+    expect(importDecision.competitionsToInsert).toEqual([]);
   });
 
   function getPlayerId(playerName: string): string {

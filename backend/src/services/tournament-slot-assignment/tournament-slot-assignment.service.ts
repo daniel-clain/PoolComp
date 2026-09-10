@@ -3,7 +3,7 @@ import type { Matchup, PoolComp, RegisteredPlayer, Slot } from "../../../../shar
 import _ from "lodash";
 
 import { getKnownRegisteredPlayers } from "../../../../shared/pool-comp.service.js";
-import { getPlayersInTournament, getSecondChancePlayersPool, getUnassignedPlayers, slotCanBeChangedWithoutClearingMatchResult } from "../../../../shared/tournament-slot.service.js";
+import { getPlayersInTournament, getSecondChancePlayersPool, getUnassignedPlayers, slotCanBeChangedWithoutUndoingALaterMatchResult } from "../../../../shared/tournament-slot.service.js";
 
 import {
   applyByeToEmptyFirstRoundSlots,
@@ -129,7 +129,7 @@ export function handleManualAssignPlayerToSlot(comp: PoolComp, slotId: number, p
   if (targetSlot.player?.id === player?.id) {
     return updatedSlots;
   }
-  if (!slotCanBeChangedWithoutClearingMatchResult(targetSlot, updatedSlots)) {
+  if (!slotCanBeChangedWithoutUndoingALaterMatchResult(targetSlot, updatedSlots)) {
     throw "Slot cannot be changed because a later matchup has already been assigned";
   }
   if (slotIsFirstRoundSlot(slotId, updatedSlots)) {

@@ -2,6 +2,7 @@ import { useMemo } from "react";
 import type { RegisteredPlayer } from "../../../../../../shared/domain";
 import { compStarted } from "../../../../../../shared/tournament-slot.service";
 import { useAppContext } from "../../../../AppContext";
+import { RemovePlayerFromCompConfirmModal } from "./RemovePlayerFromCompConfirmModal";
 
 export function CompPlayers({
   registeredPlayers,
@@ -15,6 +16,7 @@ export function CompPlayers({
     send,
     userIsCompManager,
     activePoolComp,
+    setModalContent,
   } = useAppContext();
 
   const compHasStarted = useMemo(() => {
@@ -42,9 +44,7 @@ export function CompPlayers({
                     <button
                       type="button"
                       className="active"
-                      onClick={() =>
-                        send(['removePlayerFromComp', { playerId: registeredPlayer.id }])
-                      }
+                      onClick={() => askToRemovePlayer(registeredPlayer)}
                       disabled={compHasStarted || !userIsCompManager}
                     >
                       {registeredPlayer.name}
@@ -74,14 +74,21 @@ export function CompPlayers({
         <panel-heading>All players</panel-heading>
         <player-grid>
           {databasePlayersForGrid.map((player) => {
-            const isRegistered = registeredPlayers.some(
-              (registeredPlayer) => registeredPlayer?.id === player.id,
-            );
+            const registeredPlayer = registeredPlayers.find(
+              (registered) => registered?.id === player.id,
+            ) ?? null;
+            const isRegistered = Boolean(registeredPlayer);
             return (
               <button
                 key={player.id}
                 type="button"
-                onClick={() => send([isRegistered ? 'removePlayerFromComp' : 'addPlayerToComp', { playerId: player.id }])}
+                onClick={() => {
+                  if (registeredPlayer) {
+                    askToRemovePlayer(registeredPlayer);
+                    return;
+                  }
+                  send(['addPlayerToComp', { playerId: player.id }]);
+                }}
                 className={isRegistered ? "active" : ""}
                 disabled={canAddMorePlayersDisabled || !userIsCompManager}
               >
@@ -93,4 +100,8 @@ export function CompPlayers({
       </all-players-panel>}
     </comp-players>
   );
+
+  function askToRemovePlayer(player: RegisteredPlayer) {
+    setModalContent(<RemovePlayerFromCompConfirmModal player={player} />);
+  }
 }

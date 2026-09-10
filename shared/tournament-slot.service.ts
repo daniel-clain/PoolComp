@@ -188,12 +188,23 @@ export function changingSlotAffectsSecondChanceComp(
 }
 
 
-export function slotCanBeChangedWithoutClearingMatchResult(
+export function slotCanBeChangedWithoutUndoingALaterMatchResult(
   slot: Slot,
   tournamentSlots: Slot[],
 ): boolean {
-  const nextRoundSlot = getSlotsNextRoundSlot(slot, tournamentSlots);
-  return !nextRoundSlot?.player;
+  return laterSlotsAreOnlyByeAutoAdvances(slot);
+  function laterSlotsAreOnlyByeAutoAdvances(currentSlot: Slot): boolean {
+    const nextRoundSlot = getSlotsNextRoundSlot(currentSlot, tournamentSlots);
+    if (!nextRoundSlot?.player) {
+      return true;
+    }
+    const matchup = getSlotsMatchup(currentSlot, tournamentSlots);
+    const isByeMatchup = Boolean(matchup.slot1.isBye || matchup.slot2.isBye);
+    if (!isByeMatchup) {
+      return false;
+    }
+    return laterSlotsAreOnlyByeAutoAdvances(nextRoundSlot);
+  }
 }
 
 

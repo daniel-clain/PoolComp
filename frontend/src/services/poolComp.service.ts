@@ -5,10 +5,12 @@ import {
   type Slot
 } from "../../../shared/domain";
 
-import { getSlotSourceMatchup, slotCanBeChangedWithoutClearingMatchResult } from "../../../shared/tournament-slot.service";
+import { getSlotSourceMatchup, slotCanBeChangedWithoutUndoingALaterMatchResult } from "../../../shared/tournament-slot.service";
 
 export function canSetSlot(slot: Slot, slots: Slot[]): boolean {
-  if (!slotCanBeChangedWithoutClearingMatchResult(slot, slots)) {
+  console.log('test')
+  //return true;
+  if (!slotCanBeChangedWithoutUndoingALaterMatchResult(slot, slots)) {
     return false;
   }
 

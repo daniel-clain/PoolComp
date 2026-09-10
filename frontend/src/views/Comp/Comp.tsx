@@ -62,7 +62,7 @@ export function Comp() {
         {compActions()}
       </top-row>
       {compMainPanel()}
-      {bigCompErrorsElem && bigCompErrorsElem()}
+      {isBigComp && bigCompErrorsElem()}
       {compActionsBottom()}
       <ScalingImage id="eight-ball-image" src={ballImage} />
       <ScalingImage id="bg-leaves-image" src={leavesImage} />
