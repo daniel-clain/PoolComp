@@ -12,5 +12,5 @@ export async function doThing(backendService: BackendService, _data: {}): Promis
     activeCompCollection,
     compHistoryCollection,
   });
-  await backendService.loadDatabaseDataIntoBackendState();
+  await backendService.loadDatabaseDataIntoBackendState({ refreshCompHistory: true });
 }

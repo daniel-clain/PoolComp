@@ -14,6 +14,7 @@ export async function completeActivePoolComp(
     .sort({ date: -1 })
     .toArray();
   backendService.backendState.compHistory = updatedCompHistory
+  backendService.rememberCompHistoryIsComplete();
 
 
   const deletedResult = await backendService.mongoDbService.activeCompCollection.deleteOne({

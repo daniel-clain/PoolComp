@@ -21,7 +21,15 @@ export async function createMongoDbService() {
 
 
 
-  return { playersCollection, activeCompCollection, compHistoryCollection, getAllData, getAllHistoryData }
+  return {
+    playersCollection,
+    activeCompCollection,
+    compHistoryCollection,
+    getPlayersAndActiveComp,
+    getRecentCompHistory,
+    getAllData,
+    getAllHistoryData,
+  }
 
   async function connectToDatabase(): Promise<Db> {
     const mongoConnectionString = process.env.MONGODB_URI;
@@ -55,13 +63,22 @@ export async function createMongoDbService() {
     throw new Error("MongoDB connection failed after all retries.");
   }
 
+  async function getPlayersAndActiveComp(): Promise<[Player[], PoolComp_D | null]> {
+    return Promise.all([
+      playersCollection.find({}, { projection: { _id: 0 } }).toArray(),
+      activeCompCollection.findOne({}, { projection: { _id: 0 } }),
+    ]);
+  }
+
+  async function getRecentCompHistory(): Promise<PoolComp_D[]> {
+    return compHistoryCollection.find({}, { projection: { _id: 0 } }).sort({ date: -1 }).limit(5).toArray();
+  }
+
   async function getAllData(): Promise<[Player[], PoolComp_D | null, PoolComp_D[]]> {
-    const [playerDocuments, activeCompDocument, historyDocuments] =
-      await Promise.all([
-        playersCollection.find({}, { projection: { _id: 0 } }).toArray(),
-        activeCompCollection.findOne({}, { projection: { _id: 0 } }),
-        compHistoryCollection.find({}, { projection: { _id: 0 } }).sort({ date: -1 }).limit(5).toArray(),
-      ]);
+    const [[playerDocuments, activeCompDocument], historyDocuments] = await Promise.all([
+      getPlayersAndActiveComp(),
+      getRecentCompHistory(),
+    ]);
     return [playerDocuments, activeCompDocument, historyDocuments];
   }
 

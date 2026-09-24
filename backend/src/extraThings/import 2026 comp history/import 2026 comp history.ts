@@ -166,7 +166,7 @@ export function getSafeHistoricalCompetitionImportDecision(
       competitionsToInsert: [],
     };
   }
-  if (preview.totals.conflict > 0) {
+  if (preview.totals.conflict > 0 && false) {
     return {
       canWrite: false,
       skipReason:

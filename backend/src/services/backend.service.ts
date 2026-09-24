@@ -13,6 +13,8 @@ const maximumStoredBackendErrors = 50;
 export function createBackendService(mongoDbService: MongoDbService, websocketService: WebSocketService, backendState: BackendState) {
 
 
+  let compHistoryIsComplete = false;
+
   return {
     mongoDbService,
     backendState,
@@ -20,6 +22,8 @@ export function createBackendService(mongoDbService: MongoDbService, websocketSe
     getCompHistory,
     getPlayerById,
     loadDatabaseDataIntoBackendState,
+    loadCompleteCompHistory,
+    rememberCompHistoryIsComplete,
     addBackendError,
     sentToClient,
     sendToAllClients
@@ -38,13 +42,29 @@ export function createBackendService(mongoDbService: MongoDbService, websocketSe
     return player;
   }
 
-  async function loadDatabaseDataIntoBackendState() {
-    const [players, activePoolComp, compHistory] = await mongoDbService.getAllData();
+  async function loadDatabaseDataIntoBackendState(options?: { refreshCompHistory: boolean }) {
+    const refreshCompHistory = options?.refreshCompHistory ?? false;
+    const [players, activePoolComp] = await mongoDbService.getPlayersAndActiveComp();
     console.log("activePoolComp", activePoolComp);
 
     backendState.activePoolComp = activePoolComp;
-    backendState.compHistory = compHistory;
     backendState.players = _.orderBy(players, ['name'], ['asc']);
+
+    if (compHistoryIsComplete && !refreshCompHistory) return;
+
+    backendState.compHistory = compHistoryIsComplete
+      ? await mongoDbService.getAllHistoryData()
+      : await mongoDbService.getRecentCompHistory();
+  }
+
+  async function loadCompleteCompHistory() {
+    if (compHistoryIsComplete) return;
+    backendState.compHistory = await mongoDbService.getAllHistoryData();
+    compHistoryIsComplete = true;
+  }
+
+  function rememberCompHistoryIsComplete() {
+    compHistoryIsComplete = true;
   }
 
   function addBackendError(text: string) {
